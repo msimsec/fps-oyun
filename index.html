@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Tactical FPS - 1v1 Düello ve Vandal Skinleri</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #0b0f19;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            color: #00d4ff;
+        }
+
+        #canvas-container {
+            width: 100vw;
+            height: 100vh;
+            display: block;
+        }
+
+        .hud {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(0, 212, 255, 0.8);
+        }
+
+        .crosshair {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 10px;
+            height: 10px;
+            border: 2px solid rgba(0, 255, 255, 0.8);
+            border-radius: 50%;
+        }
+
+        .health-hud {
+            position: absolute;
+            bottom: 30px;
+            left: 30px;
+            font-size: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px 20px;
+            border: 2px solid #00d4ff;
+            border-radius: 5px;
+        }
+
+        .ammo-hud {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            font-size: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px 20px;
+            border: 2px solid #ffaa00;
+            color: #ffaa00;
+            border-radius: 5px;
+        }
+
+        .score-hud {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            font-size: 18px;
+            text-align: right;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px 20px;
+            border: 2px solid #00d4ff;
+            border-radius: 5px;
+        }
+
+        .gold-hud {
+            position: absolute;
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 22px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 8px 20px;
+            border: 2px solid #ffaa00;
+            color: #ffaa00;
+            border-radius: 5px;
+        }
+
+        /* Game Over & Shop Screens */
+        .game-over {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.92);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            pointer-events: auto;
+            z-index: 100;
+        }
+
+        .game-over.show {
+            display: flex;
+        }
+
+        .game-over h1 {
+            color: #ff0000;
+            font-size: 45px;
+            margin-bottom: 15px;
+            text-shadow: 0 0 15px rgba(255, 0, 0, 0.8);
+        }
+
+        .stats-box {
+            color: #00d4ff;
+            font-size: 16px;
+            margin-bottom: 25px;
+            text-align: center;
+            font-family: 'Courier New', monospace;
+            background: rgba(0, 212, 255, 0.05);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            padding: 15px 25px;
+            border-radius: 8px;
+        }
+
+        .menu-buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            transition: 0.2s;
+        }
+
+        .restart-btn {
+            background: #00d4ff;
+            color: #1a1a2e;
+        }
+
+        .restart-btn:hover {
+            background: #00ffff;
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.8);
+        }
+
+        .duel-btn {
+            background: #a855f7;
+            color: #ffffff;
+        }
+
+        .duel-btn:hover {
+            background: #c084fc;
+            box-shadow: 0 0 15px rgba(168, 85, 247, 0.8);
+        }
+
+        .shop-open-btn {
+            background: #ffaa00;
+            color: #1a1a2e;
+        }
+
+        .shop-open-btn:hover {
+            background: #ffcc00;
+            box-shadow: 0 0 15px rgba(255, 170, 0, 0.8);
+        }
+
+        /* Shop Modal */
+        .shop-modal {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 10, 20, 0.96);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 200;
+            pointer-events: auto;
+            font-family: 'Courier New', monospace;
+            color: #ffaa00;
+        }
+
+        .shop-modal.show {
+            display: flex;
+        }
+
+        .shop-title {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            text-shadow: 0 0 15px rgba(255, 170, 0, 0.8);
+        }
+
+        .shop-gold {
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+
+        .shop-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+            max-width: 900px;
+        }
+
+        .shop-card {
+            background: rgba(255, 170, 0, 0.1);
+            border: 2px solid #ffaa00;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            width: 270px;
+        }
+
+        .shop-card h3 {
+            font-size: 15px;
+            margin-bottom: 5px;
+        }
+
+        .shop-card p {
+            font-size: 11px;
+            color: #ddd;
+            margin-bottom: 10px;
+        }
+
+        .buy-btn {
+            background: #ffaa00;
+            color: #1a1a2e;
+            border: none;
+            padding: 7px 12px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 4px;
+            width: 100%;
+            font-family: 'Courier New', monospace;
+        }
+
+        .buy-btn:hover {
+            background: #ffcc00;
+            box-shadow: 0 0 10px rgba(255, 170, 0, 0.8);
+        }
+
+        .back-btn {
+            background: #00d4ff;
+            color: #1a1a2e;
+            padding: 10px 25px;
+            font-size: 15px;
+            font-weight: bold;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+        }
+    </style>
+
+    <!-- Three.js Kütüphanesi -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+
+    <div id="canvas-container"></div>
+
+    <div class="hud">
+        <div class="crosshair"></div>
+        <div class="gold-hud">ALTIN: <span id="goldDisplay">0</span> 🪙</div>
+        <div class="health-hud">CAN: <span id="hpDisplay">100</span>/100 | Kalkan: <span id="shieldDisplay">YOK</span></div>
+        <div class="ammo-hud">MERMİ: <span id="ammoDisplay">30</span>/<span id="ammoPoolDisplay">90</span></div>
+        <div class="score-hud">
+            <div>SKOR: <span id="scoreDisplay">0</span></div>
+            <div>VURULAN: <span id="killsDisplay">0</span></div>
+            <div>2 TUŞU CAN: <span id="healKitsDisplay">0</span></div>
+        </div>
+    </div>
+
+    <!-- Game Over Screen -->
+    <div class="game-over" id="gameOverScreen">
+        <h1 id="gameOverTitle">GÖREV BAŞARISIZ</h1>
+        <div class="stats-box">
+            <div>Skor: <span id="finalScore">0</span> | Vurulan: <span id="finalKills">0</span></div>
+            <div>Kazanılan Altın: <span id="finalGold">0</span> 🪙</div>
+        </div>
+        <div class="menu-buttons">
+            <button class="btn restart-btn" onclick="restartGame()">YENİDEN BAŞLA</button>
+            <button class="btn duel-btn" onclick="start1v1Duel()">1v1 DÜELLO AT ⚔️</button>
+            <button class="btn shop-open-btn" onclick="openShop()">SİLAH MAĞAZASI 🛒</button>
+        </div>
+    </div>
+
+    <!-- Shop Modal -->
+    <div class="shop-modal" id="shopModal">
+        <div class="shop-title">VALORANT VANDAL MAĞAZASI 🛒</div>
+        <div class="shop-gold">Mevcut Altın: <span id="modalGold">0</span> 🪙</div>
+        
+        <div class="shop-grid">
+            <div class="shop-card">
+                <h3>Vandal Hasarı</h3>
+                <p>Mermi hasarını artırır<br>Hasar: <span id="modalDmg">15</span></p>
+                <button class="buy-btn" onclick="buyDamage()">Satın Al (100 Altın)</button>
+            </div>
+            <div class="shop-card">
+                <h3>Gelişmiş Şarjör</h3>
+                <p>Mermi kapasitesini artırır<br>+15 Kapasite</p>
+                <button class="buy-btn" onclick="buyAmmo()">Satın Al (75 Altın)</button>
+            </div>
+            <div class="shop-card">
+                <h3>Can Basma Hakkı</h3>
+                <p>Oyunda '2' tuşuna basınca canını fulle<br>Adet: <span id="modalHeal">0</span></p>
+                <button class="buy-btn" onclick="buyHealKit()">Satın Al (50 Altın)</button>
+            </div>
+            <div class="shop-card">
+                <h3>Ağır Kalkan (Shield)</h3>
+                <p>Alınan hasarı yarıya indirir<br>Durum: <span id="modalShield">YOK</span></p>
+                <button class="buy-btn" onclick="buyShield()">Satın Al (150 Altın)</button>
+            </div>
+            <div class="shop-card">
+                <h3>Vandal: Asil (Prime)</h3>
+                <p>Özel Mor/Altın Işıltılı Vandal Skini<br>Durum: <span id="primeStatus">KİLİTLİ</span></p>
+                <button class="buy-btn" onclick="buySkin('prime')">Satın Al (300 Altın)</button>
+            </div>
+            <div class="shop-card">
+                <h3>Vandal: Yağmacı (Reaver)</h3>
+                <p>Karanlık Mor Ruhani Vandal Skini<br>Durum: <span id="reaverStatus">KİLİTLİ</span></p>
+                <button class="buy-btn" onclick="buySkin('reaver')">Satın Al (300 Altın)</button>
+            </div>
+        </div>
+
+        <div style="margin-bottom: 20px; font-size: 14px;">
+            Aktif Skini Seç: 
+            <select id="skinSelect" onchange="changeSkin(this.value)" style="padding: 5px; font-family: 'Courier New'; background: #1a1a2e; color: #ffaa00; border: 1px solid #ffaa00;">
+                <option value="classic">Standart Vandal</option>
+                <option value="prime">Asil (Prime) Vandal</option>
+                <option value="reaver">Yağmacı (Reaver) Vandal</option>
+            </select>
+        </div>
+
+        <button class="back-btn" onclick="closeShop()">Oyuna Dön</button>
+    </div>
+
+    <script>
+        let scene, camera, renderer;
+        let player = {
+            health: 100,
+            maxHealth: 100,
+            ammo: parseInt(localStorage.getItem('val_maxAmmo')) || 30,
+            maxAmmo: parseInt(localStorage.getItem('val_maxAmmo')) || 30,
+            ammoPool: parseInt(localStorage.getItem('val_ammoPool')) || 90,
+            score: 0,
+            kills: 0,
+            gold: parseInt(localStorage.getItem('val_gold')) || 0,
+            damage: parseInt(localStorage.getItem('val_damage')) || 15,
+            healKits: parseInt(localStorage.getItem('val_healKits')) || 0,
+            hasShield: localStorage.getItem('val_hasShield') === 'true',
+            activeSkin: localStorage.getItem('val_skin') || 'classic',
+            unlockedSkins: JSON.parse(localStorage.getItem('val_unlockedSkins')) || { classic: true, prime: false, reaver: false },
+            speed: 0.12
+        };
+
+        let moveForward = false, moveBackward = false, moveLeft = false, moveRight = false;
+        let enemies = [];
+        let bullets = [];
+        let particles = [];
+        let walls = [];
+        let gameRunning = true;
+        let isDuelMode = false;
+        let duelBot = null;
+        let cameraAngleY = 0, cameraAngleX = 0;
+        let brickMaterial;
+        let weapon3DGroup, weaponBodyMat, weaponAccentMat;
+
+        function createBrickTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 512;
+            canvas.height = 512;
+            const ctx = canvas.getContext('2d');
+
+            ctx.fillStyle = '#8b7d7b';
+            ctx.fillRect(0, 0, 512, 512);
+
+            const rows = 12;
+            const cols = 6;
+            const rh = 512 / rows;
+            const cw = 512 / cols;
+
+            for (let i = 0; i < rows; i++) {
+                let offset = (i % 2 === 0) ? 0 : cw / 2;
+                for (let j = -1; j < cols + 1; j++) {
+                    let bx = j * cw + offset;
+                    let by = i * rh;
+                    let bw = cw - 4;
+                    let bh = rh - 4;
+
+                    let r = 160 + Math.floor(Math.random() * 45);
+                    let g = 60 + Math.floor(Math.random() * 25);
+                    let b = 45 + Math.floor(Math.random() * 20);
+                    ctx.fillStyle = `rgb(${r},${g},${b})`;
+                    ctx.fillRect(bx + 2, by + 2, bw, bh);
+
+                    ctx.fillStyle = 'rgba(0,0,0,0.15)';
+                    ctx.fillRect(bx + 2, by + bh - 4, bw, 4);
+                }
+            }
+
+            const texture = new THREE.CanvasTexture(canvas);
+            texture.wrapS = THREE.RepeatWrapping;
+            texture.wrapT = THREE.RepeatWrapping;
+            return texture;
+        }
+
+        function init() {
+            const container = document.getElementById('canvas-container');
+
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x0b0f19);
+            scene.fog = new THREE.FogExp2(0x0b0f19, 0.025);
+
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 1.6, 10);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.shadowMap.enabled = true;
+            container.appendChild(renderer.domElement);
+
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+
+            const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            dirLight.position.set(25, 50, 25);
+            dirLight.castShadow = true;
+            scene.add(dirLight);
+
+            const floorGeo = new THREE.PlaneGeometry(100, 100);
+            const floorMat = new THREE.MeshStandardMaterial({ color: 0x1f2937, roughness: 0.8 });
+            const floor = new THREE.Mesh(floorGeo, floorMat);
+            floor.rotation.x = -Math.PI / 2;
+            floor.receiveShadow = true;
+            scene.add(floor);
+
+            const ceiling = new THREE.Mesh(floorGeo, floorMat);
+            ceiling.rotation.x = Math.PI / 2;
+            ceiling.position.y = 10;
+            scene.add(ceiling);
+
+            const brickTex = createBrickTexture();
+            brickTex.repeat.set(4, 2);
+            brickMaterial = new THREE.MeshStandardMaterial({ map: brickTex, roughness: 0.7 });
+            createBrickMap();
+
+            createWeaponModel();
+
+            window.addEventListener('keydown', onKeyDown);
+            window.addEventListener('keyup', onKeyUp);
+            document.addEventListener('mousemove', onMouseMove);
+            
+            document.addEventListener('click', () => {
+                if (gameRunning) {
+                    document.body.requestPointerLock();
+                    shoot();
+                }
+            });
+
+            window.addEventListener('resize', onWindowResize);
+            animate();
+        }
+
+        function createWeaponModel() {
+            weapon3DGroup = new THREE.Group();
+
+            weaponBodyMat = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.3, metalness: 0.8 });
+            weaponAccentMat = new THREE.MeshStandardMaterial({ color: 0x00d4ff, roughness: 0.2, metalness: 0.9 });
+
+            const bodyGeo = new THREE.BoxGeometry(0.12, 0.15, 0.8);
+            const body = new THREE.Mesh(bodyGeo, weaponBodyMat);
+            body.position.set(0.25, -0.22, -0.5);
+            weapon3DGroup.add(body);
+
+            const barrelGeo = new THREE.CylinderGeometry(0.03, 0.03, 0.5, 8);
+            const barrel = new THREE.Mesh(barrelGeo, weaponAccentMat);
+            barrel.rotation.x = Math.PI / 2;
+            barrel.position.set(0.25, -0.2, -0.85);
+            weapon3DGroup.add(barrel);
+
+            updateWeaponSkinColors();
+
+            camera.add(weapon3DGroup);
+            scene.add(camera);
+        }
+
+        function updateWeaponSkinColors() {
+            if (!weaponBodyMat) return;
+            if (player.activeSkin === 'classic') {
+                weaponBodyMat.color.setHex(0x222222);
+                weaponAccentMat.color.setHex(0x00ffff);
+            } else if (player.activeSkin === 'prime') {
+                weaponBodyMat.color.setHex(0xa349a4);
+                weaponAccentMat.color.setHex(0xffcc00);
+            } else if (player.activeSkin === 'reaver') {
+                weaponBodyMat.color.setHex(0x4b0082);
+                weaponAccentMat.color.setHex(0x9932cc);
+            }
+        }
+
+        function createBrickMap() {
+            const boundarySize = 45;
+            createWall(0, 5, -boundarySize, 90, 10, 2);
+            createWall(0, 5, boundarySize, 90, 10, 2);
+            createWall(-boundarySize, 5, 0, 2, 10, 90);
+            createWall(boundarySize, 5, 0, 2, 10, 90);
+
+            createWall(-15, 2.5, -15, 16, 5, 2);
+            createWall(15, 2.5, -15, 16, 5, 2);
+            createWall(-15, 2.5, 15, 2, 5, 16);
+            createWall(15, 2.5, 15, 2, 5, 16);
+            createWall(0, 2.5, 0, 12, 5, 12);
+        }
+
+        function createWall(x, y, z, w, h, d) {
+            const geo = new THREE.BoxGeometry(w, h, d);
+            const mesh = new THREE.Mesh(geo, brickMaterial);
+            mesh.position.set(x, y, z);
+            mesh.castShadow = true;
+            mesh.receiveShadow = true;
+            scene.add(mesh);
+            walls.push({ x, z, w, d });
+        }
+
+        function saveGameData() {
+            localStorage.setItem('val_gold', player.gold);
+            localStorage.setItem('val_damage', player.damage);
+            localStorage.setItem('val_maxAmmo', player.maxAmmo);
+            localStorage.setItem('val_ammoPool', player.ammoPool);
+            localStorage.setItem('val_healKits', player.healKits);
+            localStorage.setItem('val_hasShield', player.hasShield);
+            localStorage.setItem('val_skin', player.activeSkin);
+            localStorage.setItem('val_unlockedSkins', JSON.stringify(player.unlockedSkins));
+        }
+
+        function onKeyDown(e) {
+            const key = e.key.toLowerCase();
+            if (key === 'w') moveForward = true;
+            if (key === 's') moveBackward = true;
+            if (key === 'a') moveLeft = true;
+            if (key === 'd') moveRight = true;
+            if (key === 'r') reload();
+            if (key === '2' && gameRunning) {
+                if (player.healKits > 0 && player.health < player.maxHealth) {
+                    player.health = player.maxHealth;
+                    player.healKits--;
+                    saveGameData();
+                }
+            }
+        }
+
+        function onKeyUp(e) {
+            const key = e.key.toLowerCase();
+            if (key === 'w') moveForward = false;
+            if (key === 's') moveBackward = false;
+            if (key === 'a') moveLeft = false;
+            if (key === 'd') moveRight = false;
+        }
+
+        function onMouseMove(e) {
+            if (document.pointerLockElement === document.body && gameRunning) {
+                cameraAngleY -= e.movementX * 0.003;
+                cameraAngleX -= e.movementY * 0.003;
+                cameraAngleX = Math.max(-Math.PI / 2.2, Math.min(Math.PI / 2.2, cameraAngleX));
+                
+                camera.rotation.order = 'YXZ';
+                camera.rotation.y = cameraAngleY;
+                camera.rotation.x = cameraAngleX;
+            }
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function shoot() {
+            if (player.ammo <= 0) return;
+            player.ammo--;
+
+            let bulletColor = 0x00ffcc;
+            if (player.activeSkin === 'prime') bulletColor = 0xcc66ff;
+            if (player.activeSkin === 'reaver') bulletColor = 0x9933ff;
+
+            const bulletGeo = new THREE.SphereGeometry(0.12, 8, 8);
+            const bulletMat = new THREE.MeshBasicMaterial({ color: bulletColor });
+            const bullet = new THREE.Mesh(bulletGeo, bulletMat);
+
+            bullet.position.copy(camera.position);
+
+            const direction = new THREE.Vector3();
+            camera.getWorldDirection(direction);
+
+            bullet.velocity = direction.multiplyScalar(1.4);
+            bullet.life = 100;
+            bullet.damage = player.damage;
+            bullet.colorHex = bulletColor;
+            bullet.isPlayer = true;
+
+            scene.add(bullet);
+            bullets.push(bullet);
+
+            if (weapon3DGroup) {
+                weapon3DGroup.position.z += 0.08;
+                setTimeout(() => { weapon3DGroup.position.z = 0; }, 80);
+            }
+        }
+
+        function reload() {
+            const need = player.maxAmmo - player.ammo;
+            const canReload = Math.min(need, player.ammoPool);
+            player.ammo += canReload;
+            player.ammoPool -= canReload;
+        }
+
+        // İnsansı Karakter / 1v1 Bot Sınıfı
+        class HumanoidEnemy {
+            constructor(x, z, isDuel = false) {
+                this.group = new THREE.Group();
+                this.isDuel = isDuel;
+
+                const bodyGeo = new THREE.BoxGeometry(0.9, 1.2, 0.5);
+                const mat = new THREE.MeshStandardMaterial({ color: isDuel ? 0xa855f7 : 0xdc2626, roughness: 0.4 });
+                const body = new THREE.Mesh(bodyGeo, mat);
+                body.position.y = 0.6;
+                body.castShadow = true;
+                this.group.add(body);
+
+                const headGeo = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+                const headMat = new THREE.MeshStandardMaterial({ color: isDuel ? 0xc084fc : 0xf87171, roughness: 0.5 });
+                const head = new THREE.Mesh(headGeo, headMat);
+                head.position.y = 1.45;
+                head.castShadow = true;
+                this.group.add(head);
+
+                const armGeo = new THREE.BoxGeometry(0.3, 1.0, 0.3);
+                const leftArm = new THREE.Mesh(armGeo, mat);
+                leftArm.position.set(-0.6, 0.6, 0);
+                this.group.add(leftArm);
+
+                const rightArm = new THREE.Mesh(armGeo, mat);
+                rightArm.position.set(0.6, 0.6, 0);
+                this.group.add(rightArm);
+
+                this.group.position.set(x, 0, z);
+                scene.add(this.group);
+
+                // Eğer 1v1 düellosundaysa seninle aynı cana (100) sahip olur!
+                this.health = isDuel ? 100 : 30;
+                this.maxHealth = this.health;
+                this.speed = isDuel ? 0.04 : 0.035;
+                this.shootTimer = 0;
+            }
+
+            update() {
+                const dx = camera.position.x - this.group.position.x;
+                const dz = camera.position.z - this.group.position.z;
+                const dist = Math.sqrt(dx*dx + dz*dz);
+
+                if (dist > 1.5) {
+                    this.group.position.x += (dx / dist) * this.speed;
+                    this.group.position.z += (dz / dist) * this.speed;
+                    this.group.lookAt(camera.position.x, this.group.position.y, camera.position.z);
+                } else {
+                    let damageTaken = player.hasShield ? 1 : 2;
+                    player.health -= damageTaken;
+                    if (player.health <= 0) gameOver();
+                }
+
+                // 1v1 modundaysa bot da sana ateş eder!
+                if (this.isDuel) {
+                    this.shootTimer++;
+                    if (this.shootTimer > 60) { // Her 1 saniyede bir ateş eder
+                        this.shootTimer = 0;
+                        this.shootAtPlayer();
+                    }
+                }
+            }
+
+            shootAtPlayer() {
+                const bulletGeo = new THREE.SphereGeometry(0.12, 8, 8);
+                const bulletMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+                const bullet = new THREE.Mesh(bulletGeo, bulletMat);
+
+                bullet.position.copy(this.group.position);
+                bullet.position.y += 1.0;
+
+                const targetDir = new THREE.Vector3().subVectors(camera.position, this.group.position).normalize();
+                bullet.velocity = targetDir.multiplyScalar(1.0);
+                bullet.life = 100;
+                bullet.damage = 10; // Düelloda bot mermisi daha etkilidir
+                bullet.isPlayer = false;
+
+                scene.add(bullet);
+                bullets.push(bullet);
+            }
+
+            destroy() {
+                scene.remove(this.group);
+            }
+        }
+
+        function createParticles(x, y, z, colorHex) {
+            for (let i = 0; i < 6; i++) {
+                const pGeo = new THREE.BoxGeometry(0.08, 0.08, 0.08);
+                const pMat = new THREE.MeshBasicMaterial({ color: colorHex });
+                const p = new THREE.Mesh(pGeo, pMat);
+                p.position.set(x, y, z);
+                
+                p.velocity = new THREE.Vector3(
+                    (Math.random() - 0.5) * 0.3,
+                    Math.random() * 0.3,
+                    (Math.random() - 0.5) * 0.3
+                );
+                p.life = 25;
+                scene.add(p);
+                particles.push(p);
+            }
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            if (gameRunning) {
+                let dir = new THREE.Vector3();
+                camera.getWorldDirection(dir);
+                dir.y = 0;
+                dir.normalize();
+
+                let sideDir = new THREE.Vector3(-dir.z, 0, dir.x);
+                let nextX = camera.position.x;
+                let nextZ = camera.position.z;
+
+                if (moveForward) { nextX += dir.x * player.speed; nextZ += dir.z * player.speed; }
+                if (moveBackward) { nextX -= dir.x * player.speed; nextZ -= dir.z * player.speed; }
+                if (moveLeft) { nextX += sideDir.x * player.speed; nextZ += sideDir.z * player.speed; }
+                if (moveRight) { nextX -= sideDir.x * player.speed; nextZ -= sideDir.z * player.speed; }
+
+                let canMove = true;
+                for (let wall of walls) {
+                    if (nextX > wall.x - wall.w/2 - 0.6 && nextX < wall.x + wall.w/2 + 0.6 &&
+                        nextZ > wall.z - wall.d/2 - 0.6 && nextZ < wall.z + wall.d/2 + 0.6) {
+                        canMove = false;
+                        break;
+                    }
+                }
+
+                if (canMove) {
+                    camera.position.x = nextX;
+                    camera.position.z = nextZ;
+                }
+
+                for (let i = bullets.length - 1; i >= 0; i--) {
+                    let b = bullets[i];
+                    b.position.add(b.velocity);
+                    b.life--;
+
+                    let hitWall = false;
+                    for (let wall of walls) {
+                        if (b.position.x > wall.x - wall.w/2 && b.position.x < wall.x + wall.w/2 &&
+                            b.position.z > wall.z - wall.d/2 && b.position.z < wall.z + wall.d/2) {
+                            hitWall = true;
+                            createParticles(b.position.x, b.position.y, b.position.z, 0xb45309);
+                            break;
+                        }
+                    }
+
+                    if (hitWall || b.life <= 0) {
+                        scene.remove(b);
+                        bullets.splice(i, 1);
+                        continue;
+                    }
+
+                    // Eğer mermi oyuncudan çıktıysa düşmanlara çarpar
+                    if (b.isPlayer) {
+                        if (isDuelMode && duelBot) {
+                            if (b.position.distanceTo(duelBot.group.position) < 1.0) {
+                                duelBot.health -= b.damage;
+                                createParticles(b.position.x, b.position.y, b.position.z, b.colorHex);
+                                scene.remove(b);
+                                bullets.splice(i, 1);
+
+                                if (duelBot.health <= 0) {
+                                    duelBot.destroy();
+                                    duelBot = null;
+                                    isDuelMode = false;
+                                    player.score += 500;
+                                    player.gold += 150;
+                                    player.kills++;
+                                    saveGameData();
+                                    alert("Tebrikler! 1v1 Düelloyu Kazandın! (+150 Altın)");
+                                    restartGame();
+                                }
+                                continue;
+                            }
+                        }
+
+                        for (let j = enemies.length - 1; j >= 0; j--) {
+                            let e = enemies[j];
+                            if (b.position.distanceTo(e.group.position) < 1.0) {
+                                e.health -= b.damage;
+                                createParticles(b.position.x, b.position.y, b.position.z, b.colorHex);
+                                scene.remove(b);
+                                bullets.splice(i, 1);
+
+                                if (e.health <= 0) {
+                                    e.destroy();
+                                    enemies.splice(j, 1);
+                                    player.score += 100;
+                                    player.kills++;
+                                    player.gold += 25;
+                                    player.ammoPool += 20;
+                                    saveGameData();
+                                }
+                                break;
+                            }
+                        }
+                    } else {
+                        // Botun mermisi oyuncuya çarparsa
+                        if (b.position.distanceTo(camera.position) < 1.0) {
+                            let damageTaken = player.hasShield ? 5 : 10;
+                            player.health -= damageTaken;
+                            scene.remove(b);
+                            bullets.splice(i, 1);
+                            if (player.health <= 0) gameOver();
+                        }
+                    }
+                }
+
+                for (let i = particles.length - 1; i >= 0; i--) {
+                    let p = particles[i];
+                    p.position.add(p.velocity);
+                    p.life--;
+                    if (p.life <= 0) {
+                        scene.remove(p);
+                        particles.splice(i, 1);
+                    }
+                }
+
+                if (isDuelMode && duelBot) {
+                    duelBot.update();
+                } else {
+                    enemies.forEach(e => e.update());
+                    if (Math.random() < 0.025 && enemies.length < 12) {
+                        let angle = Math.random() * Math.PI * 2;
+                        let radius = 25;
+                        let ex = camera.position.x + Math.cos(angle) * radius;
+                        let ez = camera.position.z + Math.sin(angle) * radius;
+                        enemies.push(new HumanoidEnemy(ex, ez, false));
+                    }
+                }
+
+                document.getElementById('hpDisplay').textContent = Math.max(0, Math.floor(player.health));
+                document.getElementById('ammoDisplay').textContent = player.ammo;
+                document.getElementById('ammoPoolDisplay').textContent = player.ammoPool;
+                document.getElementById('scoreDisplay').textContent = player.score;
+                document.getElementById('killsDisplay').textContent = player.kills;
+                document.getElementById('goldDisplay').textContent = player.gold;
+                document.getElementById('healKitsDisplay').textContent = player.healKits;
+                document.getElementById('shieldDisplay').textContent = player.hasShield ? 'AKTİF' : 'YOK';
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        // 1v1 Düello Başlatma
+        function start1v1Duel() {
+            document.getElementById('gameOverScreen').classList.remove('show');
+            restartGame();
+            isDuelMode = true;
+            // Karşında seninle aynı özelliklere sahip özel bir 1v1 botu doğar
+            duelBot = new HumanoidEnemy(camera.position.x + 5, camera.position.z - 5, true);
+        }
+
+        function openShop() {
+            document.getElementById('gameOverScreen').classList.remove('show');
+            document.getElementById('shopModal').classList.add('show');
+            updateShopModal();
+        }
+
+        function closeShop() {
+            document.getElementById('shopModal').classList.remove('show');
+            document.getElementById('gameOverScreen').classList.add('show');
+        }
+
+        function updateShopModal() {
+            document.getElementById('modalGold').textContent = player.gold;
+            document.getElementById('modalDmg').textContent = player.damage;
+            document.getElementById('modalHeal').textContent = player.healKits;
+            document.getElementById('modalShield').textContent = player.hasShield ? 'AKTİF' : 'YOK';
+            
+            document.getElementById('primeStatus').textContent = player.unlockedSkins.prime ? 'SAHİPSİNİZ' : 'KİLİTLİ';
+            document.getElementById('reaverStatus').textContent = player.unlockedSkins.reaver ? 'SAHİPSİNİZ' : 'KİLİTLİ';
+            document.getElementById('skinSelect').value = player.activeSkin;
+        }
+
+        function buyDamage() {
+            if (player.gold >= 100) {
+                player.gold -= 100;
+                player.damage += 15;
+                saveGameData();
+                updateShopModal();
+            } else { alert("Yeterli altının yok!"); }
+        }
+
+        function buyAmmo() {
+            if (player.gold >= 75) {
+                player.gold -= 75;
+                player.maxAmmo += 15;
+                player.ammoPool += 45;
+                saveGameData();
+                updateShopModal();
+            } else { alert("Yeterli altının yok!"); }
+        }
+
+        function buyHealKit() {
+            if (player.gold >= 50) {
+                player.gold -= 50;
+                player.healKits++;
+                saveGameData();
+                updateShopModal();
+            } else { alert("Yeterli altının yok!"); }
+        }
+
+        function buyShield() {
+            if (player.hasShield) { alert("Zaten kalkanın var!"); return; }
+            if (player.gold >= 150) {
+                player.gold -= 150;
+                player.hasShield = true;
+                saveGameData();
+                updateShopModal();
+            } else { alert("Yeterli altının yok! (150 Altın)"); }
+        }
+
+        function buySkin(skinName) {
+            if (player.unlockedSkins[skinName]) { alert("Bu skine zaten sahipsin!"); return; }
+            if (player.gold >= 300) {
+                player.gold -= 300;
+                player.unlockedSkins[skinName] = true;
+                player.activeSkin = skinName;
+                updateWeaponSkinColors();
+                saveGameData();
+                updateShopModal();
+                alert("Skin açıldı ve kuşanıldı!");
+            } else { alert("Yeterli altının yok! (300 Altın)"); }
+        }
+
+        function changeSkin(skinName) {
+            if (player.unlockedSkins[skinName]) {
+                player.activeSkin = skinName;
+                updateWeaponSkinColors();
+                saveGameData();
+            } else {
+                alert("Önce bu skini satın almalısın!");
+                document.getElementById('skinSelect').value = player.activeSkin;
+            }
+        }
+
+        function gameOver() {
+            gameRunning = false;
+            document.exitPointerLock();
+            document.getElementById('finalScore').textContent = player.score;
+            document.getElementById('finalKills').textContent = player.kills;
+            document.getElementById('finalGold').textContent = player.gold;
+            document.getElementById('gameOverScreen').classList.add('show');
+        }
+
+        function restartGame() {
+            saveGameData();
+            enemies.forEach(e => e.destroy());
+            enemies = [];
+            if (duelBot) { duelBot.destroy(); duelBot = null; }
+            bullets.forEach(b => scene.remove(b));
+            bullets = [];
+            
+            player.health = 100;
+            player.ammo = player.maxAmmo;
+            player.score = 0;
+            player.kills = 0;
+            isDuelMode = false;
+            
+            camera.position.set(0, 1.6, 10);
+            cameraAngleY = 0;
+            cameraAngleX = 0;
+            
+            document.getElementById('gameOverScreen').classList.remove('show');
+            document.getElementById('shopModal').classList.remove('show');
+            gameRunning = true;
+        }
+
+        init();
+    </script>
+</body>
+</html>
