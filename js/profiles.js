@@ -122,10 +122,10 @@ function renderProfiles() {
         const actions = document.createElement('div');
         actions.className = 'profile-actions';
         const ren = document.createElement('button');
-        ren.className = 'icon-btn'; ren.title = 'Adını değiştir'; ren.textContent = '✎';
+        ren.className = 'icon-btn'; ren.title = 'Adını değiştir'; ren.textContent = '✎ Ad';
         ren.onclick = () => renameProfile(p.id);
         const del = document.createElement('button');
-        del.className = 'icon-btn danger'; del.title = 'Sil'; del.textContent = '🗑';
+        del.className = 'icon-btn danger'; del.title = 'Oyuncuyu ve kaydını sil'; del.textContent = '🗑 Sil';
         del.onclick = () => deleteProfile(p.id);
         actions.append(ren, del);
 

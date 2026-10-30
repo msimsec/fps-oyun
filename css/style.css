@@ -328,3 +328,19 @@ body {
 /* Bildirim, mağaza/ayarlar ekranındaki "Geri Dön" butonunun üstünü kapatmasın */
 #toast { bottom: 28px; }
 .records-player { color: #ffaa00; font-family: 'Courier New', monospace; font-size: 16px; margin: -6px 0 14px; }
+
+/* Bölüm seçici (ana menü) */
+.map-picker-title { color: #94a3b8; font-family: 'Courier New', monospace; font-size: 13px; letter-spacing: 2px; margin-bottom: 8px; }
+.map-picker { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 22px; }
+.map-option {
+    width: 250px; padding: 12px 14px; border-radius: 8px; cursor: pointer; text-align: left;
+    display: flex; flex-direction: column; gap: 5px; font-family: 'Courier New', monospace;
+    background: #141a2a; border: 2px solid #334155; color: #e2e8f0; transition: 0.15s;
+}
+.map-option:hover { border-color: #00d4ff; }
+.map-option.active { border-color: #22c55e; box-shadow: 0 0 12px rgba(34, 197, 94, 0.45); }
+.map-option.map-depot { background: linear-gradient(135deg, #1c1917, #3b1d14); }
+.map-option.map-space { background: radial-gradient(circle at 80% 20%, #1e3a8a 0, #0b1026 45%, #02030a 100%); }
+.map-name { font-size: 17px; font-weight: bold; color: #ffaa00; }
+.map-desc { font-size: 12px; color: #cbd5e1; line-height: 1.35; }
+.icon-btn { font-size: 12px; white-space: nowrap; font-family: 'Courier New', monospace; }

@@ -1,4 +1,4 @@
-# 3D Tactical FPS (v1.2)
+# 3D Tactical FPS (v1.3)
 
 Tarayıcıda çalışan, Three.js ile yazılmış birinci şahıs nişancı oyunu. Kurulum veya derleme gerektirmez.
 
@@ -7,6 +7,13 @@ Tarayıcıda çalışan, Three.js ile yazılmış birinci şahıs nişancı oyun
 ## Oyuncu girişi
 
 Oyun açılınca **"Kim oynuyor?"** ekranı gelir. Herkes adını yazıp kayıt olur; her oyuncunun altını, silahları, skinleri, yükseltmeleri, rekorları ve ayarları ayrı tutulur. Menüdeki **Oyuncu değiştir** ile geçiş yapılır. Parola yoktur ve kayıtlar yalnızca o tarayıcıda saklanır (en fazla 20 oyuncu).
+
+## Bölümler
+
+Ana menüdeki **BÖLÜM SEÇ** kısmından oynanacak harita seçilir (seçim oyuncuya özel kaydedilir):
+
+- **Depo:** Tuğla duvarlı kapalı alan, kasalar ve siperler.
+- **Space:** Uzay boşluğunda yüzen 6 platform. Platformlar arası yürünemez; turuncu **zıplatma rampaları** oyuncuyu karşı platforma fırlatır. Platformdan düşen 35 can kaybeder ve başlangıç platformuna döner. Düşmanlar platformlarından ayrılmaz, uzaktan ateş eder. Yüksek nişancı kulesine kuzey platformundaki rampayla çıkılır.
 
 ## Oyun modları
 
@@ -67,7 +74,8 @@ js/
   utils.js        Çarpışma, zemin yüksekliği, ekran geçişleri, küçük yardımcılar
   audio.js        Web Audio ile üretilen ses efektleri
   feedback.js     Hasar sayıları, öldürme akışı, duyurular, düello can çubuğu
-  world.js        Sahne, harita, kasalar, silah modelleri, başlangıç (init)
+  world.js        Sahne, ışıklar, Depo duvarları/kasaları, silah modelleri, başlangıç (init)
+  maps.js         Bölümler: Depo ve Space, zıplatma rampaları, boşluğa düşme
   input.js        Klavye/fare, pointer lock
   game.js         El başlatma/bitirme, hasar alma, can kiti
   weapons.js      Atış, şarjör, silah değiştirme, dürbün
