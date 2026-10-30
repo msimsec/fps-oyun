@@ -54,6 +54,8 @@ function updatePlayer(dt) {
         if (newFeet < curMap().killY) { fellOut(); return; }
     } else {
         camera.position.y = ground + CFG.eyeHeight;   // alçak basamaklara yürüyerek çık
+        const plat = platformIndexAt(camera.position.x, camera.position.z, ground);
+        if (plat >= 0) player.platform = plat;
         checkJumpPads();
     }
 

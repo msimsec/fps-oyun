@@ -70,6 +70,12 @@ class HumanoidEnemy {
         this.strafeTimer = 0;
         this.blindTime = 0;        // nişancı: oyuncuyu kaç saniyedir göremiyor
         this.sightCheck = 0;
+        this.skills = {};          // dalgaya göre kazanılan yetenekler (waves.js atar)
+        this.air = false;          // havada mı (zıplama / rampa / düşme)
+        this.vy = 0; this.avx = 0; this.avz = 0;
+        this.jumpCd = 0;
+        this.stuck = 0;            // ne kadardır hiç ilerleyemiyor
+        this.dodgeTimer = 0; this.dodgeCooldown = 0; this.dodgeDir = 1;
     }
 
     update(dt) {
@@ -79,6 +85,25 @@ class HumanoidEnemy {
         const dist = Math.hypot(dx, dz) || 0.0001;
         const nx = dx / dist, nz = dz / dist;
         this.group.rotation.y = Math.atan2(dx, dz);
+
+        if (this.air) {
+            this.updateAir(dt);
+            if (this.hpBar.visible) this.hpBar.lookAt(camera.position);
+            return;
+        }
+        // Altındaki zemin bittiyse (kasanın kenarından yürüdü) düşmeye başla
+        if (!this.isDuel && groundHeight(p.x, p.z, p.y, 0.3) < p.y - 0.05) {
+            this.air = true; this.vy = 0; this.avx = 0; this.avz = 0;
+            return;
+        }
+        this.jumpCd -= dt;
+        this.dodgeCooldown -= dt;
+        if (this.dodgeTimer > 0) {
+            // Kaçınma: vurulunca kısa süre hızla yana kay
+            this.dodgeTimer -= dt;
+            const s = this.speed * 2.4 * dt;
+            this.move(-nz * this.dodgeDir * s, nx * this.dodgeDir * s);
+        }
 
         if (this.isDuel) {
             this.strafeAndKeepDistance(dt, dist, nx, nz, 6, 10);
@@ -99,9 +124,16 @@ class HumanoidEnemy {
             this.chase(dt, dist, nx, nz);
             this.updateSight(dt);
         } else {
-            if (dist > 1.5) {
-                this.chase(dt, dist, nx, nz);
-            } else if (footY() - p.y < 1.2 && footY() - p.y > -1) {
+            const rise = footY() - p.y;      // oyuncu ne kadar yukarıda
+            if (this.onOtherPlatform()) {
+                // Space: oyuncu başka platformda. Rampa yeteneği varsa oraya giden rampaya yürü,
+                // yoksa kenarda ileri geri gidip gelmek yerine yerinde yana kayarak ateş et.
+                if (!(this.skills.pads && this.goToPad(dt))) this.strafeAndKeepDistance(dt, dist, nx, nz, 0, Infinity);
+            } else if (dist > 1.5) {
+                // Oyuncu zıplanabilecek bir kasanın üstündeyse yanına zıpla
+                if (this.skills.jump && this.jumpCd <= 0 && dist < 3.5 && rise > CFG.stepHeight && rise < 1.1) this.jump(nx, nz);
+                else this.chase(dt, dist, nx, nz);
+            } else if (rise < 1.2 && rise > -1) {
                 // Oyuncu yüksek bir kasanın üstündeyse yakın temas hasarı yok (ateş etmeye devam ederler)
                 damagePlayer(CFG.meleeDps * this.type.melee * dt);   // saniye bazlı yakın temas hasarı
             }
@@ -120,16 +152,84 @@ class HumanoidEnemy {
         moveWithCollision(p, dx, dz, this.radius, y, canStand);
     }
 
-    // Oyuncuya doğru yürü; duvara takılırsa duvar boyunca yana kay, o yön de kapalıysa yön değiştir
+    // Oyuncuya (ya da hedefe) doğru yürü. Önü kapalıysa: zıplama yeteneği varsa alçak engelin
+    // üstüne zıpla, yoksa engel boyunca yana kay. Hiç ilerleyemiyorsa yönü her karede değil,
+    // 0.6 sn'de bir değiştir (yoksa yerinde titrer).
     chase(dt, dist, nx, nz) {
         const p = this.group.position;
         const step = this.speed * dt;
         const ox = p.x, oz = p.z;
         this.move(nx * step, nz * step);
         if (Math.hypot(p.x - ox, p.z - oz) < step * 0.5) {
+            if (this.skills.jump && this.jumpCd <= 0 && this.jumpableAhead(nx, nz)) { this.jump(nx, nz); return; }
             this.move(-nz * this.strafeDir * step, nx * this.strafeDir * step);
-            if (Math.hypot(p.x - ox, p.z - oz) < step * 0.1) this.strafeDir *= -1;
+            if (Math.hypot(p.x - ox, p.z - oz) < step * 0.1) {
+                this.stuck += dt;
+                if (this.stuck > 0.6) { this.strafeDir *= -1; this.stuck = 0; }
+            } else this.stuck = 0;
+        } else this.stuck = 0;
+    }
+
+    // Önünde zıplanarak üstüne çıkılabilecek alçak bir engel (kasa, siper) var mı
+    jumpableAhead(nx, nz) {
+        const p = this.group.position;
+        const ax = p.x + nx * (this.radius + 0.5), az = p.z + nz * (this.radius + 0.5);
+        return walls.some(w => w.h > p.y + CFG.stepHeight && w.h <= p.y + 1.1 && w.b <= p.y + 0.1 &&
+            Math.abs(ax - w.x) < w.w / 2 + 0.2 && Math.abs(az - w.z) < w.d / 2 + 0.2);
+    }
+
+    jump(nx, nz) {
+        this.air = true;
+        this.vy = CFG.jumpSpeed;
+        this.avx = nx * this.speed * 1.3;
+        this.avz = nz * this.speed * 1.3;
+        this.jumpCd = 1;
+    }
+
+    // Havadayken: yerçekimi ve yatay hız; bir zemine inince durur, boşluğa düşerse ölür
+    updateAir(dt) {
+        const p = this.group.position;
+        this.vy -= CFG.gravity * dt;
+        moveWithCollision(p, this.avx * dt, this.avz * dt, this.radius, p.y);
+        const ground = groundHeight(p.x, p.z, p.y, 0.3);
+        const ny = p.y + this.vy * dt;
+        if (this.vy <= 0 && ny <= ground) {
+            p.y = ground;
+            this.air = false; this.vy = 0; this.avx = 0; this.avz = 0;
+            return;
         }
+        p.y = ny;
+        if (p.y < curMap().killY) this.fellOut();
+    }
+
+    fellOut() {
+        this.destroy();
+        const i = enemies.indexOf(this);
+        if (i !== -1) enemies.splice(i, 1);
+        addKillFeed(`${this.type.name} boşluğa düştü`, false);
+    }
+
+    // Space: düşman ile oyuncu farklı platformlarda mı
+    onOtherPlatform() {
+        if (!jumpPads.length) return false;
+        const p = this.group.position;
+        const mine = platformIndexAt(p.x, p.z, p.y);
+        return mine >= 0 && player.platform >= 0 && mine !== player.platform;
+    }
+
+    // Oyuncunun platformuna giden yoldaki ilk rampaya yürü, üstüne gelince fırla
+    goToPad(dt) {
+        const p = this.group.position;
+        const pad = nextPad(platformIndexAt(p.x, p.z, p.y), player.platform);
+        if (!pad) return false;
+        const dx = pad.x - p.x, dz = pad.z - p.z, d = Math.hypot(dx, dz) || 0.0001;
+        if (d < pad.r * 0.7) {
+            this.air = true;
+            this.vy = pad.vy; this.avx = pad.vx; this.avz = pad.vz;
+            return true;
+        }
+        this.chase(dt, d, dx / d, dz / d);
+        return true;
     }
 
     // Görüş kontrolü her karede değil, 0.4 saniyede bir (her kontrol duvar taraması yapar)
@@ -164,12 +264,13 @@ class HumanoidEnemy {
         // Space'te platformlar uzak: bölüm kendi menzilini verir
         const range = Math.max(this.type.range || 0, curMap().enemyRange);
         if (dist > 1.5 && dist < range && this.canSeePlayer()) {
-            this.shootAtPlayer(CFG.enemyBulletDamage * this.type.dmg, CFG.enemySpread * this.type.spread);
+            const aim = this.skills.aim ? 0.6 : 1;      // keskin nişan yeteneği
+            this.shootAtPlayer(CFG.enemyBulletDamage * this.type.dmg, CFG.enemySpread * this.type.spread * aim);
         }
     }
 
     nextFireDelay() {
-        const mul = this.type ? this.type.fire : 1;
+        const mul = (this.type ? this.type.fire : 1) * (this.skills && this.skills.aim ? 0.8 : 1);
         return (CFG.enemyFireMin + Math.random() * (CFG.enemyFireMax - CFG.enemyFireMin)) * mul;
     }
 
@@ -214,6 +315,11 @@ class HumanoidEnemy {
 
     takeDamage(dmg) {
         this.health -= dmg;
+        if (this.skills.dodge && !this.air && this.dodgeCooldown <= 0 && this.health > 0) {
+            this.dodgeTimer = 0.35;
+            this.dodgeCooldown = 1.6;
+            this.dodgeDir = Math.random() < 0.5 ? -1 : 1;
+        }
         const frac = Math.max(0, this.health / this.maxHealth);
         this.hpBar.visible = true;
         this.hpFill.scale.x = Math.max(0.001, frac);

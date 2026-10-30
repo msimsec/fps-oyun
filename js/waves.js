@@ -20,8 +20,10 @@ function startNextWave() {
     wave.inBreak = false;
     // Bu dalgada ilk kez çıkan düşman tipi varsa duyur
     const fresh = Object.values(ENEMY_TYPES).filter(t => t.minWave === wave.num).map(t => t.name);
-    showBanner(`DALGA ${wave.num}`, `${wave.toSpawn} düşman geliyor` + (fresh.length ? ` · Yeni: ${fresh.join(', ')}!` : ''),
-        fresh.length ? 3200 : 2200);
+    // Bu dalgada kazanılan düşman yetenekleri (rampası olmayan bölümde rampa yeteneği duyurulmaz)
+    const skills = ENEMY_SKILLS.filter(k => k.wave === wave.num && (!k.needsPads || jumpPads.length)).map(k => k.text);
+    const extra = (fresh.length ? ` · Yeni: ${fresh.join(', ')}!` : '') + (skills.length ? ` · ${skills.join(' ')}` : '');
+    showBanner(`DALGA ${wave.num}`, `${wave.toSpawn} düşman geliyor` + extra, extra ? 3600 : 2200);
     sfx('waveStart');
 }
 
@@ -38,6 +40,8 @@ function updateWaves(dt) {
             const e = new HumanoidEnemy(sp.x, sp.z, false, waveHpMul(wave.num), waveSpeedMul(wave.num),
                 pickEnemyType(wave.num));
             e.group.position.y = sp.y;       // Space'te platform yüksekliği
+            e.skills = skillsForWave(wave.num);
+            e.shootTimer = e.nextFireDelay();
             enemies.push(e);
             wave.toSpawn--;
         }
