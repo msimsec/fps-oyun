@@ -35,7 +35,8 @@ function selectWeapon(id) {
     if (!player.ownedWeapons[id]) { showToast(`${WEAPONS[id].name} kilitli (mağazadan alabilirsin)`); return; }
     player.reloading = false;                    // silah değişince şarjör değiştirme iptal
     player.fireCooldown = Math.max(player.fireCooldown, 0.25);
-    player.semiFired = false;
+    // Tetik basılıyken silah değişirse yeni (yarı otomatik) silah kendiliğinden ateş etmesin
+    player.semiFired = firing;
     setZoom(false);
     showWeapon(id);
     weaponSwitchAnim = 1;

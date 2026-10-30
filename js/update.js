@@ -34,7 +34,7 @@ function updatePlayer(dt) {
     }
 
     // Dikey hareket: yerçekimi, zıplama, kasaların üstüne çıkma / kenardan düşme
-    const ground = groundHeight(camera.position.x, camera.position.z, feet);
+    const ground = groundHeight(camera.position.x, camera.position.z, feet, CFG.playerRadius);
     if (player.onGround && feet > ground + 0.01) player.onGround = false;   // kenardan yürüyüp düştü
     if (!player.onGround) {
         player.velY -= CFG.gravity * dt;
@@ -163,8 +163,8 @@ function updateHUD() {
     setHud('goldDisplay', player.gold);
     setHud('healKitsDisplay', player.healKits);
     setHud('modeDisplay', isDuelMode
-        ? `DÜELLO · ${DIFF_LABELS[settings.duel]} · ${formatTime(duelTime)}`
-        : `DALGA ${wave.num || '-'} · KALAN ${waveRemaining()} · ${DIFF_LABELS[settings.game]}`);
+        ? `DÜELLO · ${DIFF_LABELS[run.duel]} · ${formatTime(duelTime)}`
+        : `DALGA ${wave.num || '-'} · KALAN ${waveRemaining()} · ${DIFF_LABELS[run.game]}`);
     updateDuelBar();
 }
 

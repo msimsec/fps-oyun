@@ -32,6 +32,8 @@ let isDuelMode = false;
 let duelBot = null;
 let duelTime = 0;
 let pendingDuelWin = false;
+// Elin hangi zorlukta başladığı (duraklatmada ayar değişse de rekor doğru seviyeye yazılsın)
+const run = { active: false, game: 'normal', duel: 'normal' };
 let firing = false;
 let lockTimer = null;
 const keys = { forward: false, back: false, left: false, right: false, sprint: false };
