@@ -18,7 +18,10 @@ function startNextWave() {
     wave.num++;
     wave.toSpawn = waveSize(wave.num);
     wave.inBreak = false;
-    showBanner(`DALGA ${wave.num}`, `${wave.toSpawn} düşman geliyor`);
+    // Bu dalgada ilk kez çıkan düşman tipi varsa duyur
+    const fresh = Object.values(ENEMY_TYPES).filter(t => t.minWave === wave.num).map(t => t.name);
+    showBanner(`DALGA ${wave.num}`, `${wave.toSpawn} düşman geliyor` + (fresh.length ? ` · Yeni: ${fresh.join(', ')}!` : ''),
+        fresh.length ? 3200 : 2200);
     sfx('waveStart');
 }
 
@@ -32,7 +35,8 @@ function updateWaves(dt) {
     if (wave.toSpawn > 0 && enemies.length < CFG.maxEnemies && Math.random() < CFG.spawnPerSec * dt) {
         const sp = findSpawnPoint();
         if (sp) {
-            enemies.push(new HumanoidEnemy(sp.x, sp.z, false, waveHpMul(wave.num), waveSpeedMul(wave.num)));
+            enemies.push(new HumanoidEnemy(sp.x, sp.z, false, waveHpMul(wave.num), waveSpeedMul(wave.num),
+                pickEnemyType(wave.num)));
             wave.toSpawn--;
         }
     }

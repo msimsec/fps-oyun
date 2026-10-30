@@ -14,18 +14,55 @@ const CFG = {
     armorAmount: 50,
     baseDamage: 15, damageStep: 5, maxDamage: 35, damageCost: 100,
     baseMag: 30, magStep: 5, maxMag: 60, magCost: 75,
-    healCost: 50, maxHealKits: 9, shieldCost: 150, skinCost: 300,
+    healCost: 50, maxHealKits: 9, shieldCost: 150,
     // Dalgalar: her dalgada düşman sayısı, canı ve hızı biraz artar
     waveGrowth: 0.35, waveHpGrowth: 0.1, waveSpeedGrowth: 0.03, waveSpeedMax: 1.4,
     waveBreak: 5, waveGoldPerWave: 10, waveScorePerWave: 200, waveHeal: 25
 };
-const SKINS = ['classic', 'prime', 'reaver'];
 // Skin renkleri: silah gövdesi, namlu/detaylar ve mermi (mağazadaki önizleme de bunları kullanır)
 const SKIN_DEFS = {
-    classic: { name: 'Standart', body: 0x3a3f47, accent: 0x00ffff, bullet: 0x00ffcc },
-    prime:   { name: 'Kraliyet', body: 0xa349a4, accent: 0xffcc00, bullet: 0xcc66ff },
-    reaver:  { name: 'Gölge',    body: 0x4b0082, accent: 0x9932cc, bullet: 0x9933ff }
+    classic: { name: 'Standart', body: 0x3a3f47, accent: 0x00ffff, bullet: 0x00ffcc, cost: 0 },
+    prime:   { name: 'Kraliyet', body: 0xa349a4, accent: 0xffcc00, bullet: 0xcc66ff, cost: 300 },
+    reaver:  { name: 'Gölge',    body: 0x4b0082, accent: 0x9932cc, bullet: 0x9933ff, cost: 300 },
+    ember:   { name: 'Kor',      body: 0x7f1d1d, accent: 0xf97316, bullet: 0xff6a00, cost: 350 },
+    arctic:  { name: 'Buz',      body: 0xdbe4ee, accent: 0x38bdf8, bullet: 0x7dd3fc, cost: 350 },
+    toxic:   { name: 'Zehir',    body: 0x14532d, accent: 0x84cc16, bullet: 0xa3e635, cost: 350 },
+    gold:    { name: 'Altın',    body: 0xb8860b, accent: 0xfff1a8, bullet: 0xffd700, cost: 800 }
 };
+const SKINS = Object.keys(SKIN_DEFS);
+
+// Kalıcı yükseltmeler: her seviyenin etkisi (per) ve seviyeyle artan fiyat
+const UPGRADES = {
+    health: { name: 'Can Sınırı', max: 5, baseCost: 120, costStep: 60, per: 20 },     // +20 maksimum can
+    speed:  { name: 'Hareket Hızı', max: 5, baseCost: 100, costStep: 50, per: 0.06 }, // +%6 hız
+    reload: { name: 'Hızlı Şarjör', max: 5, baseCost: 100, costStep: 50, per: 0.1 }   // -%10 şarjör süresi
+};
+const UPGRADE_IDS = Object.keys(UPGRADES);
+const upgradeCost = (id, level) => UPGRADES[id].baseCost + UPGRADES[id].costStep * level;
+
+// Dalga modundaki düşman tipleri. Çarpanlar zorluk seviyesinin değerlerine uygulanır.
+// fire: ateş aralığı çarpanı (2 = yarı sıklıkta), keepDistance: [en yakın, en uzak] mesafe
+const ENEMY_TYPES = {
+    grunt:  { name: 'Er', body: 0xdc2626, head: 0xf87171, scale: 1.3,
+              hp: 1, speed: 1, melee: 1, fire: 1, dmg: 1, spread: 1, reward: 1 },
+    runner: { name: 'Koşucu', body: 0xf59e0b, head: 0xfde68a, scale: 1.1,
+              hp: 0.6, speed: 1.7, melee: 0.8, fire: 2, dmg: 0.7, spread: 1.4, reward: 1,
+              minWave: 2, chance: 0.25 },
+    sniper: { name: 'Nişancı', body: 0x0e7490, head: 0x67e8f9, scale: 1.25,
+              hp: 0.8, speed: 0.8, melee: 0.5, fire: 0.6, dmg: 1.6, spread: 0.4, reward: 1.5,
+              keepDistance: [14, 22], range: 40, minWave: 3, chance: 0.18 },
+    tank:   { name: 'Zırhlı', body: 0x475569, head: 0x94a3b8, scale: 1.6,
+              hp: 3, speed: 0.6, melee: 1.6, fire: 1.3, dmg: 1.5, spread: 1, reward: 2.5,
+              minWave: 4, chance: 0.12 }
+};
+// Dalga numarasına göre rastgele tip: en güçlüden başlayarak şans tanır, hiçbiri tutmazsa Er
+function pickEnemyType(waveNum) {
+    for (const id of ['tank', 'sniper', 'runner']) {
+        const t = ENEMY_TYPES[id];
+        if (waveNum >= t.minWave && Math.random() < t.chance) return id;
+    }
+    return 'grunt';
+}
 
 // =====================================================================
 //  SİLAHLAR — hasar = oyuncunun hasar seviyesi × dmgMul (mağazadaki yükseltme hepsine işler)
@@ -89,7 +126,7 @@ const DUEL_DIFF = {
     }
 };
 
-const SETTINGS_KEY = 'fps_settings_v1';
+const SETTINGS_KEY = profileKey('fps_settings_v1');
 const SENS_MIN = 0.2, SENS_MAX = 3, BASE_SENS = 0.003;   // radyan / piksel (1.0x)
 const settings = (() => {
     let o = null;

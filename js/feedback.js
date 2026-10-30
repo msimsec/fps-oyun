@@ -22,7 +22,7 @@ function showDamageNumber(enemy, amount, head) {
     el.textContent = Math.round(amount);
     $('floaterLayer').appendChild(el);
     const pos = enemy.group.position.clone();
-    pos.y = 2.1 * CFG.enemyScale;
+    pos.y = 2.1 * enemy.scale;
     pos.x += (Math.random() - 0.5) * 0.6;
     const f = { el, pos, age: 0, life: 0.8, amount, head };
     floaters.push(f);

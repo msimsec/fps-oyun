@@ -4,7 +4,7 @@
 //  REKORLAR — zorluk seviyesi başına en iyi skor/dalga ve düello sonuçları
 //  (yalnızca bu tarayıcıda tutulur)
 // =====================================================================
-const RECORDS_KEY = 'fps_records_v1';
+const RECORDS_KEY = profileKey('fps_records_v1');
 
 function emptyRecords() {
     const r = { game: {}, duel: {} };
