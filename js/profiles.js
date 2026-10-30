@@ -27,6 +27,16 @@ const profiles = (() => {
 })();
 
 function saveProfiles() { lsSet(PROFILES_KEY, JSON.stringify(profiles)); }
+// Listeyi değiştirmeden önce depodan yeniden oku: başka bir sekmede eklenen/silinen oyuncu,
+// bu sekmedeki eski liste kaydedilince kaybolmasın
+function refreshProfiles() {
+    try {
+        const o = JSON.parse(lsGet(PROFILES_KEY));
+        if (o && Array.isArray(o.list)) {
+            profiles.list = o.list.filter(p => p && typeof p.id === 'string' && typeof p.name === 'string').slice(0, MAX_PROFILES);
+        }
+    } catch (e) {}
+}
 function newProfileId() { return 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
 // Profil yokken (ilk açılış) oyun "_none" anahtarlarıyla yüklenir; giriş yapılmadan oynanamaz
 const profileKey = (base) => `${base}::${profiles.current || '_none'}`;
@@ -84,6 +94,7 @@ function openProfiles() {
 }
 
 function renderProfiles() {
+    refreshProfiles();
     const box = $('profileList');
     box.innerHTML = '';
     if (!profiles.list.length) {
@@ -133,6 +144,7 @@ function selectProfile(id) {
 }
 
 function createProfile() {
+    refreshProfiles();
     const name = cleanName($('newProfileName').value);
     const note = $('profileNote');
     if (!name) { note.textContent = 'Lütfen bir ad yaz.'; return; }
@@ -144,6 +156,7 @@ function createProfile() {
 }
 
 function renameProfile(id) {
+    refreshProfiles();
     const p = profiles.list.find(x => x.id === id);
     if (!p) return;
     const name = cleanName(prompt('Yeni ad:', p.name));
@@ -156,6 +169,7 @@ function renameProfile(id) {
 }
 
 function deleteProfile(id) {
+    refreshProfiles();
     const p = profiles.list.find(x => x.id === id);
     if (!p || !confirm(`"${p.name}" ve tüm kaydı (altın, silahlar, rekorlar) silinsin mi? Bu geri alınamaz.`)) return;
     PROFILE_DATA_KEYS.forEach(k => lsDel(`${k}::${id}`));

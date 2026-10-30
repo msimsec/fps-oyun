@@ -71,6 +71,7 @@ function openRecords(from) {
     recordsReturn = from;
     state = 'records';
     showScreen('recordsScreen');
+    $('recordsPlayer').textContent = currentProfile() ? currentProfile().name : '-';
     const rows = DIFFICULTIES.map(d => {
         const g = records.game[d], u = records.duel[d];
         return `<tr><td class="lvl ${d}">${DIFF_LABELS[d]}</td>` +

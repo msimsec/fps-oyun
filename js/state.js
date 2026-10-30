@@ -26,7 +26,7 @@ function saveGameData() {
     });
 }
 
-// state: 'menu' | 'starting' | 'playing' | 'paused' | 'shop' | 'settings' | 'records' | 'over'
+// state: 'menu' | 'starting' | 'playing' | 'paused' | 'shop' | 'settings' | 'records' | 'profiles' | 'over'
 let state = 'menu';
 let shopReturn = 'menu';
 let isDuelMode = false;

@@ -68,6 +68,8 @@ class HumanoidEnemy {
         this.shootTimer = isDuel ? CFG.botFirstShot : this.nextFireDelay();
         this.strafeDir = 1;
         this.strafeTimer = 0;
+        this.blindTime = 0;        // nişancı: oyuncuyu kaç saniyedir göremiyor
+        this.sightCheck = 0;
     }
 
     update(dt) {
@@ -86,20 +88,19 @@ class HumanoidEnemy {
                 this.shootTimer = CFG.botFireInterval;
                 this.shootAtPlayer(CFG.botBulletDamage, CFG.botSpread);
             }
-        } else if (this.type.keepDistance) {
+        } else if (this.type.keepDistance && this.blindTime < 2.5) {
             // Nişancı: yaklaşmaz, belli mesafede yana kayarak ateş eder
             this.strafeAndKeepDistance(dt, dist, nx, nz, this.type.keepDistance[0], this.type.keepDistance[1]);
+            this.updateSight(dt);
             this.tryShoot(dt, dist);
+        } else if (this.type.keepDistance) {
+            // Uzun süredir oyuncuyu göremiyor (ör. duvarın arkasında kaldı): görene kadar yaklaş.
+            // Yoksa saklanmış bir nişancı yüzünden dalga hiç bitmeyebilir.
+            this.chase(dt, dist, nx, nz);
+            this.updateSight(dt);
         } else {
             if (dist > 1.5) {
-                const step = this.speed * dt;
-                const ox = p.x, oz = p.z;
-                moveWithCollision(p, nx * step, nz * step, this.radius);
-                if (Math.hypot(p.x - ox, p.z - oz) < step * 0.5) {
-                    // Duvara takıldı: duvar boyunca yana kay, o yön de kapalıysa yön değiştir
-                    moveWithCollision(p, -nz * this.strafeDir * step, nx * this.strafeDir * step, this.radius);
-                    if (Math.hypot(p.x - ox, p.z - oz) < step * 0.1) this.strafeDir *= -1;
-                }
+                this.chase(dt, dist, nx, nz);
             } else if (footY() < 1.2) {
                 // Oyuncu yüksek bir kasanın üstündeyse yakın temas hasarı yok (ateş etmeye devam ederler)
                 damagePlayer(CFG.meleeDps * this.type.melee * dt);   // saniye bazlı yakın temas hasarı
@@ -108,6 +109,27 @@ class HumanoidEnemy {
         }
 
         if (this.hpBar.visible) this.hpBar.lookAt(camera.position);
+    }
+
+    // Oyuncuya doğru yürü; duvara takılırsa duvar boyunca yana kay, o yön de kapalıysa yön değiştir
+    chase(dt, dist, nx, nz) {
+        const p = this.group.position;
+        const step = this.speed * dt;
+        const ox = p.x, oz = p.z;
+        moveWithCollision(p, nx * step, nz * step, this.radius);
+        if (Math.hypot(p.x - ox, p.z - oz) < step * 0.5) {
+            moveWithCollision(p, -nz * this.strafeDir * step, nx * this.strafeDir * step, this.radius);
+            if (Math.hypot(p.x - ox, p.z - oz) < step * 0.1) this.strafeDir *= -1;
+        }
+    }
+
+    // Görüş kontrolü her karede değil, 0.4 saniyede bir (her kontrol duvar taraması yapar)
+    updateSight(dt) {
+        this.sightCheck -= dt;
+        if (this.sightCheck > 0) { if (this.blindTime > 0) this.blindTime += dt; return; }
+        this.sightCheck = 0.4;
+        if (this.canSeePlayer()) this.blindTime = 0;
+        else this.blindTime += dt + 0.0001;
     }
 
     // Belli bir mesafe aralığında kal, sağa-sola kay (düello botu ve nişancı)
