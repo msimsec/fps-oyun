@@ -385,6 +385,10 @@
         let cameraAngleY = 0, cameraAngleX = 0;
         let brickMaterial;
         let weapon3DGroup, weaponBodyMat, weaponAccentMat;
+        const clock = new THREE.Clock();
+        const hitTarget = new THREE.Vector3();
+        const ENEMY_CENTER_Y = 0.9; // Gövde merkezi (grup pozisyonu ayak hizasında)
+        const MELEE_DPS = 20;
 
         function createBrickTexture() {
             const canvas = document.createElement('canvas');
@@ -471,10 +475,13 @@
             window.addEventListener('keyup', onKeyUp);
             document.addEventListener('mousemove', onMouseMove);
             
-            document.addEventListener('click', () => {
-                if (gameRunning) {
-                    document.body.requestPointerLock();
+            document.addEventListener('click', (e) => {
+                // Menü butonlarına tıklamak ateş ettirmesin
+                if (!gameRunning || e.target.closest('button, select')) return;
+                if (document.pointerLockElement === document.body) {
                     shoot();
+                } else {
+                    document.body.requestPointerLock();
                 }
             });
 
@@ -674,24 +681,25 @@
                 this.shootTimer = 0;
             }
 
-            update() {
+            // f: 60 FPS'e göre normalize edilmiş kare süresi
+            update(f) {
                 const dx = camera.position.x - this.group.position.x;
                 const dz = camera.position.z - this.group.position.z;
                 const dist = Math.sqrt(dx*dx + dz*dz);
 
                 if (dist > 1.5) {
-                    this.group.position.x += (dx / dist) * this.speed;
-                    this.group.position.z += (dz / dist) * this.speed;
+                    this.group.position.x += (dx / dist) * this.speed * f;
+                    this.group.position.z += (dz / dist) * this.speed * f;
                     this.group.lookAt(camera.position.x, this.group.position.y, camera.position.z);
                 } else {
-                    let damageTaken = player.hasShield ? 1 : 2;
-                    player.health -= damageTaken;
+                    let dps = player.hasShield ? MELEE_DPS / 2 : MELEE_DPS;
+                    player.health -= dps * f / 60;
                     if (player.health <= 0) gameOver();
                 }
 
                 // 1v1 modundaysa bot da sana ateş eder!
                 if (this.isDuel) {
-                    this.shootTimer++;
+                    this.shootTimer += f;
                     if (this.shootTimer > 60) { // Her 1 saniyede bir ateş eder
                         this.shootTimer = 0;
                         this.shootAtPlayer();
@@ -707,7 +715,7 @@
                 bullet.position.copy(this.group.position);
                 bullet.position.y += 1.0;
 
-                const targetDir = new THREE.Vector3().subVectors(camera.position, this.group.position).normalize();
+                const targetDir = new THREE.Vector3().subVectors(camera.position, bullet.position).normalize();
                 bullet.velocity = targetDir.multiplyScalar(1.0);
                 bullet.life = 100;
                 bullet.damage = 10; // Düelloda bot mermisi daha etkilidir
@@ -740,8 +748,74 @@
             }
         }
 
+        function isInsideWall(pos) {
+            for (let wall of walls) {
+                if (pos.x > wall.x - wall.w/2 && pos.x < wall.x + wall.w/2 &&
+                    pos.z > wall.z - wall.d/2 && pos.z < wall.z + wall.d/2) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function isHit(b, enemy) {
+            hitTarget.copy(enemy.group.position);
+            hitTarget.y += ENEMY_CENTER_Y;
+            return b.position.distanceTo(hitTarget) < 1.0;
+        }
+
+        // Mermiyi bir alt adım ilerletir; mermi tükendiyse true döner
+        function stepBullet(b, scale) {
+            b.position.addScaledVector(b.velocity, scale);
+
+            if (isInsideWall(b.position)) {
+                createParticles(b.position.x, b.position.y, b.position.z, 0xb45309);
+                return true;
+            }
+
+            if (b.isPlayer) {
+                if (isDuelMode && duelBot) {
+                    if (isHit(b, duelBot)) {
+                        duelBot.health -= b.damage;
+                        createParticles(b.position.x, b.position.y, b.position.z, b.colorHex);
+                        return true;
+                    }
+                    return false;
+                }
+
+                for (let j = enemies.length - 1; j >= 0; j--) {
+                    let e = enemies[j];
+                    if (isHit(b, e)) {
+                        e.health -= b.damage;
+                        createParticles(b.position.x, b.position.y, b.position.z, b.colorHex);
+
+                        if (e.health <= 0) {
+                            e.destroy();
+                            enemies.splice(j, 1);
+                            player.score += 100;
+                            player.kills++;
+                            player.gold += 25;
+                            player.ammoPool += 20;
+                            saveGameData();
+                        }
+                        return true;
+                    }
+                }
+            } else if (b.position.distanceTo(camera.position) < 1.0) {
+                // Botun mermisi oyuncuya çarparsa
+                player.health -= player.hasShield ? 5 : 10;
+                if (player.health <= 0) gameOver();
+                return true;
+            }
+            return false;
+        }
+
         function animate() {
             requestAnimationFrame(animate);
+
+            // Hızlar 60 FPS'e göre ayarlı; f ile her FPS'te aynı hızda oynanır.
+            // Sekme değişiminde büyük sıçramaları önlemek için 0.1 sn ile sınırlı.
+            const f = Math.min(clock.getDelta(), 0.1) * 60;
 
             if (gameRunning) {
                 let dir = new THREE.Vector3();
@@ -752,11 +826,12 @@
                 let sideDir = new THREE.Vector3(-dir.z, 0, dir.x);
                 let nextX = camera.position.x;
                 let nextZ = camera.position.z;
+                const step = player.speed * f;
 
-                if (moveForward) { nextX += dir.x * player.speed; nextZ += dir.z * player.speed; }
-                if (moveBackward) { nextX -= dir.x * player.speed; nextZ -= dir.z * player.speed; }
-                if (moveLeft) { nextX += sideDir.x * player.speed; nextZ += sideDir.z * player.speed; }
-                if (moveRight) { nextX -= sideDir.x * player.speed; nextZ -= sideDir.z * player.speed; }
+                if (moveForward) { nextX += dir.x * step; nextZ += dir.z * step; }
+                if (moveBackward) { nextX -= dir.x * step; nextZ -= dir.z * step; }
+                if (moveLeft) { nextX += sideDir.x * step; nextZ += sideDir.z * step; }
+                if (moveRight) { nextX -= sideDir.x * step; nextZ -= sideDir.z * step; }
 
                 let canMove = true;
                 for (let wall of walls) {
@@ -774,85 +849,37 @@
 
                 for (let i = bullets.length - 1; i >= 0; i--) {
                     let b = bullets[i];
-                    b.position.add(b.velocity);
-                    b.life--;
+                    b.life -= f;
 
-                    let hitWall = false;
-                    for (let wall of walls) {
-                        if (b.position.x > wall.x - wall.w/2 && b.position.x < wall.x + wall.w/2 &&
-                            b.position.z > wall.z - wall.d/2 && b.position.z < wall.z + wall.d/2) {
-                            hitWall = true;
-                            createParticles(b.position.x, b.position.y, b.position.z, 0xb45309);
-                            break;
-                        }
+                    // Düşük FPS'te mermi hedefin içinden atlamasın diye hareketi alt adımlara böl
+                    const steps = Math.ceil(f);
+                    let removed = b.life <= 0;
+                    for (let s = 0; s < steps && !removed; s++) {
+                        removed = stepBullet(b, f / steps);
                     }
 
-                    if (hitWall || b.life <= 0) {
+                    if (removed) {
                         scene.remove(b);
                         bullets.splice(i, 1);
-                        continue;
                     }
+                }
 
-                    // Eğer mermi oyuncudan çıktıysa düşmanlara çarpar
-                    if (b.isPlayer) {
-                        if (isDuelMode && duelBot) {
-                            if (b.position.distanceTo(duelBot.group.position) < 1.0) {
-                                duelBot.health -= b.damage;
-                                createParticles(b.position.x, b.position.y, b.position.z, b.colorHex);
-                                scene.remove(b);
-                                bullets.splice(i, 1);
-
-                                if (duelBot.health <= 0) {
-                                    duelBot.destroy();
-                                    duelBot = null;
-                                    isDuelMode = false;
-                                    player.score += 500;
-                                    player.gold += 150;
-                                    player.kills++;
-                                    saveGameData();
-                                    alert("Tebrikler! 1v1 Düelloyu Kazandın! (+150 Altın)");
-                                    restartGame();
-                                }
-                                continue;
-                            }
-                        }
-
-                        for (let j = enemies.length - 1; j >= 0; j--) {
-                            let e = enemies[j];
-                            if (b.position.distanceTo(e.group.position) < 1.0) {
-                                e.health -= b.damage;
-                                createParticles(b.position.x, b.position.y, b.position.z, b.colorHex);
-                                scene.remove(b);
-                                bullets.splice(i, 1);
-
-                                if (e.health <= 0) {
-                                    e.destroy();
-                                    enemies.splice(j, 1);
-                                    player.score += 100;
-                                    player.kills++;
-                                    player.gold += 25;
-                                    player.ammoPool += 20;
-                                    saveGameData();
-                                }
-                                break;
-                            }
-                        }
-                    } else {
-                        // Botun mermisi oyuncuya çarparsa
-                        if (b.position.distanceTo(camera.position) < 1.0) {
-                            let damageTaken = player.hasShield ? 5 : 10;
-                            player.health -= damageTaken;
-                            scene.remove(b);
-                            bullets.splice(i, 1);
-                            if (player.health <= 0) gameOver();
-                        }
-                    }
+                if (isDuelMode && duelBot && duelBot.health <= 0) {
+                    duelBot.destroy();
+                    duelBot = null;
+                    isDuelMode = false;
+                    player.score += 500;
+                    player.gold += 150;
+                    player.kills++;
+                    saveGameData();
+                    alert("Tebrikler! 1v1 Düelloyu Kazandın! (+150 Altın)");
+                    restartGame();
                 }
 
                 for (let i = particles.length - 1; i >= 0; i--) {
                     let p = particles[i];
-                    p.position.add(p.velocity);
-                    p.life--;
+                    p.position.addScaledVector(p.velocity, f);
+                    p.life -= f;
                     if (p.life <= 0) {
                         scene.remove(p);
                         particles.splice(i, 1);
@@ -860,10 +887,10 @@
                 }
 
                 if (isDuelMode && duelBot) {
-                    duelBot.update();
+                    duelBot.update(f);
                 } else {
-                    enemies.forEach(e => e.update());
-                    if (Math.random() < 0.025 && enemies.length < 12) {
+                    enemies.forEach(e => e.update(f));
+                    if (Math.random() < 0.025 * f && enemies.length < 12) {
                         let angle = Math.random() * Math.PI * 2;
                         let radius = 25;
                         let ex = camera.position.x + Math.cos(angle) * radius;
@@ -871,7 +898,6 @@
                         enemies.push(new HumanoidEnemy(ex, ez, false));
                     }
                 }
-
                 document.getElementById('hpDisplay').textContent = Math.max(0, Math.floor(player.health));
                 document.getElementById('ammoDisplay').textContent = player.ammo;
                 document.getElementById('ammoPoolDisplay').textContent = player.ammoPool;
@@ -891,7 +917,8 @@
             restartGame();
             isDuelMode = true;
             // Karşında seninle aynı özelliklere sahip özel bir 1v1 botu doğar
-            duelBot = new HumanoidEnemy(camera.position.x + 5, camera.position.z - 5, true);
+            // Ortadaki duvarın (x: -6..6) dışında, açık alanda doğar
+            duelBot = new HumanoidEnemy(camera.position.x + 8, camera.position.z - 5, true);
         }
 
         function openShop() {
