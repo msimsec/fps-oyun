@@ -321,3 +321,10 @@ body {
 .skin-option.locked:hover { border-color: #ffaa00; cursor: pointer; }
 .skin-option.locked.poor { opacity: 0.5; }
 .skin-option.locked.poor:hover { border-color: #334155; cursor: not-allowed; }
+
+/* Ekrana sığmayan menüler: "center" taşan üst kısmı kaydırılamaz alana itiyordu
+   (ör. 1280×720'de mağaza başlığı görünmüyordu). "safe center" sığmazsa üstten başlatır. */
+.overlay, .shop-modal { justify-content: center; justify-content: safe center; overflow-y: auto; }
+/* Bildirim, mağaza/ayarlar ekranındaki "Geri Dön" butonunun üstünü kapatmasın */
+#toast { bottom: 28px; }
+.records-player { color: #ffaa00; font-family: 'Courier New', monospace; font-size: 16px; margin: -6px 0 14px; }
