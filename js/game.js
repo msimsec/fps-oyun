@@ -5,6 +5,9 @@
 // =====================================================================
 function resetWorld(duel) {
     applyDifficulty();   // ayar değişiklikleri yeni elde geçerli olur
+    run.game = settings.game;
+    run.duel = settings.duel;
+    run.active = true;
     enemies.forEach(e => e.destroy()); enemies = [];
     if (duelBot) { duelBot.destroy(); duelBot = null; }
     bullets.forEach(b => scene.remove(b)); bullets = [];
@@ -68,6 +71,10 @@ function resumeGame() {
 
 function goToMenu() {
     if (document.pointerLockElement) document.exitPointerLock();
+    // Dalga modundan yarıda çıkılırsa o ana kadarki skor/dalga yine rekorlara işlensin
+    // (düellodan çıkmak galibiyet ya da mağlubiyet sayılmaz)
+    if (run.active && !isDuelMode) updateRecords(false);
+    run.active = false;
     hideBanner();
     state = 'menu';
     showScreen('menuScreen');
@@ -76,6 +83,7 @@ function goToMenu() {
 function endRun(won) {
     if (state !== 'playing') return;
     state = 'over';
+    run.active = false;
     resetKeys();
     setZoom(false);
     hideBanner();
@@ -99,7 +107,7 @@ function endRun(won) {
     $('finalGold').textContent = player.goldEarned;
     $('finalTotalGold').textContent = player.gold;
     $('finalDifficulty').textContent = (isDuelMode ? 'Düello ' : '') +
-        DIFF_LABELS[isDuelMode ? settings.duel : settings.game];
+        DIFF_LABELS[isDuelMode ? run.duel : run.game];
     $('finalExtra').textContent = isDuelMode ? `Süre: ${formatTime(duelTime)}` : `Ulaşılan dalga: ${wave.num}`;
     $('newRecord').textContent = broken.length ? `🏆 YENİ REKOR: ${broken.join(' · ')}` : '';
     showScreen('gameOverScreen');

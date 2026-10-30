@@ -27,18 +27,22 @@ function flashClass(id, cls, ms) {
 // Duvar/kasa çarpışması (yatay düzlemde, r = yarıçap payı).
 // feet: ayak yüksekliği; üst yüzeyi ayağın en fazla stepHeight üstünde olan engeller engellemez
 // (üstlerine çıkılır). Düşmanlar her zaman 0 ile çağırır, yani kasalara çıkamaz.
-function collides(x, z, r, feet = 0) {
+// Dönen değer engelin ne kadar içine girildiği (0 = çarpışma yok).
+function overlapDepth(x, z, r, feet = 0) {
+    let depth = 0;
     for (const w of walls) {
         if (w.h <= feet + CFG.stepHeight) continue;
-        if (x > w.x - w.w / 2 - r && x < w.x + w.w / 2 + r &&
-            z > w.z - w.d / 2 - r && z < w.z + w.d / 2 + r) return true;
+        const px = Math.min(x - (w.x - w.w / 2 - r), (w.x + w.w / 2 + r) - x);
+        const pz = Math.min(z - (w.z - w.d / 2 - r), (w.z + w.d / 2 + r) - z);
+        if (px > 0 && pz > 0) depth = Math.max(depth, Math.min(px, pz));
     }
-    return false;
+    return depth;
 }
-// Durulan zeminin yüksekliği: altındaki ve çıkılabilecek en yüksek engelin üstü (yoksa 0)
-function groundHeight(x, z, feet) {
+function collides(x, z, r, feet = 0) { return overlapDepth(x, z, r, feet) > 0; }
+// Durulan zeminin yüksekliği: altındaki ve çıkılabilecek en yüksek engelin üstü (yoksa 0).
+// r çarpışma payıyla aynı olmalı; daha küçük olursa kenardan düşen oyuncu engelin içine düşüp sıkışır.
+function groundHeight(x, z, feet, r) {
     let g = 0;
-    const r = 0.3;
     for (const w of walls) {
         if (w.h > feet + CFG.stepHeight || w.h <= g) continue;
         if (x > w.x - w.w / 2 - r && x < w.x + w.w / 2 + r &&
@@ -55,10 +59,15 @@ function pointInWall(p) {
     }
     return false;
 }
-// Eksenleri ayrı ayrı deneyerek duvar boyunca kaymayı sağlar
+// Eksenleri ayrı ayrı deneyerek duvar boyunca kaymayı sağlar. Bir şekilde engelin içinde
+// kalındıysa, içeri daha az girilen yöne harekete izin verilir (sıkışıp kalmayı önler).
 function moveWithCollision(pos, dx, dz, r, feet = 0) {
-    if (!collides(pos.x + dx, pos.z, r, feet)) pos.x += dx;
-    if (!collides(pos.x, pos.z + dz, r, feet)) pos.z += dz;
+    const cur = overlapDepth(pos.x, pos.z, r, feet);
+    const nx = overlapDepth(pos.x + dx, pos.z, r, feet);
+    if (nx === 0 || nx < cur) pos.x += dx;
+    const cur2 = overlapDepth(pos.x, pos.z, r, feet);
+    const nz = overlapDepth(pos.x, pos.z + dz, r, feet);
+    if (nz === 0 || nz < cur2) pos.z += dz;
 }
 
 function applyCameraRotation() {

@@ -45,7 +45,7 @@ function saveRecords() {
 function updateRecords(won) {
     const broken = [];
     if (isDuelMode) {
-        const r = records.duel[settings.duel];
+        const r = records.duel[run.duel];
         if (won) {
             r.wins++;
             if (duelTime > 0 && (!r.bestTime || duelTime < r.bestTime)) {
@@ -56,7 +56,7 @@ function updateRecords(won) {
             r.losses++;
         }
     } else {
-        const r = records.game[settings.game];
+        const r = records.game[run.game];
         if (player.score > r.score) { if (r.score) broken.push('En yüksek skor'); r.score = player.score; }
         if (wave.num > r.wave) { if (r.wave) broken.push('En uzak dalga'); r.wave = wave.num; }
         if (player.kills > r.kills) r.kills = player.kills;
