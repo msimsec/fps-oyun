@@ -164,43 +164,43 @@
         <div class="shop-grid">
             <div class="shop-card">
                 <h3>Silah Hasarı</h3>
-                <p>Tüm silahların hasarını +5 artırır<br>Hasar: <span id="modalDmg">15</span></p>
-                <button class="buy-btn" onclick="buyDamage()">Satın Al (100 Altın)</button>
+                <p>Temel hasarı +5 artırır; her silaha kendi çarpanıyla işler<br>Seviye: <span id="modalDmg">15</span><br><span class="dmg-detail" id="modalDmgDetail"></span></p>
+                <button class="buy-btn" id="btnDamage" onclick="buyDamage()"></button>
             </div>
             <div class="shop-card">
                 <h3>Gelişmiş Tüfek Şarjörü</h3>
                 <p>Tüfek şarjörünü kalıcı +5 artırır<br>Kapasite: <span id="modalMag">30</span></p>
-                <button class="buy-btn" onclick="buyAmmo()">Satın Al (75 Altın)</button>
+                <button class="buy-btn" id="btnMag" onclick="buyAmmo()"></button>
             </div>
             <div class="shop-card">
                 <h3>Can Kiti</h3>
-                <p>Oyunda 'H' tuşuna basınca canını fuller<br>Adet: <span id="modalHeal">0</span></p>
-                <button class="buy-btn" onclick="buyHealKit()">Satın Al (50 Altın)</button>
+                <p>Oyunda 'H' tuşuna basınca canını fuller; eller arasında saklanır<br>Adet: <span id="modalHeal">0</span></p>
+                <button class="buy-btn" id="btnHeal" onclick="buyHealKit()"></button>
             </div>
             <div class="shop-card">
                 <h3>Ağır Kalkan</h3>
-                <p>+50 kalkan puanı; hasarı önce kalkan emer, bitince tükenir<br>Durum: <span id="modalShield">YOK</span></p>
-                <button class="buy-btn" onclick="buyShield()">Satın Al (150 Altın)</button>
+                <p>+50 kalkan puanı; hasarı önce kalkan emer, bitince tükenir. Menüden alınırsa sonraki elin başında takılır<br>Durum: <span id="modalShield">YOK</span></p>
+                <button class="buy-btn" id="btnShield" onclick="buyShield()"></button>
             </div>
             <div class="shop-card weapon-card">
                 <h3>Pompalı (3)</h3>
                 <p>8 saçma, yakında çok güçlü, uzakta etkisiz · 6'lık şarjör<br>Durum: <span id="shotgunStatus">KİLİTLİ</span></p>
-                <button class="buy-btn" onclick="buyWeapon('shotgun')">Satın Al (250 Altın)</button>
+                <button class="buy-btn" id="btnShotgun" onclick="buyWeapon('shotgun')"></button>
             </div>
             <div class="shop-card weapon-card">
                 <h3>Keskin Nişancı (4)</h3>
                 <p>5 kat hasar, sağ tıkla dürbün · 5'lik şarjör<br>Durum: <span id="sniperStatus">KİLİTLİ</span></p>
-                <button class="buy-btn" onclick="buyWeapon('sniper')">Satın Al (400 Altın)</button>
+                <button class="buy-btn" id="btnSniper" onclick="buyWeapon('sniper')"></button>
             </div>
             <div class="shop-card">
                 <h3>Skin: Kraliyet</h3>
                 <p>Mor/Altın ışıltılı silah skini<br>Durum: <span id="primeStatus">KİLİTLİ</span></p>
-                <button class="buy-btn" onclick="buySkin('prime')">Satın Al (300 Altın)</button>
+                <button class="buy-btn" id="btnPrime" onclick="buySkin('prime')"></button>
             </div>
             <div class="shop-card">
                 <h3>Skin: Gölge</h3>
                 <p>Karanlık mor ruhani silah skini<br>Durum: <span id="reaverStatus">KİLİTLİ</span></p>
-                <button class="buy-btn" onclick="buySkin('reaver')">Satın Al (300 Altın)</button>
+                <button class="buy-btn" id="btnReaver" onclick="buySkin('reaver')"></button>
             </div>
         </div>
 
