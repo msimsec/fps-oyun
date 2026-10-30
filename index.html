@@ -342,36 +342,36 @@
     const SKINS = ['classic', 'prime', 'reaver'];
 
     // =====================================================================
-    //  ZORLUK SEVİYELERİ — her elin başında CFG'ye uygulanır ("Orta" eski varsayılanlar)
+    //  ZORLUK SEVİYELERİ — her elin başında CFG'ye uygulanır
     // =====================================================================
     const DIFFICULTIES = ['easy', 'normal', 'hard'];
     const DIFF_LABELS = { easy: 'Kolay', normal: 'Orta', hard: 'Zor' };
     const GAME_DIFF = {
         easy: {
-            enemyHealth: 20, enemySpeed: 1.7, maxEnemies: 8, spawnPerSec: 1.0, meleeDps: 20,
-            enemyFireMin: 2.5, enemyFireMax: 4.0, enemyBulletDamage: 3, enemySpread: 0.12, killGold: 20
+            enemyHealth: 16, enemySpeed: 1.5, maxEnemies: 7, spawnPerSec: 0.8, meleeDps: 16,
+            enemyFireMin: 3.0, enemyFireMax: 4.5, enemyBulletDamage: 2, enemySpread: 0.14, killGold: 20
         },
         normal: {
-            enemyHealth: 30, enemySpeed: 2.1, maxEnemies: 12, spawnPerSec: 1.5, meleeDps: 30,
-            enemyFireMin: 1.8, enemyFireMax: 3.0, enemyBulletDamage: 4, enemySpread: 0.08, killGold: 25
+            enemyHealth: 25, enemySpeed: 1.9, maxEnemies: 10, spawnPerSec: 1.2, meleeDps: 24,
+            enemyFireMin: 2.2, enemyFireMax: 3.5, enemyBulletDamage: 3, enemySpread: 0.10, killGold: 25
         },
         hard: {
-            enemyHealth: 45, enemySpeed: 2.7, maxEnemies: 16, spawnPerSec: 2.2, meleeDps: 40,
-            enemyFireMin: 1.2, enemyFireMax: 2.2, enemyBulletDamage: 6, enemySpread: 0.05, killGold: 35
+            enemyHealth: 38, enemySpeed: 2.4, maxEnemies: 14, spawnPerSec: 1.8, meleeDps: 32,
+            enemyFireMin: 1.5, enemyFireMax: 2.6, enemyBulletDamage: 5, enemySpread: 0.065, killGold: 35
         }
     };
     const DUEL_DIFF = {
         easy: {
-            duelHealth: 250, duelSpeed: 2.2, botFireInterval: 0.6, botBulletDamage: 6,
-            botSpread: 0.08, botFirstShot: 1.2, duelGold: 75
+            duelHealth: 200, duelSpeed: 2.0, botFireInterval: 0.7, botBulletDamage: 5,
+            botSpread: 0.10, botFirstShot: 1.4, duelGold: 75
         },
         normal: {
-            duelHealth: 400, duelSpeed: 2.6, botFireInterval: 0.4, botBulletDamage: 8,
-            botSpread: 0.05, botFirstShot: 0.8, duelGold: 150
+            duelHealth: 330, duelSpeed: 2.4, botFireInterval: 0.5, botBulletDamage: 7,
+            botSpread: 0.065, botFirstShot: 1.0, duelGold: 150
         },
         hard: {
-            duelHealth: 600, duelSpeed: 3.2, botFireInterval: 0.3, botBulletDamage: 10,
-            botSpread: 0.03, botFirstShot: 0.5, duelGold: 300
+            duelHealth: 500, duelSpeed: 2.9, botFireInterval: 0.35, botBulletDamage: 9,
+            botSpread: 0.04, botFirstShot: 0.7, duelGold: 300
         }
     };
 
