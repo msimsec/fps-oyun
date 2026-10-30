@@ -21,7 +21,7 @@ function resetWorld(duel) {
     if (player.hasShield) { player.armor = CFG.armorAmount; player.hasShield = false; }
     resetArsenal();
     player.score = 0; player.kills = 0; player.headshots = 0; player.goldEarned = 0;
-    player.velY = 0; player.airVX = 0; player.airVZ = 0; player.onGround = true;
+    player.velY = 0; player.airVX = 0; player.airVZ = 0; player.onGround = true; player.platform = 0;
     if (currentMapId !== settings.map) buildMap(settings.map);
     run.map = currentMapId;
     weaponKick = 0; weaponSwitchAnim = 0;

@@ -55,6 +55,19 @@ const ENEMY_TYPES = {
               hp: 3, speed: 0.6, melee: 1.6, fire: 1.3, dmg: 1.5, spread: 1, reward: 2.5,
               minWave: 4, chance: 0.12 }
 };
+// Dalga ilerledikçe düşmanların kazandığı yetenekler (o dalgada ve sonrasında doğan herkes)
+const ENEMY_SKILLS = [
+    { wave: 2, id: 'jump',  text: 'Düşmanlar artık zıplayabiliyor!' },
+    { wave: 3, id: 'pads',  text: 'Düşmanlar artık rampaları kullanıyor!', needsPads: true },
+    { wave: 4, id: 'dodge', text: 'Düşmanlar artık vurulunca kaçıyor!' },
+    { wave: 5, id: 'aim',   text: 'Düşmanların nişanı keskinleşti!' }
+];
+function skillsForWave(n) {
+    const s = {};
+    ENEMY_SKILLS.forEach(k => { if (n >= k.wave) s[k.id] = true; });
+    return s;
+}
+
 // Dalga numarasına göre rastgele tip: en güçlüden başlayarak şans tanır, hiçbiri tutmazsa Er
 function pickEnemyType(waveNum) {
     for (const id of ['tank', 'sniper', 'runner']) {

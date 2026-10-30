@@ -245,7 +245,8 @@ function buildSpace() {
         const apex = Math.max(y, ty) + 6;
         const vy = Math.sqrt(2 * CFG.gravity * (apex - y));
         const time = vy / CFG.gravity + Math.sqrt(2 * (apex - ty) / CFG.gravity);
-        jumpPads.push({ x: pd.x, z: pd.z, y, r: 1.4, vy, vx: (pd.to.x - pd.x) / time, vz: (pd.to.z - pd.z) / time });
+        jumpPads.push({ x: pd.x, z: pd.z, y, r: 1.4, vy, vx: (pd.to.x - pd.x) / time, vz: (pd.to.z - pd.z) / time,
+                        from: SPACE_PLATFORMS.indexOf(from), to: SPACE_PLATFORMS.indexOf(to) });
         let t = Math.random() * 6;
         mapAnimators.push((dt) => {
             t += dt * 3;
@@ -253,6 +254,31 @@ function buildSpace() {
             glow.scale.setScalar(0.9 + (Math.sin(t) * 0.5 + 0.5) * 0.35);
         });
     }
+}
+
+// Space: (x, z, y) noktasının durduğu platformun sırası; platform üstünde değilse -1
+function platformIndexAt(x, z, y) {
+    if (currentMapId !== 'space') return 0;
+    return SPACE_PLATFORMS.findIndex(p => Math.abs(x - p.x) <= p.w / 2 + 0.7 && Math.abs(z - p.z) <= p.d / 2 + 0.7 &&
+        Math.abs(y - p.top) < 0.3);
+}
+
+// from platformundan to platformuna rampa zincirinin ilk rampası (en kısa yol, BFS)
+function nextPad(from, to) {
+    if (from < 0 || to < 0 || from === to) return null;
+    const via = new Map([[from, null]]);
+    const queue = [from];
+    while (queue.length) {
+        const n = queue.shift();
+        if (n === to) break;
+        for (const pd of jumpPads) {
+            if (pd.from === n && !via.has(pd.to)) { via.set(pd.to, pd); queue.push(pd.to); }
+        }
+    }
+    if (!via.has(to)) return null;
+    let pd = via.get(to);
+    while (pd && pd.from !== from) pd = via.get(pd.from);
+    return pd;
 }
 
 // Oyuncu bir rampanın üstündeyse fırlat (yalnızca yerdeyken)

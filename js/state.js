@@ -14,7 +14,8 @@ const player = {
     gold: save.gold, damage: save.damage, healKits: save.healKits,
     hasShield: save.hasShield, activeSkin: save.activeSkin, unlockedSkins: save.unlockedSkins,
     reloading: false, reloadTimer: 0, reloadTotal: 1, fireCooldown: 0, semiFired: false,
-    velY: 0, airVX: 0, airVZ: 0, onGround: true, zoomed: false
+    velY: 0, airVX: 0, airVZ: 0, onGround: true, zoomed: false,
+    platform: 0                     // Space: oyuncunun son durduğu platform
 };
 
 function saveGameData() {
