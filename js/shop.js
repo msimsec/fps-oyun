@@ -35,7 +35,7 @@ function updateShopModal() {
     $('modalShield').textContent = shieldStatusText();
     $('primeStatus').textContent = player.unlockedSkins.prime ? 'SAHİPSİNİZ' : 'KİLİTLİ';
     $('reaverStatus').textContent = player.unlockedSkins.reaver ? 'SAHİPSİNİZ' : 'KİLİTLİ';
-    $('skinSelect').value = player.activeSkin;
+    renderSkinPicker();
     ['shotgun', 'sniper'].forEach(id => {
         $(id + 'Status').textContent = player.ownedWeapons[id] ? 'SAHİPSİNİZ' : 'KİLİTLİ';
     });
@@ -126,8 +126,31 @@ function changeSkin(skinName) {
         player.activeSkin = skinName;
         updateWeaponSkinColors();
         saveGameData();
+        renderSkinPicker();
     } else {
         showToast('Önce bu skini satın almalısın');
-        $('skinSelect').value = player.activeSkin;
     }
+}
+
+const hexColor = (n) => '#' + n.toString(16).padStart(6, '0');
+
+// Her skin için renk örnekli bir kart: gövde, namlu/detay ve mermi rengi + durum
+function renderSkinPicker() {
+    $('skinPicker').innerHTML = SKINS.map(id => {
+        const s = SKIN_DEFS[id];
+        const owned = player.unlockedSkins[id];
+        const active = player.activeSkin === id;
+        const status = active ? 'SEÇİLİ ✓' : owned ? 'Seçmek için tıkla' : `KİLİTLİ · ${CFG.skinCost} altın`;
+        const swatch = (c, label) => `<span class="swatch" style="background:${hexColor(c)}" title="${label}"></span>`;
+        return `<button class="skin-option${active ? ' active' : ''}${owned ? '' : ' locked'}" onclick="changeSkin('${id}')">
+            <span class="skin-gun">
+                <span class="gun-body" style="background:${hexColor(s.body)}"></span>
+                <span class="gun-barrel" style="background:${hexColor(s.accent)}"></span>
+                <span class="gun-bullet" style="background:${hexColor(s.bullet)}; box-shadow: 0 0 6px ${hexColor(s.bullet)}"></span>
+            </span>
+            <span class="skin-name">${s.name}</span>
+            <span class="swatches">${swatch(s.body, 'Gövde')}${swatch(s.accent, 'Namlu ve detaylar')}${swatch(s.bullet, 'Mermi')}</span>
+            <span class="skin-status">${status}</span>
+        </button>`;
+    }).join('');
 }

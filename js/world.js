@@ -133,7 +133,7 @@ function addPart(group, geo, mat, x, y, z, rotX = 0) {
 function createWeaponModels() {
     weapon3DGroup = new THREE.Group();
     // Gövde ve vurgu renkleri skine göre değişir; tahta ve kabza parçaları sabit kalır
-    weaponBodyMat = new THREE.MeshStandardMaterial({ color: 0x3a3f47, roughness: 0.45, metalness: 0.5 });
+    weaponBodyMat = new THREE.MeshStandardMaterial({ color: SKIN_DEFS.classic.body, roughness: 0.45, metalness: 0.5 });
     weaponAccentMat = new THREE.MeshStandardMaterial({ color: 0x00d4ff, roughness: 0.2, metalness: 0.9 });
     const woodMat = new THREE.MeshStandardMaterial({ color: 0x7a4a24, roughness: 0.8 });
     const gripMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.9 });
@@ -205,19 +205,13 @@ function createWeaponModels() {
 
 function updateWeaponSkinColors() {
     if (!weaponBodyMat) return;
-    if (player.activeSkin === 'prime') {
-        weaponBodyMat.color.setHex(0xa349a4); weaponAccentMat.color.setHex(0xffcc00);
-    } else if (player.activeSkin === 'reaver') {
-        weaponBodyMat.color.setHex(0x4b0082); weaponAccentMat.color.setHex(0x9932cc);
-    } else {
-        weaponBodyMat.color.setHex(0x3a3f47); weaponAccentMat.color.setHex(0x00ffff);
-    }
+    const s = SKIN_DEFS[player.activeSkin] || SKIN_DEFS.classic;
+    weaponBodyMat.color.setHex(s.body);
+    weaponAccentMat.color.setHex(s.accent);
 }
 
 function skinBulletColor() {
-    if (player.activeSkin === 'prime') return 0xcc66ff;
-    if (player.activeSkin === 'reaver') return 0x9933ff;
-    return 0x00ffcc;
+    return (SKIN_DEFS[player.activeSkin] || SKIN_DEFS.classic).bullet;
 }
 
 function createBrickMap() {

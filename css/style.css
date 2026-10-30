@@ -249,3 +249,27 @@ body {
 @media (max-width: 1180px) { .shop-grid { grid-template-columns: repeat(3, 1fr); } }
 @media (max-width: 900px) { .shop-grid { grid-template-columns: repeat(2, 1fr); } }
 .buy-btn.owned { background: #334155; color: #cbd5e1; cursor: default; box-shadow: none; }
+
+/* Skin seçici: renk önizlemeli kartlar */
+.skin-picker-title { font-size: 15px; margin-bottom: 8px; }
+.skin-picker { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 20px; }
+.skin-option {
+    width: 170px; padding: 10px 8px; border-radius: 8px; cursor: pointer;
+    background: #141a2a; border: 2px solid #334155; color: #e2e8f0;
+    font-family: 'Courier New', monospace; display: flex; flex-direction: column; align-items: center; gap: 6px;
+    transition: 0.15s;
+}
+.skin-option:hover { border-color: #ffaa00; }
+.skin-option.active { border-color: #22c55e; box-shadow: 0 0 12px rgba(34, 197, 94, 0.5); }
+.skin-option.locked { opacity: 0.6; }
+.skin-option.locked:hover { border-color: #334155; cursor: not-allowed; }
+.skin-name { font-size: 15px; font-weight: bold; color: #ffaa00; }
+.skin-status { font-size: 11px; color: #94a3b8; }
+.skin-option.active .skin-status { color: #22c55e; font-weight: bold; }
+.swatches { display: flex; gap: 5px; }
+.swatch { width: 18px; height: 18px; border-radius: 3px; border: 1px solid rgba(255, 255, 255, 0.35); }
+/* Küçük silah silüeti: gövde + namlu + mermi */
+.skin-gun { position: relative; width: 120px; height: 26px; }
+.gun-body { position: absolute; left: 0; top: 6px; width: 70px; height: 14px; border-radius: 2px; }
+.gun-barrel { position: absolute; left: 70px; top: 10px; width: 34px; height: 5px; border-radius: 2px; }
+.gun-bullet { position: absolute; left: 110px; top: 9px; width: 8px; height: 8px; border-radius: 50%; }
