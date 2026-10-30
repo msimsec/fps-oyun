@@ -9,7 +9,7 @@
 // =====================================================================
 const PROFILES_KEY = 'fps_profiles_v1';
 const PROFILE_CHOSEN_KEY = 'fps_profile_chosen';   // sessionStorage: bu sekmede giriş yapıldı mı
-const MAX_PROFILES = 8, NAME_MAX = 16;
+const MAX_PROFILES = 20, NAME_MAX = 16;
 const PROFILE_DATA_KEYS = ['fps_save_v2', 'fps_records_v1', 'fps_settings_v1'];
 
 function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
@@ -122,10 +122,10 @@ function renderProfiles() {
         const actions = document.createElement('div');
         actions.className = 'profile-actions';
         const ren = document.createElement('button');
-        ren.className = 'icon-btn'; ren.title = 'Adını değiştir'; ren.textContent = '✎';
+        ren.className = 'icon-btn'; ren.title = 'Adını değiştir'; ren.textContent = '✎ Ad';
         ren.onclick = () => renameProfile(p.id);
         const del = document.createElement('button');
-        del.className = 'icon-btn danger'; del.title = 'Sil'; del.textContent = '🗑';
+        del.className = 'icon-btn danger'; del.title = 'Oyuncuyu ve kaydını sil'; del.textContent = '🗑 Sil';
         del.onclick = () => deleteProfile(p.id);
         actions.append(ren, del);
 

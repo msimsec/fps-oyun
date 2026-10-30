@@ -14,7 +14,7 @@ const player = {
     gold: save.gold, damage: save.damage, healKits: save.healKits,
     hasShield: save.hasShield, activeSkin: save.activeSkin, unlockedSkins: save.unlockedSkins,
     reloading: false, reloadTimer: 0, reloadTotal: 1, fireCooldown: 0, semiFired: false,
-    velY: 0, onGround: true, zoomed: false
+    velY: 0, airVX: 0, airVZ: 0, onGround: true, zoomed: false
 };
 
 function saveGameData() {
@@ -34,7 +34,7 @@ let duelBot = null;
 let duelTime = 0;
 let pendingDuelWin = false;
 // Elin hangi zorlukta başladığı (duraklatmada ayar değişse de rekor doğru seviyeye yazılsın)
-const run = { active: false, game: 'normal', duel: 'normal' };
+const run = { active: false, game: 'normal', duel: 'normal', map: 'depot' };
 let firing = false;
 let lockTimer = null;
 const keys = { forward: false, back: false, left: false, right: false, sprint: false };

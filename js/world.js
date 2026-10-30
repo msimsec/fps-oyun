@@ -52,8 +52,6 @@ function init() {
     const container = $('canvas-container');
 
     scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x0b0f19);
-    scene.fog = new THREE.FogExp2(0x0b0f19, 0.025);
 
     camera = new THREE.PerspectiveCamera(CFG.baseFov, window.innerWidth / window.innerHeight, 0.1, 1000);
     camera.rotation.order = 'YXZ';
@@ -82,24 +80,12 @@ function init() {
     dirLight.shadow.bias = -0.0005;
     scene.add(dirLight);
 
-    const floorGeo = new THREE.PlaneGeometry(100, 100);
-    const floorMat = new THREE.MeshStandardMaterial({ color: 0x1f2937, roughness: 0.8 });
-    const floor = new THREE.Mesh(floorGeo, floorMat);
-    floor.rotation.x = -Math.PI / 2;
-    floor.receiveShadow = true;
-    scene.add(floor);
-
-    const ceiling = new THREE.Mesh(floorGeo, floorMat);
-    ceiling.rotation.x = Math.PI / 2;
-    ceiling.position.y = 10;
-    scene.add(ceiling);
-
     const brickTex = createBrickTexture();
     brickTex.repeat.set(4, 2);
     brickMaterial = new THREE.MeshStandardMaterial({ map: brickTex, roughness: 0.7 });
     crateMaterial = new THREE.MeshStandardMaterial({ map: createCrateTexture(), roughness: 0.85 });
-    createBrickMap();
-    createCover();
+    buildMap(settings.map);           // seçili bölüm (Depo / Space)
+    placeAtSpawn();
     createWeaponModels();
 
     window.addEventListener('keydown', onKeyDown);
@@ -259,10 +245,5 @@ function createCover() {
 }
 
 function createWall(x, y, z, w, h, d, material = brickMaterial) {
-    const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), material);
-    mesh.position.set(x, y, z);
-    mesh.castShadow = true;
-    mesh.receiveShadow = true;
-    scene.add(mesh);
-    walls.push({ x, z, w, d, h: y + h / 2 });
+    return addWall(x, y, z, w, h, d, material);
 }

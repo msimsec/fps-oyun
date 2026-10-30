@@ -101,7 +101,7 @@ class HumanoidEnemy {
         } else {
             if (dist > 1.5) {
                 this.chase(dt, dist, nx, nz);
-            } else if (footY() < 1.2) {
+            } else if (footY() - p.y < 1.2 && footY() - p.y > -1) {
                 // Oyuncu yüksek bir kasanın üstündeyse yakın temas hasarı yok (ateş etmeye devam ederler)
                 damagePlayer(CFG.meleeDps * this.type.melee * dt);   // saniye bazlı yakın temas hasarı
             }
@@ -111,14 +111,23 @@ class HumanoidEnemy {
         if (this.hpBar.visible) this.hpBar.lookAt(camera.position);
     }
 
+    // Bulunduğu yükseklikte yürür; zemini olmayan bölümde (Space) platformun dışına çıkmaz
+    move(dx, dz) {
+        const p = this.group.position;
+        const y = p.y;
+        const canStand = curMap().floorY === -Infinity
+            ? (x, z) => groundHeight(x, z, y, 0.3) >= y - 0.05 : null;
+        moveWithCollision(p, dx, dz, this.radius, y, canStand);
+    }
+
     // Oyuncuya doğru yürü; duvara takılırsa duvar boyunca yana kay, o yön de kapalıysa yön değiştir
     chase(dt, dist, nx, nz) {
         const p = this.group.position;
         const step = this.speed * dt;
         const ox = p.x, oz = p.z;
-        moveWithCollision(p, nx * step, nz * step, this.radius);
+        this.move(nx * step, nz * step);
         if (Math.hypot(p.x - ox, p.z - oz) < step * 0.5) {
-            moveWithCollision(p, -nz * this.strafeDir * step, nx * this.strafeDir * step, this.radius);
+            this.move(-nz * this.strafeDir * step, nx * this.strafeDir * step);
             if (Math.hypot(p.x - ox, p.z - oz) < step * 0.1) this.strafeDir *= -1;
         }
     }
@@ -145,14 +154,15 @@ class HumanoidEnemy {
         }
         mx += -nz * this.strafeDir * 0.7;
         mz += nx * this.strafeDir * 0.7;
-        moveWithCollision(p, mx * this.speed * dt, mz * this.speed * dt, this.radius);
+        this.move(mx * this.speed * dt, mz * this.speed * dt);
     }
 
     tryShoot(dt, dist) {
         this.shootTimer -= dt;
         if (this.shootTimer > 0) return;
         this.shootTimer = this.nextFireDelay();
-        const range = this.type.range || CFG.enemyRange;
+        // Space'te platformlar uzak: bölüm kendi menzilini verir
+        const range = Math.max(this.type.range || 0, curMap().enemyRange);
         if (dist > 1.5 && dist < range && this.canSeePlayer()) {
             this.shootAtPlayer(CFG.enemyBulletDamage * this.type.dmg, CFG.enemySpread * this.type.spread);
         }
@@ -165,7 +175,7 @@ class HumanoidEnemy {
 
     // Arada duvar varsa ateş etmez (mermi boşa duvara gitmesin)
     canSeePlayer() {
-        const from = new THREE.Vector3(this.group.position.x, 1.4 * this.scale, this.group.position.z);
+        const from = new THREE.Vector3(this.group.position.x, this.group.position.y + 1.4 * this.scale, this.group.position.z);
         const to = camera.position;
         const steps = Math.ceil(from.distanceTo(to) / 0.5);
         const pt = new THREE.Vector3();
@@ -177,7 +187,7 @@ class HumanoidEnemy {
     }
 
     shootAtPlayer(damage, spread) {
-        const origin = new THREE.Vector3(this.group.position.x, 1.4 * this.scale, this.group.position.z);
+        const origin = new THREE.Vector3(this.group.position.x, this.group.position.y + 1.4 * this.scale, this.group.position.z);
         const target = new THREE.Vector3(camera.position.x, camera.position.y - 0.3, camera.position.z);
         const dist = origin.distanceTo(target);
         const dir = target.sub(origin).normalize();
@@ -196,7 +206,7 @@ class HumanoidEnemy {
         const p = this.group.position;
         const k = this.scale;
         const h = Math.hypot(pt.x - p.x, pt.z - p.z) / k;
-        const y = pt.y / k;
+        const y = (pt.y - p.y) / k;
         if (y > 1.2 && y < 1.75 && h < 0.35) return 'head';
         if (y >= 0 && y <= 1.2 && h < 0.7) return 'body';
         return null;
@@ -221,14 +231,7 @@ function hitsPlayer(pt) {
 }
 
 function findSpawnPoint() {
-    for (let i = 0; i < 20; i++) {
-        const angle = Math.random() * Math.PI * 2;
-        const radius = 18 + Math.random() * 10;
-        const x = camera.position.x + Math.cos(angle) * radius;
-        const z = camera.position.z + Math.sin(angle) * radius;
-        if (Math.abs(x) < 42 && Math.abs(z) < 42 && !collides(x, z, 1.0)) return { x, z };
-    }
-    return null;
+    return curMap().enemySpawn(camera.position.x, camera.position.z);
 }
 
 function onEnemyKilled(e, hit) {

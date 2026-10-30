@@ -21,7 +21,9 @@ function resetWorld(duel) {
     if (player.hasShield) { player.armor = CFG.armorAmount; player.hasShield = false; }
     resetArsenal();
     player.score = 0; player.kills = 0; player.headshots = 0; player.goldEarned = 0;
-    player.velY = 0; player.onGround = true;
+    player.velY = 0; player.airVX = 0; player.airVZ = 0; player.onGround = true;
+    if (currentMapId !== settings.map) buildMap(settings.map);
+    run.map = currentMapId;
     weaponKick = 0; weaponSwitchAnim = 0;
     camera.fov = CFG.baseFov; camera.updateProjectionMatrix();
 
@@ -31,12 +33,12 @@ function resetWorld(duel) {
     cameraAngleX = 0;
     if (duel) {
         // Oyuncu ve bot arasında duvar yok; bot oyuncunun tam karşısında doğar
-        camera.position.set(0, CFG.eyeHeight, 12);
-        cameraAngleY = Math.PI;
-        duelBot = new HumanoidEnemy(0, 34, true);
+        const d = curMap().duel;
+        placeAt(d.player);
+        duelBot = new HumanoidEnemy(d.bot.x, d.bot.z, true);
+        duelBot.group.position.y = d.bot.y;
     } else {
-        camera.position.set(0, CFG.eyeHeight, 10);
-        cameraAngleY = 0;
+        placeAtSpawn();
         resetWaves();
     }
     applyCameraRotation();
@@ -107,7 +109,7 @@ function endRun(won) {
     $('finalGold').textContent = player.goldEarned;
     $('finalTotalGold').textContent = player.gold;
     $('finalDifficulty').textContent = (isDuelMode ? 'Düello ' : '') +
-        DIFF_LABELS[isDuelMode ? run.duel : run.game];
+        DIFF_LABELS[isDuelMode ? run.duel : run.game] + ` · Bölüm: ${curMap().name}`;
     $('finalExtra').textContent = isDuelMode ? `Süre: ${formatTime(duelTime)}` : `Ulaşılan dalga: ${wave.num}`;
     $('newRecord').textContent = broken.length ? `🏆 YENİ REKOR: ${broken.join(' · ')}` : '';
     showScreen('gameOverScreen');
@@ -141,3 +143,12 @@ function useHealKit() {
         showToast('Canın zaten dolu');
     }
 }
+
+// Oyuncuyu bölümün başlangıç noktasına koy
+function placeAt(s) {
+    camera.position.set(s.x, s.y + CFG.eyeHeight, s.z);
+    cameraAngleY = s.angle || 0;
+    cameraAngleX = 0;
+    if (camera) applyCameraRotation();
+}
+function placeAtSpawn() { placeAt(curMap().spawn); }

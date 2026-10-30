@@ -32,6 +32,10 @@ function updatePlayer(dt) {
         const s = speed * dt / len;   // çapraz giderken hız artmaz
         moveWithCollision(camera.position, mx * s, mz * s, CFG.playerRadius, feet);
     }
+    // Rampanın verdiği yatay hız (havadayken)
+    if (!player.onGround && (player.airVX || player.airVZ)) {
+        moveWithCollision(camera.position, player.airVX * dt, player.airVZ * dt, CFG.playerRadius, feet);
+    }
 
     // Dikey hareket: yerçekimi, zıplama, kasaların üstüne çıkma / kenardan düşme
     const ground = groundHeight(camera.position.x, camera.position.z, feet, CFG.playerRadius);
@@ -43,11 +47,14 @@ function updatePlayer(dt) {
             newFeet = ground;
             if (player.velY < -4) sfx('land');
             player.velY = 0;
+            player.airVX = 0; player.airVZ = 0;
             player.onGround = true;
         }
         camera.position.y = newFeet + CFG.eyeHeight;
+        if (newFeet < curMap().killY) { fellOut(); return; }
     } else {
         camera.position.y = ground + CFG.eyeHeight;   // alçak basamaklara yürüyerek çık
+        checkJumpPads();
     }
 
     if (player.fireCooldown > 0) player.fireCooldown -= dt;
@@ -94,7 +101,7 @@ function updateBullets(dt) {
         for (let s = 0; s < steps && !remove; s++) {
             b.position.add(tmpVec);
 
-            if (b.position.y < 0 || b.position.y > 10 || pointInWall(b.position)) {
+            if (b.position.y < curMap().bulletMinY || b.position.y > curMap().bulletMaxY || pointInWall(b.position)) {
                 createParticles(b.position, 0xb45309, b.geometry === GEO.pellet ? 2 : 6);
                 remove = true;
                 break;
@@ -164,8 +171,8 @@ function updateHUD() {
     setHud('goldDisplay', player.gold);
     setHud('healKitsDisplay', player.healKits);
     setHud('modeDisplay', isDuelMode
-        ? `DÜELLO · ${DIFF_LABELS[run.duel]} · ${formatTime(duelTime)}`
-        : `DALGA ${wave.num || '-'} · KALAN ${waveRemaining()} · ${DIFF_LABELS[run.game]}`);
+        ? `${curMap().name} · DÜELLO · ${DIFF_LABELS[run.duel]} · ${formatTime(duelTime)}`
+        : `${curMap().name} · DALGA ${wave.num || '-'} · KALAN ${waveRemaining()} · ${DIFF_LABELS[run.game]}`);
     updateDuelBar();
 }
 
@@ -191,6 +198,7 @@ function animate() {
         updateHUD();
     }
     updateFloaters(dt);
+    updateMapEffects(dt);
 
     renderer.render(scene, camera);
 }

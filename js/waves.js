@@ -35,8 +35,10 @@ function updateWaves(dt) {
     if (wave.toSpawn > 0 && enemies.length < CFG.maxEnemies && Math.random() < CFG.spawnPerSec * dt) {
         const sp = findSpawnPoint();
         if (sp) {
-            enemies.push(new HumanoidEnemy(sp.x, sp.z, false, waveHpMul(wave.num), waveSpeedMul(wave.num),
-                pickEnemyType(wave.num)));
+            const e = new HumanoidEnemy(sp.x, sp.z, false, waveHpMul(wave.num), waveSpeedMul(wave.num),
+                pickEnemyType(wave.num));
+            e.group.position.y = sp.y;       // Space'te platform yüksekliği
+            enemies.push(e);
             wave.toSpawn--;
         }
     }

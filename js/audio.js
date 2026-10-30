@@ -73,6 +73,7 @@ const SFX = {
     empty: () => tone(320, 0.03, 'square', 0.12),
     switch: () => noise(0.05, 0.2, 3000, 'highpass'),
     jump: () => tone(260, 0.08, 'sine', 0.08, 380),
+    jumpPad: () => { tone(180, 0.35, 'sawtooth', 0.15, 900); noise(0.25, 0.15, 800, 'bandpass', 3000); },
     land: () => noise(0.06, 0.12, 400),
     heal: () => { tone(440, 0.1, 'sine', 0.2, 660); tone(660, 0.15, 'sine', 0.2, 990, 0.1); },
     buy: () => { tone(880, 0.06, 'triangle', 0.15); tone(1320, 0.1, 'triangle', 0.15, null, 0.06); },
