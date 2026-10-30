@@ -1,0 +1,166 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    background-color: #0b0f19;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    overflow: hidden;
+    color: #00d4ff;
+}
+
+#canvas-container { width: 100vw; height: 100vh; display: block; }
+
+.hud {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none;
+    font-family: 'Courier New', monospace; font-weight: bold;
+    text-shadow: 0 0 10px rgba(0, 212, 255, 0.8);
+}
+
+.crosshair {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 10px; height: 10px;
+    border: 2px solid rgba(0, 255, 255, 0.8);
+    border-radius: 50%;
+    transition: border-color 0.08s;
+}
+.crosshair.hit { border-color: #ffffff; }
+.crosshair.head { border-color: #ff3333; }
+
+.health-hud {
+    position: absolute; bottom: 30px; left: 30px; font-size: 20px;
+    background: rgba(0, 0, 0, 0.7); padding: 10px 20px;
+    border: 2px solid #00d4ff; border-radius: 5px;
+}
+
+.ammo-hud {
+    position: absolute; bottom: 30px; right: 30px; font-size: 20px;
+    background: rgba(0, 0, 0, 0.7); padding: 10px 20px;
+    border: 2px solid #ffaa00; color: #ffaa00; border-radius: 5px;
+    text-align: right;
+}
+.reload-text { font-size: 13px; color: #ffdd77; min-height: 16px; }
+
+.score-hud {
+    position: absolute; top: 30px; right: 30px; font-size: 18px; text-align: right;
+    background: rgba(0, 0, 0, 0.7); padding: 10px 20px;
+    border: 2px solid #00d4ff; border-radius: 5px;
+}
+
+.gold-hud {
+    position: absolute; top: 30px; left: 50%; transform: translateX(-50%);
+    font-size: 22px; background: rgba(0, 0, 0, 0.7); padding: 8px 20px;
+    border: 2px solid #ffaa00; color: #ffaa00; border-radius: 5px;
+}
+
+.damage-flash {
+    position: absolute; inset: 0; pointer-events: none;
+    box-shadow: inset 0 0 120px rgba(255, 0, 0, 0.0);
+    transition: box-shadow 0.15s;
+}
+.damage-flash.on { box-shadow: inset 0 0 120px rgba(255, 0, 0, 0.55); }
+
+/* Menü / Duraklatma / Oyun Sonu ekranları */
+.overlay {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.92);
+    display: none; flex-direction: column; justify-content: center; align-items: center;
+    pointer-events: auto; z-index: 100; text-align: center; padding: 20px;
+}
+.overlay.show { display: flex; }
+
+.overlay h1 {
+    color: #ff0000; font-size: 45px; margin-bottom: 15px;
+    text-shadow: 0 0 15px rgba(255, 0, 0, 0.8);
+}
+.overlay h1.cyan { color: #00d4ff; text-shadow: 0 0 15px rgba(0, 212, 255, 0.8); }
+
+.stats-box {
+    color: #00d4ff; font-size: 16px; margin-bottom: 25px; text-align: center;
+    font-family: 'Courier New', monospace;
+    background: rgba(0, 212, 255, 0.05);
+    border: 1px solid rgba(0, 212, 255, 0.3);
+    padding: 15px 25px; border-radius: 8px; line-height: 1.6;
+}
+
+.note { color: #ffaa00; font-family: 'Courier New', monospace; font-size: 14px; margin-bottom: 15px; min-height: 18px; }
+
+.menu-buttons { display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; }
+
+.btn {
+    padding: 12px 25px; font-size: 16px; border: none; border-radius: 5px;
+    cursor: pointer; font-weight: bold; font-family: 'Courier New', monospace; transition: 0.2s;
+}
+.restart-btn { background: #00d4ff; color: #1a1a2e; }
+.restart-btn:hover { background: #00ffff; box-shadow: 0 0 15px rgba(0, 212, 255, 0.8); }
+.duel-btn { background: #a855f7; color: #ffffff; }
+.duel-btn:hover { background: #c084fc; box-shadow: 0 0 15px rgba(168, 85, 247, 0.8); }
+.shop-open-btn { background: #ffaa00; color: #1a1a2e; }
+.shop-open-btn:hover { background: #ffcc00; box-shadow: 0 0 15px rgba(255, 170, 0, 0.8); }
+.ghost-btn { background: transparent; color: #00d4ff; border: 1px solid #00d4ff; }
+.ghost-btn:hover { background: rgba(0, 212, 255, 0.15); }
+.settings-btn { background: #475569; color: #ffffff; }
+.settings-btn:hover { background: #64748b; box-shadow: 0 0 15px rgba(148, 163, 184, 0.8); }
+
+/* Ayarlar */
+.settings-group { margin-bottom: 22px; font-family: 'Courier New', monospace; }
+.settings-label { color: #00d4ff; font-size: 18px; font-weight: bold; margin-bottom: 10px; }
+.seg { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+.seg-btn {
+    padding: 10px 22px; font-size: 15px; font-weight: bold; cursor: pointer;
+    font-family: 'Courier New', monospace; border-radius: 5px;
+    background: transparent; color: #cbd5e1; border: 2px solid #475569; transition: 0.2s;
+}
+.seg-btn:hover { border-color: #94a3b8; color: #ffffff; }
+.seg-btn.active.easy { background: #22c55e; border-color: #22c55e; color: #0b0f19; }
+.seg-btn.active.normal { background: #00d4ff; border-color: #00d4ff; color: #0b0f19; }
+.seg-btn.active.hard { background: #ef4444; border-color: #ef4444; color: #ffffff; }
+.settings-desc { color: #94a3b8; font-size: 13px; margin-top: 8px; min-height: 16px; }
+.sens-row { display: flex; gap: 12px; align-items: center; justify-content: center; }
+.sens-row input[type=range] { width: 260px; accent-color: #00d4ff; cursor: pointer; }
+.sens-value { color: #ffffff; font-size: 16px; font-weight: bold; min-width: 48px; text-align: left; }
+
+/* Mağaza */
+.shop-modal {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(10, 10, 20, 0.96);
+    display: none; flex-direction: column; justify-content: center; align-items: center;
+    z-index: 200; pointer-events: auto;
+    font-family: 'Courier New', monospace; color: #ffaa00;
+    overflow-y: auto; padding: 20px;
+}
+.shop-modal.show { display: flex; }
+.shop-title { font-size: 32px; font-weight: bold; margin-bottom: 5px; text-shadow: 0 0 15px rgba(255, 170, 0, 0.8); }
+.shop-gold { font-size: 18px; margin-bottom: 20px; }
+.shop-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 15px; margin-bottom: 25px; max-width: 900px;
+}
+@media (max-width: 900px) { .shop-grid { grid-template-columns: repeat(2, 1fr); } }
+.shop-card {
+    background: rgba(255, 170, 0, 0.1); border: 2px solid #ffaa00;
+    padding: 12px; border-radius: 8px; text-align: center; width: 270px; max-width: 100%;
+}
+.shop-card h3 { font-size: 15px; margin-bottom: 5px; }
+.shop-card p { font-size: 11px; color: #ddd; margin-bottom: 10px; }
+.buy-btn {
+    background: #ffaa00; color: #1a1a2e; border: none; padding: 7px 12px;
+    font-weight: bold; cursor: pointer; border-radius: 4px; width: 100%;
+    font-family: 'Courier New', monospace;
+}
+.buy-btn:hover { background: #ffcc00; box-shadow: 0 0 10px rgba(255, 170, 0, 0.8); }
+.back-btn {
+    background: #00d4ff; color: #1a1a2e; padding: 10px 25px; font-size: 15px;
+    font-weight: bold; border: none; border-radius: 5px; cursor: pointer;
+    font-family: 'Courier New', monospace;
+}
+
+/* Bildirim (alert yerine) */
+#toast {
+    position: absolute; left: 50%; bottom: 110px; transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.85); color: #fff; border: 1px solid #ffaa00;
+    padding: 10px 18px; border-radius: 6px; font-family: 'Courier New', monospace;
+    font-size: 15px; z-index: 300; pointer-events: none;
+    opacity: 0; transition: opacity 0.2s;
+}
+#toast.show { opacity: 1; }
