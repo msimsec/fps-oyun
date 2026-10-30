@@ -36,6 +36,18 @@ function updateShopModal() {
     $('primeStatus').textContent = player.unlockedSkins.prime ? 'SAHİPSİNİZ' : 'KİLİTLİ';
     $('reaverStatus').textContent = player.unlockedSkins.reaver ? 'SAHİPSİNİZ' : 'KİLİTLİ';
     $('skinSelect').value = player.activeSkin;
+    ['shotgun', 'sniper'].forEach(id => {
+        $(id + 'Status').textContent = player.ownedWeapons[id] ? 'SAHİPSİNİZ' : 'KİLİTLİ';
+    });
+    // Sahip olunan silah ve skinlerin butonunda fiyat yerine "Sahipsin" yazsın
+    const owned = { shotgunStatus: player.ownedWeapons.shotgun, sniperStatus: player.ownedWeapons.sniper,
+                    primeStatus: player.unlockedSkins.prime, reaverStatus: player.unlockedSkins.reaver };
+    Object.entries(owned).forEach(([statusId, has]) => {
+        const btn = $(statusId).closest('.shop-card').querySelector('.buy-btn');
+        if (!btn.dataset.label) btn.dataset.label = btn.textContent;
+        btn.textContent = has ? 'Sahipsin ✓' : btn.dataset.label;
+        btn.classList.toggle('owned', has);
+    });
 }
 
 function spend(cost) {
@@ -45,6 +57,8 @@ function spend(cost) {
 }
 
 function afterPurchase(msg) {
+    initAudio();
+    sfx('buy');
     saveGameData();
     updateShopModal();
     updateHUD();
@@ -84,6 +98,17 @@ function buyShield() {
         player.hasShield = true;
         afterPurchase('Kalkan sonraki elin başında kuşanılacak');
     }
+}
+
+function buyWeapon(id) {
+    if (!WEAPONS[id] || !WEAPONS[id].cost) return;
+    if (player.ownedWeapons[id]) { showToast(`${WEAPONS[id].name} zaten sende`); return; }
+    if (!spend(WEAPONS[id].cost)) return;
+    player.ownedWeapons[id] = true;
+    // Duraklatılmış bir elin ortasında alınırsa hemen kullanılabilsin
+    player.arsenal[id] = { ammo: magSize(id), pool: WEAPONS[id].startPool };
+    const key = WEAPON_ORDER.indexOf(id) + 1;
+    afterPurchase(`${WEAPONS[id].name} alındı! Oyunda ${key} tuşuyla seç`);
 }
 
 function buySkin(skinName) {

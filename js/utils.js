@@ -24,13 +24,27 @@ function flashClass(id, cls, ms) {
     el['_t' + cls] = setTimeout(() => el.classList.remove(cls), ms);
 }
 
-// Duvar çarpışması (yatay düzlemde, r = yarıçap payı)
-function collides(x, z, r) {
+// Duvar/kasa çarpışması (yatay düzlemde, r = yarıçap payı).
+// feet: ayak yüksekliği; üst yüzeyi ayağın en fazla stepHeight üstünde olan engeller engellemez
+// (üstlerine çıkılır). Düşmanlar her zaman 0 ile çağırır, yani kasalara çıkamaz.
+function collides(x, z, r, feet = 0) {
     for (const w of walls) {
+        if (w.h <= feet + CFG.stepHeight) continue;
         if (x > w.x - w.w / 2 - r && x < w.x + w.w / 2 + r &&
             z > w.z - w.d / 2 - r && z < w.z + w.d / 2 + r) return true;
     }
     return false;
+}
+// Durulan zeminin yüksekliği: altındaki ve çıkılabilecek en yüksek engelin üstü (yoksa 0)
+function groundHeight(x, z, feet) {
+    let g = 0;
+    const r = 0.3;
+    for (const w of walls) {
+        if (w.h > feet + CFG.stepHeight || w.h <= g) continue;
+        if (x > w.x - w.w / 2 - r && x < w.x + w.w / 2 + r &&
+            z > w.z - w.d / 2 - r && z < w.z + w.d / 2 + r) g = w.h;
+    }
+    return g;
 }
 // Mermi için: yükseklik de dahil
 function pointInWall(p) {
@@ -42,9 +56,9 @@ function pointInWall(p) {
     return false;
 }
 // Eksenleri ayrı ayrı deneyerek duvar boyunca kaymayı sağlar
-function moveWithCollision(pos, dx, dz, r) {
-    if (!collides(pos.x + dx, pos.z, r)) pos.x += dx;
-    if (!collides(pos.x, pos.z + dz, r)) pos.z += dz;
+function moveWithCollision(pos, dx, dz, r, feet = 0) {
+    if (!collides(pos.x + dx, pos.z, r, feet)) pos.x += dx;
+    if (!collides(pos.x, pos.z + dz, r, feet)) pos.z += dz;
 }
 
 function applyCameraRotation() {
@@ -52,12 +66,19 @@ function applyCameraRotation() {
     camera.rotation.x = cameraAngleX;
 }
 
+const SCREENS = ['menuScreen', 'pauseScreen', 'gameOverScreen', 'shopModal', 'settingsScreen', 'recordsScreen'];
 function hideAllScreens() {
-    ['menuScreen', 'pauseScreen', 'gameOverScreen', 'shopModal', 'settingsScreen'].forEach(id => $(id).classList.remove('show'));
+    SCREENS.forEach(id => $(id).classList.remove('show'));
 }
 function showScreen(id) { hideAllScreens(); $(id).classList.add('show'); }
 
 function resetKeys() {
-    keys.forward = keys.back = keys.left = keys.right = false;
+    keys.forward = keys.back = keys.left = keys.right = keys.sprint = false;
     firing = false;
+    player.semiFired = false;
+}
+
+function formatTime(sec) {
+    const m = Math.floor(sec / 60), s = sec - m * 60;
+    return `${m}:${s < 10 ? '0' : ''}${s.toFixed(1)}`;
 }

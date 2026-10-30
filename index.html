@@ -17,32 +17,49 @@
 
     <div class="hud">
         <div class="damage-flash" id="damageFlash"></div>
+        <div class="scope-overlay" id="scopeOverlay"></div>
         <div class="crosshair" id="crosshair"></div>
+        <div id="floaterLayer"></div>
+        <div class="mode-hud" id="modeDisplay"></div>
         <div class="gold-hud">ALTIN: <span id="goldDisplay">0</span> 🪙</div>
+        <div class="duel-bar" id="duelBar">
+            <div class="duel-bar-fill" id="duelBarFill"></div>
+            <div class="duel-bar-text" id="duelBarText"></div>
+        </div>
+        <div class="banner" id="banner">
+            <div class="banner-title" id="bannerTitle"></div>
+            <div class="banner-sub" id="bannerSub"></div>
+        </div>
         <div class="health-hud">CAN: <span id="hpDisplay">100</span>/100 | Kalkan: <span id="shieldDisplay">YOK</span></div>
         <div class="ammo-hud">
             <div class="reload-text" id="reloadDisplay"></div>
+            <div class="weapon-name" id="weaponName">TÜFEK</div>
             MERMİ: <span id="ammoDisplay">30</span>/<span id="ammoPoolDisplay">90</span>
+            <div class="weapon-slots" id="weaponSlots"></div>
         </div>
         <div class="score-hud">
             <div>SKOR: <span id="scoreDisplay">0</span></div>
             <div>VURULAN: <span id="killsDisplay">0</span></div>
-            <div>2 TUŞU CAN: <span id="healKitsDisplay">0</span></div>
+            <div>H: CAN KİTİ <span id="healKitsDisplay">0</span></div>
         </div>
+        <div class="kill-feed" id="killFeed"></div>
     </div>
 
     <!-- Başlangıç Menüsü -->
     <div class="overlay show" id="menuScreen">
         <h1 class="cyan">3D TACTICAL FPS</h1>
+        <div class="version">v1.1</div>
         <div class="stats-box">
-            WASD: Hareket &nbsp;·&nbsp; Fare: Nişan &nbsp;·&nbsp; Sol tık (basılı tut): Ateş<br>
-            R: Şarjör &nbsp;·&nbsp; 2: Can kiti &nbsp;·&nbsp; ESC: Duraklat
+            WASD: Hareket &nbsp;·&nbsp; Shift: Koş &nbsp;·&nbsp; Space: Zıpla &nbsp;·&nbsp; Fare: Nişan<br>
+            Sol tık: Ateş &nbsp;·&nbsp; Sağ tık: Dürbün (keskin nişancı) &nbsp;·&nbsp; R: Şarjör<br>
+            1-4 / Tekerlek: Silah değiştir &nbsp;·&nbsp; H: Can kiti &nbsp;·&nbsp; ESC: Duraklat
         </div>
         <div class="note" id="mobileNote"></div>
         <div class="menu-buttons">
             <button class="btn restart-btn" onclick="startRun(false)">OYUNA BAŞLA</button>
             <button class="btn duel-btn" onclick="startRun(true)">1v1 DÜELLO ⚔️</button>
             <button class="btn shop-open-btn" onclick="openShop('menu')">MAĞAZA 🛒</button>
+            <button class="btn records-btn" onclick="openRecords('menu')">REKORLAR 🏆</button>
             <button class="btn settings-btn" onclick="openSettings('menu')">AYARLAR ⚙️</button>
         </div>
         <div class="note" id="difficultyInfo" style="margin-top: 18px;"></div>
@@ -55,16 +72,19 @@
         <div class="menu-buttons">
             <button class="btn restart-btn" onclick="resumeGame()">DEVAM ET</button>
             <button class="btn shop-open-btn" onclick="openShop('paused')">MAĞAZA 🛒</button>
-            <button class="btn settings-btn" onclick="openSettings('paused')">AYARLAR ⚙️</button>
             <button class="btn ghost-btn" onclick="goToMenu()">ANA MENÜ</button>
+            <button class="btn records-btn" onclick="openRecords('paused')">REKORLAR 🏆</button>
+            <button class="btn settings-btn" onclick="openSettings('paused')">AYARLAR ⚙️</button>
         </div>
     </div>
 
     <!-- Oyun Sonu -->
     <div class="overlay" id="gameOverScreen">
         <h1 id="gameOverTitle">GÖREV BAŞARISIZ</h1>
+        <div class="new-record" id="newRecord"></div>
         <div class="stats-box">
-            <div>Skor: <span id="finalScore">0</span> | Vurulan: <span id="finalKills">0</span></div>
+            <div>Skor: <span id="finalScore">0</span> | Vurulan: <span id="finalKills">0</span> | Kafa vuruşu: <span id="finalHeadshots">0</span></div>
+            <div id="finalExtra"></div>
             <div>Bu elde kazanılan altın: <span id="finalGold">0</span> 🪙</div>
             <div>Toplam altın: <span id="finalTotalGold">0</span> 🪙</div>
             <div>Zorluk: <span id="finalDifficulty">-</span></div>
@@ -72,9 +92,26 @@
         <div class="menu-buttons">
             <button class="btn restart-btn" onclick="startRun(false)">YENİDEN BAŞLA</button>
             <button class="btn duel-btn" onclick="startRun(true)">1v1 DÜELLO AT ⚔️</button>
+            <button class="btn ghost-btn" onclick="goToMenu()">ANA MENÜ</button>
             <button class="btn shop-open-btn" onclick="openShop('over')">SİLAH MAĞAZASI 🛒</button>
             <button class="btn settings-btn" onclick="openSettings('over')">AYARLAR ⚙️</button>
-            <button class="btn ghost-btn" onclick="goToMenu()">ANA MENÜ</button>
+        </div>
+    </div>
+
+    <!-- Rekorlar -->
+    <div class="overlay" id="recordsScreen">
+        <h1 class="cyan">REKORLAR 🏆</h1>
+        <table class="records-table">
+            <thead>
+                <tr><th rowspan="2">Seviye</th><th colspan="3">Dalga Modu</th><th colspan="2">1v1 Düello</th></tr>
+                <tr><th>En iyi skor</th><th>En uzak dalga</th><th>En çok vuruş</th><th>Galibiyet / Mağlubiyet</th><th>En hızlı galibiyet</th></tr>
+            </thead>
+            <tbody id="recordsBody"></tbody>
+        </table>
+        <div class="note">Rekorlar yalnızca bu tarayıcıda saklanır.</div>
+        <div class="menu-buttons">
+            <button class="back-btn" onclick="closeRecords()">Geri Dön</button>
+            <button class="btn ghost-btn" onclick="resetRecords()">Sıfırla</button>
         </div>
     </div>
 
@@ -107,29 +144,37 @@
             </div>
             <div class="settings-desc">Hemen geçerli olur · Varsayılan 1.0x</div>
         </div>
+        <div class="settings-group">
+            <div class="settings-label">Ses Düzeyi</div>
+            <div class="sens-row">
+                <input type="range" id="volumeSlider" min="0" max="100" step="5" oninput="setVolume(this.value)" onchange="previewVolume()">
+                <span class="sens-value" id="volumeValue">60%</span>
+            </div>
+            <div class="settings-desc">0% sesi tamamen kapatır</div>
+        </div>
         <div class="note" id="settingsNote"></div>
         <button class="back-btn" onclick="closeSettings()">Geri Dön</button>
     </div>
 
     <!-- Mağaza -->
     <div class="shop-modal" id="shopModal">
-        <div class="shop-title">TAKTİK TÜFEK MAĞAZASI 🛒</div>
+        <div class="shop-title">TAKTİK SİLAH MAĞAZASI 🛒</div>
         <div class="shop-gold">Mevcut Altın: <span id="modalGold">0</span> 🪙</div>
 
         <div class="shop-grid">
             <div class="shop-card">
-                <h3>Tüfek Hasarı</h3>
-                <p>Mermi hasarını +5 artırır<br>Hasar: <span id="modalDmg">15</span></p>
+                <h3>Silah Hasarı</h3>
+                <p>Tüm silahların hasarını +5 artırır<br>Hasar: <span id="modalDmg">15</span></p>
                 <button class="buy-btn" onclick="buyDamage()">Satın Al (100 Altın)</button>
             </div>
             <div class="shop-card">
-                <h3>Gelişmiş Şarjör</h3>
-                <p>Şarjör kapasitesini kalıcı +5 artırır<br>Kapasite: <span id="modalMag">30</span></p>
+                <h3>Gelişmiş Tüfek Şarjörü</h3>
+                <p>Tüfek şarjörünü kalıcı +5 artırır<br>Kapasite: <span id="modalMag">30</span></p>
                 <button class="buy-btn" onclick="buyAmmo()">Satın Al (75 Altın)</button>
             </div>
             <div class="shop-card">
                 <h3>Can Kiti</h3>
-                <p>Oyunda '2' tuşuna basınca canını fuller<br>Adet: <span id="modalHeal">0</span></p>
+                <p>Oyunda 'H' tuşuna basınca canını fuller<br>Adet: <span id="modalHeal">0</span></p>
                 <button class="buy-btn" onclick="buyHealKit()">Satın Al (50 Altın)</button>
             </div>
             <div class="shop-card">
@@ -137,14 +182,24 @@
                 <p>+50 kalkan puanı; hasarı önce kalkan emer, bitince tükenir<br>Durum: <span id="modalShield">YOK</span></p>
                 <button class="buy-btn" onclick="buyShield()">Satın Al (150 Altın)</button>
             </div>
+            <div class="shop-card weapon-card">
+                <h3>Pompalı (3)</h3>
+                <p>8 saçma, yakında çok güçlü, uzakta etkisiz · 6'lık şarjör<br>Durum: <span id="shotgunStatus">KİLİTLİ</span></p>
+                <button class="buy-btn" onclick="buyWeapon('shotgun')">Satın Al (250 Altın)</button>
+            </div>
+            <div class="shop-card weapon-card">
+                <h3>Keskin Nişancı (4)</h3>
+                <p>5 kat hasar, sağ tıkla dürbün · 5'lik şarjör<br>Durum: <span id="sniperStatus">KİLİTLİ</span></p>
+                <button class="buy-btn" onclick="buyWeapon('sniper')">Satın Al (400 Altın)</button>
+            </div>
             <div class="shop-card">
                 <h3>Skin: Kraliyet</h3>
-                <p>Mor/Altın ışıltılı tüfek skini<br>Durum: <span id="primeStatus">KİLİTLİ</span></p>
+                <p>Mor/Altın ışıltılı silah skini<br>Durum: <span id="primeStatus">KİLİTLİ</span></p>
                 <button class="buy-btn" onclick="buySkin('prime')">Satın Al (300 Altın)</button>
             </div>
             <div class="shop-card">
                 <h3>Skin: Gölge</h3>
-                <p>Karanlık mor ruhani tüfek skini<br>Durum: <span id="reaverStatus">KİLİTLİ</span></p>
+                <p>Karanlık mor ruhani silah skini<br>Durum: <span id="reaverStatus">KİLİTLİ</span></p>
                 <button class="buy-btn" onclick="buySkin('reaver')">Satın Al (300 Altın)</button>
             </div>
         </div>
@@ -167,11 +222,15 @@
     <script src="js/save.js"></script>
     <script src="js/state.js"></script>
     <script src="js/utils.js"></script>
+    <script src="js/audio.js"></script>
+    <script src="js/feedback.js"></script>
     <script src="js/world.js"></script>
     <script src="js/input.js"></script>
     <script src="js/game.js"></script>
     <script src="js/weapons.js"></script>
     <script src="js/enemies.js"></script>
+    <script src="js/waves.js"></script>
+    <script src="js/records.js"></script>
     <script src="js/update.js"></script>
     <script src="js/shop.js"></script>
     <script src="js/settings.js"></script>

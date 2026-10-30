@@ -35,7 +35,8 @@ function defaultSave() {
     return {
         gold: 0, damage: CFG.baseDamage, maxAmmo: CFG.baseMag, healKits: 0,
         hasShield: false, activeSkin: 'classic',
-        unlockedSkins: { classic: true, prime: false, reaver: false }
+        unlockedSkins: { classic: true, prime: false, reaver: false },
+        weapons: { shotgun: false, sniper: false }   // tüfek ve tabanca her zaman açık
     };
 }
 
@@ -43,6 +44,7 @@ function sanitizeSave(o) {
     const d = defaultSave();
     if (!o || typeof o !== 'object') return d;
     const skins = (o.unlockedSkins && typeof o.unlockedSkins === 'object') ? o.unlockedSkins : {};
+    const weapons = (o.weapons && typeof o.weapons === 'object') ? o.weapons : {};
     const s = {
         gold: clampInt(o.gold, 0, 0, 1000000),
         damage: clampInt(o.damage, d.damage, CFG.baseDamage, CFG.maxDamage),
@@ -50,7 +52,8 @@ function sanitizeSave(o) {
         healKits: clampInt(o.healKits, 0, 0, CFG.maxHealKits),
         hasShield: o.hasShield === true,
         activeSkin: SKINS.includes(o.activeSkin) ? o.activeSkin : 'classic',
-        unlockedSkins: { classic: true, prime: skins.prime === true, reaver: skins.reaver === true }
+        unlockedSkins: { classic: true, prime: skins.prime === true, reaver: skins.reaver === true },
+        weapons: { shotgun: weapons.shotgun === true, sniper: weapons.sniper === true }
     };
     if (!s.unlockedSkins[s.activeSkin]) s.activeSkin = 'classic';
     return s;
