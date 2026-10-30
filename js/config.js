@@ -20,6 +20,12 @@ const CFG = {
     waveBreak: 5, waveGoldPerWave: 10, waveScorePerWave: 200, waveHeal: 25
 };
 const SKINS = ['classic', 'prime', 'reaver'];
+// Skin renkleri: silah gövdesi, namlu/detaylar ve mermi (mağazadaki önizleme de bunları kullanır)
+const SKIN_DEFS = {
+    classic: { name: 'Standart', body: 0x3a3f47, accent: 0x00ffff, bullet: 0x00ffcc },
+    prime:   { name: 'Kraliyet', body: 0xa349a4, accent: 0xffcc00, bullet: 0xcc66ff },
+    reaver:  { name: 'Gölge',    body: 0x4b0082, accent: 0x9932cc, bullet: 0x9933ff }
+};
 
 // =====================================================================
 //  SİLAHLAR — hasar = oyuncunun hasar seviyesi × dmgMul (mağazadaki yükseltme hepsine işler)
