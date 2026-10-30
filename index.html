@@ -3,13 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Tactical FPS - 1v1 Düello ve Vandal Skinleri</title>
+    <title>3D Tactical FPS - 1v1 Düello ve Tüfek Skinleri</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             background-color: #0b0f19;
@@ -18,272 +14,163 @@
             color: #00d4ff;
         }
 
-        #canvas-container {
-            width: 100vw;
-            height: 100vh;
-            display: block;
-        }
+        #canvas-container { width: 100vw; height: 100vh; display: block; }
 
         .hud {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             pointer-events: none;
-            font-family: 'Courier New', monospace;
-            font-weight: bold;
+            font-family: 'Courier New', monospace; font-weight: bold;
             text-shadow: 0 0 10px rgba(0, 212, 255, 0.8);
         }
 
         .crosshair {
-            position: absolute;
-            top: 50%;
-            left: 50%;
+            position: absolute; top: 50%; left: 50%;
             transform: translate(-50%, -50%);
-            width: 10px;
-            height: 10px;
+            width: 10px; height: 10px;
             border: 2px solid rgba(0, 255, 255, 0.8);
             border-radius: 50%;
+            transition: border-color 0.08s;
         }
+        .crosshair.hit { border-color: #ffffff; }
+        .crosshair.head { border-color: #ff3333; }
 
         .health-hud {
-            position: absolute;
-            bottom: 30px;
-            left: 30px;
-            font-size: 20px;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 10px 20px;
-            border: 2px solid #00d4ff;
-            border-radius: 5px;
+            position: absolute; bottom: 30px; left: 30px; font-size: 20px;
+            background: rgba(0, 0, 0, 0.7); padding: 10px 20px;
+            border: 2px solid #00d4ff; border-radius: 5px;
         }
 
         .ammo-hud {
-            position: absolute;
-            bottom: 30px;
-            right: 30px;
-            font-size: 20px;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 10px 20px;
-            border: 2px solid #ffaa00;
-            color: #ffaa00;
-            border-radius: 5px;
+            position: absolute; bottom: 30px; right: 30px; font-size: 20px;
+            background: rgba(0, 0, 0, 0.7); padding: 10px 20px;
+            border: 2px solid #ffaa00; color: #ffaa00; border-radius: 5px;
+            text-align: right;
         }
+        .reload-text { font-size: 13px; color: #ffdd77; min-height: 16px; }
 
         .score-hud {
-            position: absolute;
-            top: 30px;
-            right: 30px;
-            font-size: 18px;
-            text-align: right;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 10px 20px;
-            border: 2px solid #00d4ff;
-            border-radius: 5px;
+            position: absolute; top: 30px; right: 30px; font-size: 18px; text-align: right;
+            background: rgba(0, 0, 0, 0.7); padding: 10px 20px;
+            border: 2px solid #00d4ff; border-radius: 5px;
         }
 
         .gold-hud {
-            position: absolute;
-            top: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 22px;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 8px 20px;
-            border: 2px solid #ffaa00;
-            color: #ffaa00;
-            border-radius: 5px;
+            position: absolute; top: 30px; left: 50%; transform: translateX(-50%);
+            font-size: 22px; background: rgba(0, 0, 0, 0.7); padding: 8px 20px;
+            border: 2px solid #ffaa00; color: #ffaa00; border-radius: 5px;
         }
 
-        /* Game Over & Shop Screens */
-        .game-over {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+        .damage-flash {
+            position: absolute; inset: 0; pointer-events: none;
+            box-shadow: inset 0 0 120px rgba(255, 0, 0, 0.0);
+            transition: box-shadow 0.15s;
+        }
+        .damage-flash.on { box-shadow: inset 0 0 120px rgba(255, 0, 0, 0.55); }
+
+        /* Menü / Duraklatma / Oyun Sonu ekranları */
+        .overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.92);
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            pointer-events: auto;
-            z-index: 100;
+            display: none; flex-direction: column; justify-content: center; align-items: center;
+            pointer-events: auto; z-index: 100; text-align: center; padding: 20px;
         }
+        .overlay.show { display: flex; }
 
-        .game-over.show {
-            display: flex;
-        }
-
-        .game-over h1 {
-            color: #ff0000;
-            font-size: 45px;
-            margin-bottom: 15px;
+        .overlay h1 {
+            color: #ff0000; font-size: 45px; margin-bottom: 15px;
             text-shadow: 0 0 15px rgba(255, 0, 0, 0.8);
         }
+        .overlay h1.cyan { color: #00d4ff; text-shadow: 0 0 15px rgba(0, 212, 255, 0.8); }
 
         .stats-box {
-            color: #00d4ff;
-            font-size: 16px;
-            margin-bottom: 25px;
-            text-align: center;
+            color: #00d4ff; font-size: 16px; margin-bottom: 25px; text-align: center;
             font-family: 'Courier New', monospace;
             background: rgba(0, 212, 255, 0.05);
             border: 1px solid rgba(0, 212, 255, 0.3);
-            padding: 15px 25px;
-            border-radius: 8px;
+            padding: 15px 25px; border-radius: 8px; line-height: 1.6;
         }
 
-        .menu-buttons {
-            display: flex;
-            gap: 15px;
-        }
+        .note { color: #ffaa00; font-family: 'Courier New', monospace; font-size: 14px; margin-bottom: 15px; min-height: 18px; }
+
+        .menu-buttons { display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; }
 
         .btn {
-            padding: 12px 25px;
-            font-size: 16px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-            font-family: 'Courier New', monospace;
-            transition: 0.2s;
+            padding: 12px 25px; font-size: 16px; border: none; border-radius: 5px;
+            cursor: pointer; font-weight: bold; font-family: 'Courier New', monospace; transition: 0.2s;
         }
+        .restart-btn { background: #00d4ff; color: #1a1a2e; }
+        .restart-btn:hover { background: #00ffff; box-shadow: 0 0 15px rgba(0, 212, 255, 0.8); }
+        .duel-btn { background: #a855f7; color: #ffffff; }
+        .duel-btn:hover { background: #c084fc; box-shadow: 0 0 15px rgba(168, 85, 247, 0.8); }
+        .shop-open-btn { background: #ffaa00; color: #1a1a2e; }
+        .shop-open-btn:hover { background: #ffcc00; box-shadow: 0 0 15px rgba(255, 170, 0, 0.8); }
+        .ghost-btn { background: transparent; color: #00d4ff; border: 1px solid #00d4ff; }
+        .ghost-btn:hover { background: rgba(0, 212, 255, 0.15); }
 
-        .restart-btn {
-            background: #00d4ff;
-            color: #1a1a2e;
-        }
-
-        .restart-btn:hover {
-            background: #00ffff;
-            box-shadow: 0 0 15px rgba(0, 212, 255, 0.8);
-        }
-
-        .duel-btn {
-            background: #a855f7;
-            color: #ffffff;
-        }
-
-        .duel-btn:hover {
-            background: #c084fc;
-            box-shadow: 0 0 15px rgba(168, 85, 247, 0.8);
-        }
-
-        .shop-open-btn {
-            background: #ffaa00;
-            color: #1a1a2e;
-        }
-
-        .shop-open-btn:hover {
-            background: #ffcc00;
-            box-shadow: 0 0 15px rgba(255, 170, 0, 0.8);
-        }
-
-        /* Shop Modal */
+        /* Mağaza */
         .shop-modal {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(10, 10, 20, 0.96);
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 200;
-            pointer-events: auto;
-            font-family: 'Courier New', monospace;
-            color: #ffaa00;
+            display: none; flex-direction: column; justify-content: center; align-items: center;
+            z-index: 200; pointer-events: auto;
+            font-family: 'Courier New', monospace; color: #ffaa00;
+            overflow-y: auto; padding: 20px;
         }
-
-        .shop-modal.show {
-            display: flex;
-        }
-
-        .shop-title {
-            font-size: 32px;
-            font-weight: bold;
-            margin-bottom: 5px;
-            text-shadow: 0 0 15px rgba(255, 170, 0, 0.8);
-        }
-
-        .shop-gold {
-            font-size: 18px;
-            margin-bottom: 20px;
-        }
-
+        .shop-modal.show { display: flex; }
+        .shop-title { font-size: 32px; font-weight: bold; margin-bottom: 5px; text-shadow: 0 0 15px rgba(255, 170, 0, 0.8); }
+        .shop-gold { font-size: 18px; margin-bottom: 20px; }
         .shop-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin-bottom: 25px;
-            max-width: 900px;
+            display: grid; grid-template-columns: repeat(3, 1fr);
+            gap: 15px; margin-bottom: 25px; max-width: 900px;
         }
-
+        @media (max-width: 900px) { .shop-grid { grid-template-columns: repeat(2, 1fr); } }
         .shop-card {
-            background: rgba(255, 170, 0, 0.1);
-            border: 2px solid #ffaa00;
-            padding: 12px;
-            border-radius: 8px;
-            text-align: center;
-            width: 270px;
+            background: rgba(255, 170, 0, 0.1); border: 2px solid #ffaa00;
+            padding: 12px; border-radius: 8px; text-align: center; width: 270px; max-width: 100%;
         }
-
-        .shop-card h3 {
-            font-size: 15px;
-            margin-bottom: 5px;
-        }
-
-        .shop-card p {
-            font-size: 11px;
-            color: #ddd;
-            margin-bottom: 10px;
-        }
-
+        .shop-card h3 { font-size: 15px; margin-bottom: 5px; }
+        .shop-card p { font-size: 11px; color: #ddd; margin-bottom: 10px; }
         .buy-btn {
-            background: #ffaa00;
-            color: #1a1a2e;
-            border: none;
-            padding: 7px 12px;
-            font-weight: bold;
-            cursor: pointer;
-            border-radius: 4px;
-            width: 100%;
+            background: #ffaa00; color: #1a1a2e; border: none; padding: 7px 12px;
+            font-weight: bold; cursor: pointer; border-radius: 4px; width: 100%;
             font-family: 'Courier New', monospace;
         }
-
-        .buy-btn:hover {
-            background: #ffcc00;
-            box-shadow: 0 0 10px rgba(255, 170, 0, 0.8);
-        }
-
+        .buy-btn:hover { background: #ffcc00; box-shadow: 0 0 10px rgba(255, 170, 0, 0.8); }
         .back-btn {
-            background: #00d4ff;
-            color: #1a1a2e;
-            padding: 10px 25px;
-            font-size: 15px;
-            font-weight: bold;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
+            background: #00d4ff; color: #1a1a2e; padding: 10px 25px; font-size: 15px;
+            font-weight: bold; border: none; border-radius: 5px; cursor: pointer;
             font-family: 'Courier New', monospace;
         }
+
+        /* Bildirim (alert yerine) */
+        #toast {
+            position: absolute; left: 50%; bottom: 110px; transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.85); color: #fff; border: 1px solid #ffaa00;
+            padding: 10px 18px; border-radius: 6px; font-family: 'Courier New', monospace;
+            font-size: 15px; z-index: 300; pointer-events: none;
+            opacity: 0; transition: opacity 0.2s;
+        }
+        #toast.show { opacity: 1; }
     </style>
 
-    <!-- Three.js Kütüphanesi -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- Three.js r128 — üçüncü taraf CDN yerine oyunla aynı klasörden yüklenir.
+         Dosya index.html ile aynı yerden geldiği için CDN ele geçirilme riski yoktur.
+         (CDN'e dönülürse integrity + crossorigin eklenmeli.) -->
+    <script src="three.min.js"></script>
 </head>
 <body>
 
     <div id="canvas-container"></div>
 
     <div class="hud">
-        <div class="crosshair"></div>
+        <div class="damage-flash" id="damageFlash"></div>
+        <div class="crosshair" id="crosshair"></div>
         <div class="gold-hud">ALTIN: <span id="goldDisplay">0</span> 🪙</div>
         <div class="health-hud">CAN: <span id="hpDisplay">100</span>/100 | Kalkan: <span id="shieldDisplay">YOK</span></div>
-        <div class="ammo-hud">MERMİ: <span id="ammoDisplay">30</span>/<span id="ammoPoolDisplay">90</span></div>
+        <div class="ammo-hud">
+            <div class="reload-text" id="reloadDisplay"></div>
+            MERMİ: <span id="ammoDisplay">30</span>/<span id="ammoPoolDisplay">90</span>
+        </div>
         <div class="score-hud">
             <div>SKOR: <span id="scoreDisplay">0</span></div>
             <div>VURULAN: <span id="killsDisplay">0</span></div>
@@ -291,726 +178,1096 @@
         </div>
     </div>
 
-    <!-- Game Over Screen -->
-    <div class="game-over" id="gameOverScreen">
-        <h1 id="gameOverTitle">GÖREV BAŞARISIZ</h1>
+    <!-- Başlangıç Menüsü -->
+    <div class="overlay show" id="menuScreen">
+        <h1 class="cyan">3D TACTICAL FPS</h1>
         <div class="stats-box">
-            <div>Skor: <span id="finalScore">0</span> | Vurulan: <span id="finalKills">0</span></div>
-            <div>Kazanılan Altın: <span id="finalGold">0</span> 🪙</div>
+            WASD: Hareket &nbsp;·&nbsp; Fare: Nişan &nbsp;·&nbsp; Sol tık (basılı tut): Ateş<br>
+            R: Şarjör &nbsp;·&nbsp; 2: Can kiti &nbsp;·&nbsp; ESC: Duraklat
         </div>
+        <div class="note" id="mobileNote"></div>
         <div class="menu-buttons">
-            <button class="btn restart-btn" onclick="restartGame()">YENİDEN BAŞLA</button>
-            <button class="btn duel-btn" onclick="start1v1Duel()">1v1 DÜELLO AT ⚔️</button>
-            <button class="btn shop-open-btn" onclick="openShop()">SİLAH MAĞAZASI 🛒</button>
+            <button class="btn restart-btn" onclick="startRun(false)">OYUNA BAŞLA</button>
+            <button class="btn duel-btn" onclick="startRun(true)">1v1 DÜELLO ⚔️</button>
+            <button class="btn shop-open-btn" onclick="openShop('menu')">MAĞAZA 🛒</button>
         </div>
     </div>
 
-    <!-- Shop Modal -->
+    <!-- Duraklatma -->
+    <div class="overlay" id="pauseScreen">
+        <h1 class="cyan">DURAKLATILDI</h1>
+        <div class="note" id="pauseHint"></div>
+        <div class="menu-buttons">
+            <button class="btn restart-btn" onclick="resumeGame()">DEVAM ET</button>
+            <button class="btn shop-open-btn" onclick="openShop('paused')">MAĞAZA 🛒</button>
+            <button class="btn ghost-btn" onclick="goToMenu()">ANA MENÜ</button>
+        </div>
+    </div>
+
+    <!-- Oyun Sonu -->
+    <div class="overlay" id="gameOverScreen">
+        <h1 id="gameOverTitle">GÖREV BAŞARISIZ</h1>
+        <div class="stats-box">
+            <div>Skor: <span id="finalScore">0</span> | Vurulan: <span id="finalKills">0</span></div>
+            <div>Bu elde kazanılan altın: <span id="finalGold">0</span> 🪙</div>
+            <div>Toplam altın: <span id="finalTotalGold">0</span> 🪙</div>
+        </div>
+        <div class="menu-buttons">
+            <button class="btn restart-btn" onclick="startRun(false)">YENİDEN BAŞLA</button>
+            <button class="btn duel-btn" onclick="startRun(true)">1v1 DÜELLO AT ⚔️</button>
+            <button class="btn shop-open-btn" onclick="openShop('over')">SİLAH MAĞAZASI 🛒</button>
+            <button class="btn ghost-btn" onclick="goToMenu()">ANA MENÜ</button>
+        </div>
+    </div>
+
+    <!-- Mağaza -->
     <div class="shop-modal" id="shopModal">
-        <div class="shop-title">VALORANT VANDAL MAĞAZASI 🛒</div>
+        <div class="shop-title">TAKTİK TÜFEK MAĞAZASI 🛒</div>
         <div class="shop-gold">Mevcut Altın: <span id="modalGold">0</span> 🪙</div>
-        
+
         <div class="shop-grid">
             <div class="shop-card">
-                <h3>Vandal Hasarı</h3>
-                <p>Mermi hasarını artırır<br>Hasar: <span id="modalDmg">15</span></p>
+                <h3>Tüfek Hasarı</h3>
+                <p>Mermi hasarını +5 artırır<br>Hasar: <span id="modalDmg">15</span></p>
                 <button class="buy-btn" onclick="buyDamage()">Satın Al (100 Altın)</button>
             </div>
             <div class="shop-card">
                 <h3>Gelişmiş Şarjör</h3>
-                <p>Mermi kapasitesini artırır<br>+15 Kapasite</p>
+                <p>Şarjör kapasitesini kalıcı +5 artırır<br>Kapasite: <span id="modalMag">30</span></p>
                 <button class="buy-btn" onclick="buyAmmo()">Satın Al (75 Altın)</button>
             </div>
             <div class="shop-card">
-                <h3>Can Basma Hakkı</h3>
-                <p>Oyunda '2' tuşuna basınca canını fulle<br>Adet: <span id="modalHeal">0</span></p>
+                <h3>Can Kiti</h3>
+                <p>Oyunda '2' tuşuna basınca canını fuller<br>Adet: <span id="modalHeal">0</span></p>
                 <button class="buy-btn" onclick="buyHealKit()">Satın Al (50 Altın)</button>
             </div>
             <div class="shop-card">
-                <h3>Ağır Kalkan (Shield)</h3>
-                <p>Alınan hasarı yarıya indirir<br>Durum: <span id="modalShield">YOK</span></p>
+                <h3>Ağır Kalkan</h3>
+                <p>+50 kalkan puanı; hasarı önce kalkan emer, bitince tükenir<br>Durum: <span id="modalShield">YOK</span></p>
                 <button class="buy-btn" onclick="buyShield()">Satın Al (150 Altın)</button>
             </div>
             <div class="shop-card">
-                <h3>Vandal: Asil (Prime)</h3>
-                <p>Özel Mor/Altın Işıltılı Vandal Skini<br>Durum: <span id="primeStatus">KİLİTLİ</span></p>
+                <h3>Skin: Kraliyet</h3>
+                <p>Mor/Altın ışıltılı tüfek skini<br>Durum: <span id="primeStatus">KİLİTLİ</span></p>
                 <button class="buy-btn" onclick="buySkin('prime')">Satın Al (300 Altın)</button>
             </div>
             <div class="shop-card">
-                <h3>Vandal: Yağmacı (Reaver)</h3>
-                <p>Karanlık Mor Ruhani Vandal Skini<br>Durum: <span id="reaverStatus">KİLİTLİ</span></p>
+                <h3>Skin: Gölge</h3>
+                <p>Karanlık mor ruhani tüfek skini<br>Durum: <span id="reaverStatus">KİLİTLİ</span></p>
                 <button class="buy-btn" onclick="buySkin('reaver')">Satın Al (300 Altın)</button>
             </div>
         </div>
 
         <div style="margin-bottom: 20px; font-size: 14px;">
-            Aktif Skini Seç: 
+            Aktif Skini Seç:
             <select id="skinSelect" onchange="changeSkin(this.value)" style="padding: 5px; font-family: 'Courier New'; background: #1a1a2e; color: #ffaa00; border: 1px solid #ffaa00;">
-                <option value="classic">Standart Vandal</option>
-                <option value="prime">Asil (Prime) Vandal</option>
-                <option value="reaver">Yağmacı (Reaver) Vandal</option>
+                <option value="classic">Standart</option>
+                <option value="prime">Kraliyet</option>
+                <option value="reaver">Gölge</option>
             </select>
         </div>
 
-        <button class="back-btn" onclick="closeShop()">Oyuna Dön</button>
+        <button class="back-btn" onclick="closeShop()">Geri Dön</button>
     </div>
 
+    <div id="toast"></div>
+
     <script>
-        let scene, camera, renderer;
-        let player = {
-            health: 100,
-            maxHealth: 100,
-            ammo: parseInt(localStorage.getItem('val_maxAmmo')) || 30,
-            maxAmmo: parseInt(localStorage.getItem('val_maxAmmo')) || 30,
-            ammoPool: parseInt(localStorage.getItem('val_ammoPool')) || 90,
-            score: 0,
-            kills: 0,
-            gold: parseInt(localStorage.getItem('val_gold')) || 0,
-            damage: parseInt(localStorage.getItem('val_damage')) || 15,
-            healKits: parseInt(localStorage.getItem('val_healKits')) || 0,
-            hasShield: localStorage.getItem('val_hasShield') === 'true',
-            activeSkin: localStorage.getItem('val_skin') || 'classic',
-            unlockedSkins: JSON.parse(localStorage.getItem('val_unlockedSkins')) || { classic: true, prime: false, reaver: false },
-            speed: 0.12
+    'use strict';
+
+    // =====================================================================
+    //  AYARLAR (tüm hızlar saniye başına — kare hızından bağımsız)
+    // =====================================================================
+    const CFG = {
+        eyeHeight: 1.6, playerSpeed: 7.2, playerRadius: 0.6,
+        fireInterval: 0.1,            // ~10 atış/sn (otomatik tüfek)
+        reloadTime: 2.0,
+        bulletSpeed: 84, bulletLife: 1.2,
+        botBulletSpeed: 45, botBulletLife: 2.0, botBulletDamage: 10, botFireInterval: 1.0,
+        enemyHealth: 30, enemySpeed: 2.1, duelHealth: 100, duelSpeed: 2.6,
+        meleeDps: 30,                 // yakın temas hasarı (saniyede)
+        armorAmount: 50,
+        baseDamage: 15, damageStep: 5, maxDamage: 35, damageCost: 100,
+        baseMag: 30, magStep: 5, maxMag: 60, magCost: 75,
+        startPool: 90, healCost: 50, maxHealKits: 9, shieldCost: 150, skinCost: 300,
+        maxEnemies: 12, spawnPerSec: 1.5, killGold: 25, killAmmo: 20, duelGold: 150
+    };
+    const SKINS = ['classic', 'prime', 'reaver'];
+
+    // =====================================================================
+    //  KAYIT (localStorage) — güvenli okuma, doğrulama, sağlama toplamı
+    //  Not: İstemci tarafında tutulan veri her zaman değiştirilebilir. Buradaki
+    //  sağlama toplamı sadece konsoldan "elle" yapılan basit değişiklikleri
+    //  geçersiz kılar; gerçek koruma (ör. skor tablosu) sunucu doğrulaması ister.
+    // =====================================================================
+    const SAVE_KEY = 'fps_save_v2';
+    const SAVE_SALT = 'tfps-7c1e';
+
+    function sGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+    function sSet(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* gizli mod / engelli depolama */ } }
+    function sDel(k) { try { localStorage.removeItem(k); } catch (e) {} }
+
+    function hashStr(str) { // cyrb53
+        let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+        for (let i = 0; i < str.length; i++) {
+            const ch = str.charCodeAt(i);
+            h1 = Math.imul(h1 ^ ch, 2654435761);
+            h2 = Math.imul(h2 ^ ch, 1597334677);
+        }
+        h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+        h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+        return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(36);
+    }
+
+    function clampInt(v, def, min, max) {
+        const n = Math.floor(Number(v));
+        if (!Number.isFinite(n)) return def;
+        return Math.min(max, Math.max(min, n));
+    }
+
+    function defaultSave() {
+        return {
+            gold: 0, damage: CFG.baseDamage, maxAmmo: CFG.baseMag, healKits: 0,
+            hasShield: false, activeSkin: 'classic',
+            unlockedSkins: { classic: true, prime: false, reaver: false }
         };
+    }
 
-        let moveForward = false, moveBackward = false, moveLeft = false, moveRight = false;
-        let enemies = [];
-        let bullets = [];
-        let particles = [];
-        let walls = [];
-        let gameRunning = true;
-        let isDuelMode = false;
-        let duelBot = null;
-        let cameraAngleY = 0, cameraAngleX = 0;
-        let brickMaterial;
-        let weapon3DGroup, weaponBodyMat, weaponAccentMat;
+    function sanitizeSave(o) {
+        const d = defaultSave();
+        if (!o || typeof o !== 'object') return d;
+        const skins = (o.unlockedSkins && typeof o.unlockedSkins === 'object') ? o.unlockedSkins : {};
+        const s = {
+            gold: clampInt(o.gold, 0, 0, 1000000),
+            damage: clampInt(o.damage, d.damage, CFG.baseDamage, CFG.maxDamage),
+            maxAmmo: clampInt(o.maxAmmo, d.maxAmmo, CFG.baseMag, CFG.maxMag),
+            healKits: clampInt(o.healKits, 0, 0, CFG.maxHealKits),
+            hasShield: o.hasShield === true,
+            activeSkin: SKINS.includes(o.activeSkin) ? o.activeSkin : 'classic',
+            unlockedSkins: { classic: true, prime: skins.prime === true, reaver: skins.reaver === true }
+        };
+        if (!s.unlockedSkins[s.activeSkin]) s.activeSkin = 'classic';
+        return s;
+    }
 
-        function createBrickTexture() {
-            const canvas = document.createElement('canvas');
-            canvas.width = 512;
-            canvas.height = 512;
-            const ctx = canvas.getContext('2d');
-
-            ctx.fillStyle = '#8b7d7b';
-            ctx.fillRect(0, 0, 512, 512);
-
-            const rows = 12;
-            const cols = 6;
-            const rh = 512 / rows;
-            const cw = 512 / cols;
-
-            for (let i = 0; i < rows; i++) {
-                let offset = (i % 2 === 0) ? 0 : cw / 2;
-                for (let j = -1; j < cols + 1; j++) {
-                    let bx = j * cw + offset;
-                    let by = i * rh;
-                    let bw = cw - 4;
-                    let bh = rh - 4;
-
-                    let r = 160 + Math.floor(Math.random() * 45);
-                    let g = 60 + Math.floor(Math.random() * 25);
-                    let b = 45 + Math.floor(Math.random() * 20);
-                    ctx.fillStyle = `rgb(${r},${g},${b})`;
-                    ctx.fillRect(bx + 2, by + 2, bw, bh);
-
-                    ctx.fillStyle = 'rgba(0,0,0,0.15)';
-                    ctx.fillRect(bx + 2, by + bh - 4, bw, 4);
+    function loadSave() {
+        const raw = sGet(SAVE_KEY);
+        if (raw) {
+            try {
+                const wrap = JSON.parse(raw);
+                if (wrap && typeof wrap.d === 'string' && wrap.h === hashStr(SAVE_SALT + wrap.d)) {
+                    return sanitizeSave(JSON.parse(wrap.d));
                 }
-            }
-
-            const texture = new THREE.CanvasTexture(canvas);
-            texture.wrapS = THREE.RepeatWrapping;
-            texture.wrapT = THREE.RepeatWrapping;
-            return texture;
+            } catch (e) { /* bozuk kayıt → varsayılan */ }
+            return defaultSave(); // değiştirilmiş veya bozuk kayıt
         }
-
-        function init() {
-            const container = document.getElementById('canvas-container');
-
-            scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x0b0f19);
-            scene.fog = new THREE.FogExp2(0x0b0f19, 0.025);
-
-            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camera.position.set(0, 1.6, 10);
-
-            renderer = new THREE.WebGLRenderer({ antialias: true });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.shadowMap.enabled = true;
-            container.appendChild(renderer.domElement);
-
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-            scene.add(ambientLight);
-
-            const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
-            dirLight.position.set(25, 50, 25);
-            dirLight.castShadow = true;
-            scene.add(dirLight);
-
-            const floorGeo = new THREE.PlaneGeometry(100, 100);
-            const floorMat = new THREE.MeshStandardMaterial({ color: 0x1f2937, roughness: 0.8 });
-            const floor = new THREE.Mesh(floorGeo, floorMat);
-            floor.rotation.x = -Math.PI / 2;
-            floor.receiveShadow = true;
-            scene.add(floor);
-
-            const ceiling = new THREE.Mesh(floorGeo, floorMat);
-            ceiling.rotation.x = Math.PI / 2;
-            ceiling.position.y = 10;
-            scene.add(ceiling);
-
-            const brickTex = createBrickTexture();
-            brickTex.repeat.set(4, 2);
-            brickMaterial = new THREE.MeshStandardMaterial({ map: brickTex, roughness: 0.7 });
-            createBrickMap();
-
-            createWeaponModel();
-
-            window.addEventListener('keydown', onKeyDown);
-            window.addEventListener('keyup', onKeyUp);
-            document.addEventListener('mousemove', onMouseMove);
-            
-            document.addEventListener('click', () => {
-                if (gameRunning) {
-                    document.body.requestPointerLock();
-                    shoot();
-                }
+        // Eski sürümden (val_* anahtarları) tek seferlik taşıma
+        if (sGet('val_gold') !== null) {
+            let skins = null;
+            try { skins = JSON.parse(sGet('val_unlockedSkins')); } catch (e) {}
+            const migrated = sanitizeSave({
+                gold: sGet('val_gold'), damage: sGet('val_damage'), maxAmmo: sGet('val_maxAmmo'),
+                healKits: sGet('val_healKits'), hasShield: sGet('val_hasShield') === 'true',
+                activeSkin: sGet('val_skin'), unlockedSkins: skins
             });
-
-            window.addEventListener('resize', onWindowResize);
-            animate();
+            ['val_gold', 'val_damage', 'val_maxAmmo', 'val_ammoPool', 'val_healKits',
+             'val_hasShield', 'val_skin', 'val_unlockedSkins'].forEach(sDel);
+            return migrated;
         }
+        return defaultSave();
+    }
 
-        function createWeaponModel() {
-            weapon3DGroup = new THREE.Group();
+    const save = loadSave();
 
-            weaponBodyMat = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.3, metalness: 0.8 });
-            weaponAccentMat = new THREE.MeshStandardMaterial({ color: 0x00d4ff, roughness: 0.2, metalness: 0.9 });
+    // =====================================================================
+    //  OYUNCU VE DURUM
+    // =====================================================================
+    const player = {
+        health: 100, maxHealth: 100, armor: 0,
+        maxAmmo: save.maxAmmo, ammo: save.maxAmmo, ammoPool: CFG.startPool,
+        score: 0, kills: 0, goldEarned: 0,
+        gold: save.gold, damage: save.damage, healKits: save.healKits,
+        hasShield: save.hasShield, activeSkin: save.activeSkin, unlockedSkins: save.unlockedSkins,
+        reloading: false, reloadTimer: 0, fireCooldown: 0
+    };
 
-            const bodyGeo = new THREE.BoxGeometry(0.12, 0.15, 0.8);
-            const body = new THREE.Mesh(bodyGeo, weaponBodyMat);
-            body.position.set(0.25, -0.22, -0.5);
-            weapon3DGroup.add(body);
+    function saveGameData() {
+        const data = JSON.stringify({
+            gold: player.gold, damage: player.damage, maxAmmo: player.maxAmmo,
+            healKits: player.healKits, hasShield: player.hasShield,
+            activeSkin: player.activeSkin, unlockedSkins: player.unlockedSkins
+        });
+        sSet(SAVE_KEY, JSON.stringify({ d: data, h: hashStr(SAVE_SALT + data) }));
+    }
 
-            const barrelGeo = new THREE.CylinderGeometry(0.03, 0.03, 0.5, 8);
-            const barrel = new THREE.Mesh(barrelGeo, weaponAccentMat);
-            barrel.rotation.x = Math.PI / 2;
-            barrel.position.set(0.25, -0.2, -0.85);
-            weapon3DGroup.add(barrel);
+    // state: 'menu' | 'starting' | 'playing' | 'paused' | 'shop' | 'over'
+    let state = 'menu';
+    let shopReturn = 'menu';
+    let isDuelMode = false;
+    let duelBot = null;
+    let pendingDuelWin = false;
+    let firing = false;
+    const keys = { forward: false, back: false, left: false, right: false };
 
-            updateWeaponSkinColors();
+    let scene, camera, renderer, canvas;
+    let enemies = [], bullets = [], particles = [], walls = [];
+    let cameraAngleY = 0, cameraAngleX = 0;
+    let brickMaterial;
+    let weapon3DGroup, weaponBodyMat, weaponAccentMat;
+    let weaponKick = 0;
+    const clock = new THREE.Clock();
+    const tmpVec = new THREE.Vector3();
 
-            camera.add(weapon3DGroup);
-            scene.add(camera);
+    const $ = (id) => document.getElementById(id);
+
+    // ---- Paylaşılan geometri/materyaller (her mermi için yeniden oluşturulmaz) ----
+    const GEO = {
+        bullet: new THREE.SphereGeometry(0.1, 8, 8),
+        particle: new THREE.BoxGeometry(0.08, 0.08, 0.08),
+        body: new THREE.BoxGeometry(0.9, 1.2, 0.5),
+        head: new THREE.BoxGeometry(0.5, 0.5, 0.5),
+        arm: new THREE.BoxGeometry(0.3, 1.0, 0.3)
+    };
+    const MAT = {
+        enemyBody: new THREE.MeshStandardMaterial({ color: 0xdc2626, roughness: 0.4 }),
+        enemyHead: new THREE.MeshStandardMaterial({ color: 0xf87171, roughness: 0.5 }),
+        duelBody: new THREE.MeshStandardMaterial({ color: 0xa855f7, roughness: 0.4 }),
+        duelHead: new THREE.MeshStandardMaterial({ color: 0xc084fc, roughness: 0.5 })
+    };
+    const basicMatCache = {};
+    function basicMat(color) {
+        return basicMatCache[color] || (basicMatCache[color] = new THREE.MeshBasicMaterial({ color }));
+    }
+
+    // =====================================================================
+    //  YARDIMCILAR
+    // =====================================================================
+    let toastTimer = null;
+    function showToast(msg) {
+        const t = $('toast');
+        t.textContent = msg;
+        t.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+    }
+
+    const hudCache = {};
+    function setHud(id, val) {
+        if (hudCache[id] !== val) { hudCache[id] = val; $(id).textContent = val; }
+    }
+
+    function flashClass(id, cls, ms) {
+        const el = $(id);
+        el.classList.add(cls);
+        clearTimeout(el['_t' + cls]);
+        el['_t' + cls] = setTimeout(() => el.classList.remove(cls), ms);
+    }
+
+    // Duvar çarpışması (yatay düzlemde, r = yarıçap payı)
+    function collides(x, z, r) {
+        for (const w of walls) {
+            if (x > w.x - w.w / 2 - r && x < w.x + w.w / 2 + r &&
+                z > w.z - w.d / 2 - r && z < w.z + w.d / 2 + r) return true;
         }
+        return false;
+    }
+    // Mermi için: yükseklik de dahil
+    function pointInWall(p) {
+        for (const w of walls) {
+            if (p.y < w.h &&
+                p.x > w.x - w.w / 2 && p.x < w.x + w.w / 2 &&
+                p.z > w.z - w.d / 2 && p.z < w.z + w.d / 2) return true;
+        }
+        return false;
+    }
+    // Eksenleri ayrı ayrı deneyerek duvar boyunca kaymayı sağlar
+    function moveWithCollision(pos, dx, dz, r) {
+        if (!collides(pos.x + dx, pos.z, r)) pos.x += dx;
+        if (!collides(pos.x, pos.z + dz, r)) pos.z += dz;
+    }
 
-        function updateWeaponSkinColors() {
-            if (!weaponBodyMat) return;
-            if (player.activeSkin === 'classic') {
-                weaponBodyMat.color.setHex(0x222222);
-                weaponAccentMat.color.setHex(0x00ffff);
-            } else if (player.activeSkin === 'prime') {
-                weaponBodyMat.color.setHex(0xa349a4);
-                weaponAccentMat.color.setHex(0xffcc00);
-            } else if (player.activeSkin === 'reaver') {
-                weaponBodyMat.color.setHex(0x4b0082);
-                weaponAccentMat.color.setHex(0x9932cc);
+    function applyCameraRotation() {
+        camera.rotation.y = cameraAngleY;
+        camera.rotation.x = cameraAngleX;
+    }
+
+    function hideAllScreens() {
+        ['menuScreen', 'pauseScreen', 'gameOverScreen', 'shopModal'].forEach(id => $(id).classList.remove('show'));
+    }
+    function showScreen(id) { hideAllScreens(); $(id).classList.add('show'); }
+
+    function resetKeys() {
+        keys.forward = keys.back = keys.left = keys.right = false;
+        firing = false;
+    }
+
+    // =====================================================================
+    //  SAHNE
+    // =====================================================================
+    function createBrickTexture() {
+        const c = document.createElement('canvas');
+        c.width = 512; c.height = 512;
+        const ctx = c.getContext('2d');
+        ctx.fillStyle = '#8b7d7b';
+        ctx.fillRect(0, 0, 512, 512);
+        const rows = 12, cols = 6, rh = 512 / rows, cw = 512 / cols;
+        for (let i = 0; i < rows; i++) {
+            const offset = (i % 2 === 0) ? 0 : cw / 2;
+            for (let j = -1; j < cols + 1; j++) {
+                const bx = j * cw + offset, by = i * rh, bw = cw - 4, bh = rh - 4;
+                const r = 160 + Math.floor(Math.random() * 45);
+                const g = 60 + Math.floor(Math.random() * 25);
+                const b = 45 + Math.floor(Math.random() * 20);
+                ctx.fillStyle = `rgb(${r},${g},${b})`;
+                ctx.fillRect(bx + 2, by + 2, bw, bh);
+                ctx.fillStyle = 'rgba(0,0,0,0.15)';
+                ctx.fillRect(bx + 2, by + bh - 4, bw, 4);
             }
         }
+        const texture = new THREE.CanvasTexture(c);
+        texture.wrapS = THREE.RepeatWrapping;
+        texture.wrapT = THREE.RepeatWrapping;
+        return texture;
+    }
 
-        function createBrickMap() {
-            const boundarySize = 45;
-            createWall(0, 5, -boundarySize, 90, 10, 2);
-            createWall(0, 5, boundarySize, 90, 10, 2);
-            createWall(-boundarySize, 5, 0, 2, 10, 90);
-            createWall(boundarySize, 5, 0, 2, 10, 90);
+    function init() {
+        const container = $('canvas-container');
 
-            createWall(-15, 2.5, -15, 16, 5, 2);
-            createWall(15, 2.5, -15, 16, 5, 2);
-            createWall(-15, 2.5, 15, 2, 5, 16);
-            createWall(15, 2.5, 15, 2, 5, 16);
-            createWall(0, 2.5, 0, 12, 5, 12);
+        scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x0b0f19);
+        scene.fog = new THREE.FogExp2(0x0b0f19, 0.025);
+
+        camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.rotation.order = 'YXZ';
+        camera.position.set(0, CFG.eyeHeight, 10);
+
+        renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        container.appendChild(renderer.domElement);
+        canvas = renderer.domElement;
+
+        scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        dirLight.position.set(25, 50, 25);
+        dirLight.castShadow = true;
+        // Gölge kamerası tüm haritayı kapsasın (varsayılan ±5 birimdi)
+        dirLight.shadow.camera.left = -55;
+        dirLight.shadow.camera.right = 55;
+        dirLight.shadow.camera.top = 55;
+        dirLight.shadow.camera.bottom = -55;
+        dirLight.shadow.camera.near = 1;
+        dirLight.shadow.camera.far = 150;
+        dirLight.shadow.mapSize.set(2048, 2048);
+        dirLight.shadow.bias = -0.0005;
+        scene.add(dirLight);
+
+        const floorGeo = new THREE.PlaneGeometry(100, 100);
+        const floorMat = new THREE.MeshStandardMaterial({ color: 0x1f2937, roughness: 0.8 });
+        const floor = new THREE.Mesh(floorGeo, floorMat);
+        floor.rotation.x = -Math.PI / 2;
+        floor.receiveShadow = true;
+        scene.add(floor);
+
+        const ceiling = new THREE.Mesh(floorGeo, floorMat);
+        ceiling.rotation.x = Math.PI / 2;
+        ceiling.position.y = 10;
+        scene.add(ceiling);
+
+        const brickTex = createBrickTexture();
+        brickTex.repeat.set(4, 2);
+        brickMaterial = new THREE.MeshStandardMaterial({ map: brickTex, roughness: 0.7 });
+        createBrickMap();
+        createWeaponModel();
+
+        window.addEventListener('keydown', onKeyDown);
+        window.addEventListener('keyup', onKeyUp);
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mousedown', onMouseDown);
+        document.addEventListener('mouseup', (e) => { if (e.button === 0) firing = false; });
+        document.addEventListener('pointerlockchange', onPointerLockChange);
+        window.addEventListener('blur', () => { resetKeys(); });
+        window.addEventListener('resize', onWindowResize);
+
+        const finePointer = window.matchMedia && window.matchMedia('(pointer: fine)').matches;
+        if (!finePointer) $('mobileNote').textContent = 'Bu oyun klavye ve fare gerektirir; dokunmatik cihazlarda oynanamaz.';
+
+        updateHUD();
+        animate();
+    }
+
+    function createWeaponModel() {
+        weapon3DGroup = new THREE.Group();
+        weaponBodyMat = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.3, metalness: 0.8 });
+        weaponAccentMat = new THREE.MeshStandardMaterial({ color: 0x00d4ff, roughness: 0.2, metalness: 0.9 });
+
+        const body = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.15, 0.8), weaponBodyMat);
+        body.position.set(0.25, -0.22, -0.5);
+        weapon3DGroup.add(body);
+
+        const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.5, 8), weaponAccentMat);
+        barrel.rotation.x = Math.PI / 2;
+        barrel.position.set(0.25, -0.2, -0.85);
+        weapon3DGroup.add(barrel);
+
+        updateWeaponSkinColors();
+        camera.add(weapon3DGroup);
+        scene.add(camera);
+    }
+
+    function updateWeaponSkinColors() {
+        if (!weaponBodyMat) return;
+        if (player.activeSkin === 'prime') {
+            weaponBodyMat.color.setHex(0xa349a4); weaponAccentMat.color.setHex(0xffcc00);
+        } else if (player.activeSkin === 'reaver') {
+            weaponBodyMat.color.setHex(0x4b0082); weaponAccentMat.color.setHex(0x9932cc);
+        } else {
+            weaponBodyMat.color.setHex(0x222222); weaponAccentMat.color.setHex(0x00ffff);
+        }
+    }
+
+    function skinBulletColor() {
+        if (player.activeSkin === 'prime') return 0xcc66ff;
+        if (player.activeSkin === 'reaver') return 0x9933ff;
+        return 0x00ffcc;
+    }
+
+    function createBrickMap() {
+        const b = 45;
+        createWall(0, 5, -b, 90, 10, 2);
+        createWall(0, 5, b, 90, 10, 2);
+        createWall(-b, 5, 0, 2, 10, 90);
+        createWall(b, 5, 0, 2, 10, 90);
+
+        createWall(-15, 2.5, -15, 16, 5, 2);
+        createWall(15, 2.5, -15, 16, 5, 2);
+        createWall(-15, 2.5, 15, 2, 5, 16);
+        createWall(15, 2.5, 15, 2, 5, 16);
+        createWall(0, 2.5, 0, 12, 5, 12);
+    }
+
+    function createWall(x, y, z, w, h, d) {
+        const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), brickMaterial);
+        mesh.position.set(x, y, z);
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+        scene.add(mesh);
+        walls.push({ x, z, w, d, h: y + h / 2 });
+    }
+
+    // =====================================================================
+    //  GİRİŞ (klavye düzeninden bağımsız: e.code)
+    // =====================================================================
+    function onKeyDown(e) {
+        switch (e.code) {
+            case 'KeyW': case 'ArrowUp': keys.forward = true; break;
+            case 'KeyS': case 'ArrowDown': keys.back = true; break;
+            case 'KeyA': case 'ArrowLeft': keys.left = true; break;
+            case 'KeyD': case 'ArrowRight': keys.right = true; break;
+            case 'KeyR': if (state === 'playing') startReload(); break;
+            case 'Digit2': case 'Numpad2': if (state === 'playing') useHealKit(); break;
+        }
+    }
+
+    function onKeyUp(e) {
+        switch (e.code) {
+            case 'KeyW': case 'ArrowUp': keys.forward = false; break;
+            case 'KeyS': case 'ArrowDown': keys.back = false; break;
+            case 'KeyA': case 'ArrowLeft': keys.left = false; break;
+            case 'KeyD': case 'ArrowRight': keys.right = false; break;
+        }
+    }
+
+    function onMouseMove(e) {
+        if (document.pointerLockElement !== canvas || state !== 'playing') return;
+        cameraAngleY -= e.movementX * 0.003;
+        cameraAngleX -= e.movementY * 0.003;
+        cameraAngleX = Math.max(-Math.PI / 2.2, Math.min(Math.PI / 2.2, cameraAngleX));
+        applyCameraRotation();
+    }
+
+    function onMouseDown(e) {
+        // Sadece fare kilitliyken ateş edilir; kilidi almak için yapılan tıklama mermi harcamaz
+        if (e.button === 0 && state === 'playing' && document.pointerLockElement === canvas) firing = true;
+    }
+
+    function onPointerLockChange() {
+        const locked = document.pointerLockElement === canvas;
+        if (locked) {
+            if (state === 'starting' || state === 'paused') {
+                state = 'playing';
+                hideAllScreens();
+                $('pauseHint').textContent = '';
+                clock.getDelta();
+            }
+        } else {
+            resetKeys();
+            if (state === 'playing') pauseGame();
+        }
+    }
+
+    function requestLock() {
+        try {
+            const p = canvas.requestPointerLock();
+            if (p && typeof p.catch === 'function') p.catch(lockFailed);
+        } catch (e) { lockFailed(); }
+        setTimeout(() => { if (state === 'starting') lockFailed(); }, 1200);
+    }
+
+    function lockFailed() {
+        if (state !== 'starting') return;
+        state = 'paused';
+        showScreen('pauseScreen');
+        $('pauseHint').textContent = 'Fare kilitlenemedi. "Devam Et"e tekrar tıkla.';
+    }
+
+    function onWindowResize() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    // =====================================================================
+    //  OYUN AKIŞI
+    // =====================================================================
+    function resetWorld(duel) {
+        enemies.forEach(e => e.destroy()); enemies = [];
+        if (duelBot) { duelBot.destroy(); duelBot = null; }
+        bullets.forEach(b => scene.remove(b)); bullets = [];
+        particles.forEach(p => scene.remove(p)); particles = [];
+
+        player.health = player.maxHealth;
+        player.armor = 0;
+        if (player.hasShield) { player.armor = CFG.armorAmount; player.hasShield = false; }
+        player.ammo = player.maxAmmo;
+        player.ammoPool = CFG.startPool;
+        player.score = 0; player.kills = 0; player.goldEarned = 0;
+        player.reloading = false; player.reloadTimer = 0; player.fireCooldown = 0;
+        weaponKick = 0;
+
+        isDuelMode = duel;
+        pendingDuelWin = false;
+        cameraAngleX = 0;
+        if (duel) {
+            // Oyuncu ve bot arasında duvar yok; bot oyuncunun tam karşısında doğar
+            camera.position.set(0, CFG.eyeHeight, 12);
+            cameraAngleY = Math.PI;
+            duelBot = new HumanoidEnemy(0, 34, true);
+        } else {
+            camera.position.set(0, CFG.eyeHeight, 10);
+            cameraAngleY = 0;
+        }
+        applyCameraRotation();
+        resetKeys();
+        saveGameData();
+        updateHUD();
+    }
+
+    function startRun(duel) {
+        resetWorld(duel);
+        hideAllScreens();
+        state = 'starting';
+        requestLock();
+    }
+
+    function pauseGame() {
+        state = 'paused';
+        resetKeys();
+        showScreen('pauseScreen');
+    }
+
+    function resumeGame() {
+        hideAllScreens();
+        state = 'starting';
+        requestLock();
+    }
+
+    function goToMenu() {
+        if (document.pointerLockElement) document.exitPointerLock();
+        state = 'menu';
+        showScreen('menuScreen');
+    }
+
+    function endRun(won) {
+        if (state !== 'playing') return;
+        state = 'over';
+        resetKeys();
+        saveGameData();
+
+        const t = $('gameOverTitle');
+        if (won) {
+            t.textContent = 'DÜELLOYU KAZANDIN! 🏆';
+            t.style.color = '#22c55e';
+            t.style.textShadow = '0 0 15px rgba(34,197,94,0.8)';
+        } else {
+            t.textContent = isDuelMode ? 'DÜELLOYU KAYBETTİN' : 'GÖREV BAŞARISIZ';
+            t.style.color = '#ff0000';
+            t.style.textShadow = '0 0 15px rgba(255,0,0,0.8)';
+        }
+        $('finalScore').textContent = player.score;
+        $('finalKills').textContent = player.kills;
+        $('finalGold').textContent = player.goldEarned;
+        $('finalTotalGold').textContent = player.gold;
+        showScreen('gameOverScreen');
+        if (document.pointerLockElement) document.exitPointerLock();
+    }
+
+    function damagePlayer(amount) {
+        if (state !== 'playing') return;
+        if (player.armor > 0) {
+            const absorbed = Math.min(player.armor, amount);
+            player.armor -= absorbed;
+            amount -= absorbed;
+        }
+        player.health -= amount;
+        flashClass('damageFlash', 'on', 150);
+        if (player.health <= 0) { player.health = 0; endRun(false); }
+    }
+
+    function useHealKit() {
+        if (player.healKits > 0 && player.health < player.maxHealth) {
+            player.health = player.maxHealth;
+            player.healKits--;
+            saveGameData();
+            showToast('Can dolduruldu');
+        }
+    }
+
+    // =====================================================================
+    //  SİLAH
+    // =====================================================================
+    function spawnBullet(origin, dir, speed, damage, color, isPlayer, life) {
+        const b = new THREE.Mesh(GEO.bullet, basicMat(color));
+        b.position.copy(origin);
+        b.velocity = dir.clone().multiplyScalar(speed);
+        b.life = life;
+        b.damage = damage;
+        b.colorHex = color;
+        b.isPlayer = isPlayer;
+        scene.add(b);
+        bullets.push(b);
+    }
+
+    function tryShoot() {
+        if (player.reloading || player.fireCooldown > 0) return;
+        if (player.ammo <= 0) { startReload(); return; }
+        player.ammo--;
+        player.fireCooldown = CFG.fireInterval;
+
+        const dir = new THREE.Vector3();
+        camera.getWorldDirection(dir);
+        const origin = camera.position.clone().addScaledVector(dir, 0.3);
+        spawnBullet(origin, dir, CFG.bulletSpeed, player.damage, skinBulletColor(), true, CFG.bulletLife);
+        weaponKick = 0.08;
+
+        if (player.ammo === 0) startReload();
+    }
+
+    function startReload() {
+        if (player.reloading || player.ammo >= player.maxAmmo || player.ammoPool <= 0) return;
+        player.reloading = true;
+        player.reloadTimer = CFG.reloadTime;
+    }
+
+    function finishReload() {
+        const need = player.maxAmmo - player.ammo;
+        const take = Math.min(need, player.ammoPool);
+        player.ammo += take;
+        player.ammoPool -= take;
+        player.reloading = false;
+    }
+
+    // =====================================================================
+    //  DÜŞMAN / 1v1 BOT
+    // =====================================================================
+    class HumanoidEnemy {
+        constructor(x, z, isDuel = false) {
+            this.isDuel = isDuel;
+            this.group = new THREE.Group();
+            const bm = isDuel ? MAT.duelBody : MAT.enemyBody;
+            const hm = isDuel ? MAT.duelHead : MAT.enemyHead;
+
+            const body = new THREE.Mesh(GEO.body, bm);
+            body.position.y = 0.6; body.castShadow = true;
+            const head = new THREE.Mesh(GEO.head, hm);
+            head.position.y = 1.45; head.castShadow = true;
+            const la = new THREE.Mesh(GEO.arm, bm); la.position.set(-0.6, 0.6, 0);
+            const ra = new THREE.Mesh(GEO.arm, bm); ra.position.set(0.6, 0.6, 0);
+            this.group.add(body, head, la, ra);
+
+            this.group.position.set(x, 0, z);
+            scene.add(this.group);
+
+            this.health = isDuel ? CFG.duelHealth : CFG.enemyHealth;
+            this.maxHealth = this.health;
+            this.speed = isDuel ? CFG.duelSpeed : CFG.enemySpeed;
+            this.shootTimer = 1.5;          // ilk atıştan önce kısa bir süre
+            this.strafeDir = 1;
+            this.strafeTimer = 0;
         }
 
-        function createWall(x, y, z, w, h, d) {
-            const geo = new THREE.BoxGeometry(w, h, d);
-            const mesh = new THREE.Mesh(geo, brickMaterial);
-            mesh.position.set(x, y, z);
-            mesh.castShadow = true;
-            mesh.receiveShadow = true;
-            scene.add(mesh);
-            walls.push({ x, z, w, d });
-        }
+        update(dt) {
+            const p = this.group.position;
+            const dx = camera.position.x - p.x;
+            const dz = camera.position.z - p.z;
+            const dist = Math.hypot(dx, dz) || 0.0001;
+            const nx = dx / dist, nz = dz / dist;
+            this.group.rotation.y = Math.atan2(dx, dz);
 
-        function saveGameData() {
-            localStorage.setItem('val_gold', player.gold);
-            localStorage.setItem('val_damage', player.damage);
-            localStorage.setItem('val_maxAmmo', player.maxAmmo);
-            localStorage.setItem('val_ammoPool', player.ammoPool);
-            localStorage.setItem('val_healKits', player.healKits);
-            localStorage.setItem('val_hasShield', player.hasShield);
-            localStorage.setItem('val_skin', player.activeSkin);
-            localStorage.setItem('val_unlockedSkins', JSON.stringify(player.unlockedSkins));
-        }
-
-        function onKeyDown(e) {
-            const key = e.key.toLowerCase();
-            if (key === 'w') moveForward = true;
-            if (key === 's') moveBackward = true;
-            if (key === 'a') moveLeft = true;
-            if (key === 'd') moveRight = true;
-            if (key === 'r') reload();
-            if (key === '2' && gameRunning) {
-                if (player.healKits > 0 && player.health < player.maxHealth) {
-                    player.health = player.maxHealth;
-                    player.healKits--;
-                    saveGameData();
+            if (this.isDuel) {
+                // Mesafeyi koru, sağa-sola kay, düzenli ateş et
+                let mx = 0, mz = 0;
+                if (dist > 10) { mx = nx; mz = nz; }
+                else if (dist < 6) { mx = -nx; mz = -nz; }
+                this.strafeTimer -= dt;
+                if (this.strafeTimer <= 0) {
+                    this.strafeDir = Math.random() < 0.5 ? -1 : 1;
+                    this.strafeTimer = 0.8 + Math.random() * 1.2;
                 }
-            }
-        }
+                mx += -nz * this.strafeDir * 0.7;
+                mz += nx * this.strafeDir * 0.7;
+                moveWithCollision(p, mx * this.speed * dt, mz * this.speed * dt, 0.6);
 
-        function onKeyUp(e) {
-            const key = e.key.toLowerCase();
-            if (key === 'w') moveForward = false;
-            if (key === 's') moveBackward = false;
-            if (key === 'a') moveLeft = false;
-            if (key === 'd') moveRight = false;
-        }
-
-        function onMouseMove(e) {
-            if (document.pointerLockElement === document.body && gameRunning) {
-                cameraAngleY -= e.movementX * 0.003;
-                cameraAngleX -= e.movementY * 0.003;
-                cameraAngleX = Math.max(-Math.PI / 2.2, Math.min(Math.PI / 2.2, cameraAngleX));
-                
-                camera.rotation.order = 'YXZ';
-                camera.rotation.y = cameraAngleY;
-                camera.rotation.x = cameraAngleX;
-            }
-        }
-
-        function onWindowResize() {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        }
-
-        function shoot() {
-            if (player.ammo <= 0) return;
-            player.ammo--;
-
-            let bulletColor = 0x00ffcc;
-            if (player.activeSkin === 'prime') bulletColor = 0xcc66ff;
-            if (player.activeSkin === 'reaver') bulletColor = 0x9933ff;
-
-            const bulletGeo = new THREE.SphereGeometry(0.12, 8, 8);
-            const bulletMat = new THREE.MeshBasicMaterial({ color: bulletColor });
-            const bullet = new THREE.Mesh(bulletGeo, bulletMat);
-
-            bullet.position.copy(camera.position);
-
-            const direction = new THREE.Vector3();
-            camera.getWorldDirection(direction);
-
-            bullet.velocity = direction.multiplyScalar(1.4);
-            bullet.life = 100;
-            bullet.damage = player.damage;
-            bullet.colorHex = bulletColor;
-            bullet.isPlayer = true;
-
-            scene.add(bullet);
-            bullets.push(bullet);
-
-            if (weapon3DGroup) {
-                weapon3DGroup.position.z += 0.08;
-                setTimeout(() => { weapon3DGroup.position.z = 0; }, 80);
-            }
-        }
-
-        function reload() {
-            const need = player.maxAmmo - player.ammo;
-            const canReload = Math.min(need, player.ammoPool);
-            player.ammo += canReload;
-            player.ammoPool -= canReload;
-        }
-
-        // İnsansı Karakter / 1v1 Bot Sınıfı
-        class HumanoidEnemy {
-            constructor(x, z, isDuel = false) {
-                this.group = new THREE.Group();
-                this.isDuel = isDuel;
-
-                const bodyGeo = new THREE.BoxGeometry(0.9, 1.2, 0.5);
-                const mat = new THREE.MeshStandardMaterial({ color: isDuel ? 0xa855f7 : 0xdc2626, roughness: 0.4 });
-                const body = new THREE.Mesh(bodyGeo, mat);
-                body.position.y = 0.6;
-                body.castShadow = true;
-                this.group.add(body);
-
-                const headGeo = new THREE.BoxGeometry(0.5, 0.5, 0.5);
-                const headMat = new THREE.MeshStandardMaterial({ color: isDuel ? 0xc084fc : 0xf87171, roughness: 0.5 });
-                const head = new THREE.Mesh(headGeo, headMat);
-                head.position.y = 1.45;
-                head.castShadow = true;
-                this.group.add(head);
-
-                const armGeo = new THREE.BoxGeometry(0.3, 1.0, 0.3);
-                const leftArm = new THREE.Mesh(armGeo, mat);
-                leftArm.position.set(-0.6, 0.6, 0);
-                this.group.add(leftArm);
-
-                const rightArm = new THREE.Mesh(armGeo, mat);
-                rightArm.position.set(0.6, 0.6, 0);
-                this.group.add(rightArm);
-
-                this.group.position.set(x, 0, z);
-                scene.add(this.group);
-
-                // Eğer 1v1 düellosundaysa seninle aynı cana (100) sahip olur!
-                this.health = isDuel ? 100 : 30;
-                this.maxHealth = this.health;
-                this.speed = isDuel ? 0.04 : 0.035;
-                this.shootTimer = 0;
-            }
-
-            update() {
-                const dx = camera.position.x - this.group.position.x;
-                const dz = camera.position.z - this.group.position.z;
-                const dist = Math.sqrt(dx*dx + dz*dz);
-
+                this.shootTimer -= dt;
+                if (this.shootTimer <= 0) {
+                    this.shootTimer = CFG.botFireInterval;
+                    this.shootAtPlayer();
+                }
+            } else {
                 if (dist > 1.5) {
-                    this.group.position.x += (dx / dist) * this.speed;
-                    this.group.position.z += (dz / dist) * this.speed;
-                    this.group.lookAt(camera.position.x, this.group.position.y, camera.position.z);
+                    moveWithCollision(p, nx * this.speed * dt, nz * this.speed * dt, 0.6);
                 } else {
-                    let damageTaken = player.hasShield ? 1 : 2;
-                    player.health -= damageTaken;
-                    if (player.health <= 0) gameOver();
+                    damagePlayer(CFG.meleeDps * dt);   // saniye bazlı yakın temas hasarı
                 }
-
-                // 1v1 modundaysa bot da sana ateş eder!
-                if (this.isDuel) {
-                    this.shootTimer++;
-                    if (this.shootTimer > 60) { // Her 1 saniyede bir ateş eder
-                        this.shootTimer = 0;
-                        this.shootAtPlayer();
-                    }
-                }
-            }
-
-            shootAtPlayer() {
-                const bulletGeo = new THREE.SphereGeometry(0.12, 8, 8);
-                const bulletMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
-                const bullet = new THREE.Mesh(bulletGeo, bulletMat);
-
-                bullet.position.copy(this.group.position);
-                bullet.position.y += 1.0;
-
-                const targetDir = new THREE.Vector3().subVectors(camera.position, this.group.position).normalize();
-                bullet.velocity = targetDir.multiplyScalar(1.0);
-                bullet.life = 100;
-                bullet.damage = 10; // Düelloda bot mermisi daha etkilidir
-                bullet.isPlayer = false;
-
-                scene.add(bullet);
-                bullets.push(bullet);
-            }
-
-            destroy() {
-                scene.remove(this.group);
             }
         }
 
-        function createParticles(x, y, z, colorHex) {
-            for (let i = 0; i < 6; i++) {
-                const pGeo = new THREE.BoxGeometry(0.08, 0.08, 0.08);
-                const pMat = new THREE.MeshBasicMaterial({ color: colorHex });
-                const p = new THREE.Mesh(pGeo, pMat);
-                p.position.set(x, y, z);
-                
-                p.velocity = new THREE.Vector3(
-                    (Math.random() - 0.5) * 0.3,
-                    Math.random() * 0.3,
-                    (Math.random() - 0.5) * 0.3
-                );
-                p.life = 25;
-                scene.add(p);
-                particles.push(p);
-            }
+        shootAtPlayer() {
+            const origin = new THREE.Vector3(this.group.position.x, 1.4, this.group.position.z);
+            const target = new THREE.Vector3(camera.position.x, 1.3, camera.position.z);
+            const dir = target.sub(origin).normalize();
+            // küçük sapma: bot her atışı tam isabetle yapmasın
+            dir.x += (Math.random() - 0.5) * 0.03;
+            dir.y += (Math.random() - 0.5) * 0.03;
+            dir.z += (Math.random() - 0.5) * 0.03;
+            dir.normalize();
+            origin.addScaledVector(dir, 0.6);
+            spawnBullet(origin, dir, CFG.botBulletSpeed, CFG.botBulletDamage, 0xff3333, false, CFG.botBulletLife);
         }
 
-        function animate() {
-            requestAnimationFrame(animate);
+        // Mermi noktası gövdeye/kafaya değiyor mu? (kafa vuruşu 2x hasar)
+        hitTest(pt) {
+            const p = this.group.position;
+            const h = Math.hypot(pt.x - p.x, pt.z - p.z);
+            if (pt.y > 1.2 && pt.y < 1.75 && h < 0.35) return 'head';
+            if (pt.y >= 0 && pt.y <= 1.2 && h < 0.7) return 'body';
+            return null;
+        }
 
-            if (gameRunning) {
-                let dir = new THREE.Vector3();
-                camera.getWorldDirection(dir);
-                dir.y = 0;
-                dir.normalize();
+        destroy() { scene.remove(this.group); }
+    }
 
-                let sideDir = new THREE.Vector3(-dir.z, 0, dir.x);
-                let nextX = camera.position.x;
-                let nextZ = camera.position.z;
+    function hitsPlayer(pt) {
+        const h = Math.hypot(pt.x - camera.position.x, pt.z - camera.position.z);
+        return h < 0.45 && pt.y > 0 && pt.y < 1.85;
+    }
 
-                if (moveForward) { nextX += dir.x * player.speed; nextZ += dir.z * player.speed; }
-                if (moveBackward) { nextX -= dir.x * player.speed; nextZ -= dir.z * player.speed; }
-                if (moveLeft) { nextX += sideDir.x * player.speed; nextZ += sideDir.z * player.speed; }
-                if (moveRight) { nextX -= sideDir.x * player.speed; nextZ -= sideDir.z * player.speed; }
+    function findSpawnPoint() {
+        for (let i = 0; i < 20; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const radius = 18 + Math.random() * 10;
+            const x = camera.position.x + Math.cos(angle) * radius;
+            const z = camera.position.z + Math.sin(angle) * radius;
+            if (Math.abs(x) < 42 && Math.abs(z) < 42 && !collides(x, z, 1.0)) return { x, z };
+        }
+        return null;
+    }
 
-                let canMove = true;
-                for (let wall of walls) {
-                    if (nextX > wall.x - wall.w/2 - 0.6 && nextX < wall.x + wall.w/2 + 0.6 &&
-                        nextZ > wall.z - wall.d/2 - 0.6 && nextZ < wall.z + wall.d/2 + 0.6) {
-                        canMove = false;
+    function onEnemyKilled(e) {
+        e.destroy();
+        if (e.isDuel) {
+            duelBot = null;
+            pendingDuelWin = true;
+            return;
+        }
+        const idx = enemies.indexOf(e);
+        if (idx !== -1) enemies.splice(idx, 1);
+        player.score += 100;
+        player.kills++;
+        player.gold += CFG.killGold;
+        player.goldEarned += CFG.killGold;
+        player.ammoPool += CFG.killAmmo;
+        saveGameData();
+    }
+
+    function createParticles(pos, colorHex) {
+        const mat = basicMat(colorHex);
+        for (let i = 0; i < 6; i++) {
+            const p = new THREE.Mesh(GEO.particle, mat);
+            p.position.copy(pos);
+            p.velocity = new THREE.Vector3(
+                (Math.random() - 0.5) * 18,
+                Math.random() * 18,
+                (Math.random() - 0.5) * 18
+            );
+            p.life = 0.4;
+            scene.add(p);
+            particles.push(p);
+        }
+    }
+
+    // =====================================================================
+    //  GÜNCELLEMELER (dt = saniye)
+    // =====================================================================
+    function updatePlayer(dt) {
+        const f = new THREE.Vector3();
+        camera.getWorldDirection(f);
+        f.y = 0; f.normalize();
+        const rx = -f.z, rz = f.x;      // kameranın sağ yönü
+
+        let mx = 0, mz = 0;
+        if (keys.forward) { mx += f.x; mz += f.z; }
+        if (keys.back) { mx -= f.x; mz -= f.z; }
+        if (keys.right) { mx += rx; mz += rz; }
+        if (keys.left) { mx -= rx; mz -= rz; }
+        const len = Math.hypot(mx, mz);
+        if (len > 0) {
+            const s = CFG.playerSpeed * dt / len;   // çapraz giderken hız artmaz
+            moveWithCollision(camera.position, mx * s, mz * s, CFG.playerRadius);
+        }
+
+        if (player.fireCooldown > 0) player.fireCooldown -= dt;
+        if (player.reloading) {
+            player.reloadTimer -= dt;
+            if (player.reloadTimer <= 0) finishReload();
+        }
+        if (firing) tryShoot();
+
+        // Silah geri tepmesi ve şarjör animasyonu
+        weaponKick = Math.max(0, weaponKick - dt * 0.8);
+        weapon3DGroup.position.z = weaponKick;
+        if (player.reloading) {
+            const prog = 1 - player.reloadTimer / CFG.reloadTime;
+            weapon3DGroup.position.y = -0.18 * Math.sin(Math.PI * prog);
+            weapon3DGroup.rotation.x = -0.5 * Math.sin(Math.PI * prog);
+        } else {
+            weapon3DGroup.position.y = 0;
+            weapon3DGroup.rotation.x = 0;
+        }
+    }
+
+    function updateBullets(dt) {
+        for (let i = bullets.length - 1; i >= 0; i--) {
+            const b = bullets[i];
+            b.life -= dt;
+            let remove = b.life <= 0;
+
+            // Hızlı mermi hedefin içinden atlamasın diye hareketi küçük adımlara böl
+            const dist = b.velocity.length() * dt;
+            const steps = Math.max(1, Math.ceil(dist / 0.2));
+            tmpVec.copy(b.velocity).multiplyScalar(dt / steps);
+
+            for (let s = 0; s < steps && !remove; s++) {
+                b.position.add(tmpVec);
+
+                if (b.position.y < 0 || b.position.y > 10 || pointInWall(b.position)) {
+                    createParticles(b.position, 0xb45309);
+                    remove = true;
+                    break;
+                }
+
+                if (b.isPlayer) {
+                    const targets = isDuelMode ? (duelBot ? [duelBot] : []) : enemies;
+                    for (const e of targets) {
+                        const hit = e.hitTest(b.position);
+                        if (!hit) continue;
+                        const dmg = hit === 'head' ? b.damage * 2 : b.damage;
+                        e.health -= dmg;
+                        createParticles(b.position, b.colorHex);
+                        flashClass('crosshair', hit === 'head' ? 'head' : 'hit', 120);
+                        if (e.health <= 0) onEnemyKilled(e);
+                        remove = true;
                         break;
                     }
+                } else if (hitsPlayer(b.position)) {
+                    damagePlayer(b.damage);
+                    remove = true;
                 }
-
-                if (canMove) {
-                    camera.position.x = nextX;
-                    camera.position.z = nextZ;
-                }
-
-                for (let i = bullets.length - 1; i >= 0; i--) {
-                    let b = bullets[i];
-                    b.position.add(b.velocity);
-                    b.life--;
-
-                    let hitWall = false;
-                    for (let wall of walls) {
-                        if (b.position.x > wall.x - wall.w/2 && b.position.x < wall.x + wall.w/2 &&
-                            b.position.z > wall.z - wall.d/2 && b.position.z < wall.z + wall.d/2) {
-                            hitWall = true;
-                            createParticles(b.position.x, b.position.y, b.position.z, 0xb45309);
-                            break;
-                        }
-                    }
-
-                    if (hitWall || b.life <= 0) {
-                        scene.remove(b);
-                        bullets.splice(i, 1);
-                        continue;
-                    }
-
-                    // Eğer mermi oyuncudan çıktıysa düşmanlara çarpar
-                    if (b.isPlayer) {
-                        if (isDuelMode && duelBot) {
-                            if (b.position.distanceTo(duelBot.group.position) < 1.0) {
-                                duelBot.health -= b.damage;
-                                createParticles(b.position.x, b.position.y, b.position.z, b.colorHex);
-                                scene.remove(b);
-                                bullets.splice(i, 1);
-
-                                if (duelBot.health <= 0) {
-                                    duelBot.destroy();
-                                    duelBot = null;
-                                    isDuelMode = false;
-                                    player.score += 500;
-                                    player.gold += 150;
-                                    player.kills++;
-                                    saveGameData();
-                                    alert("Tebrikler! 1v1 Düelloyu Kazandın! (+150 Altın)");
-                                    restartGame();
-                                }
-                                continue;
-                            }
-                        }
-
-                        for (let j = enemies.length - 1; j >= 0; j--) {
-                            let e = enemies[j];
-                            if (b.position.distanceTo(e.group.position) < 1.0) {
-                                e.health -= b.damage;
-                                createParticles(b.position.x, b.position.y, b.position.z, b.colorHex);
-                                scene.remove(b);
-                                bullets.splice(i, 1);
-
-                                if (e.health <= 0) {
-                                    e.destroy();
-                                    enemies.splice(j, 1);
-                                    player.score += 100;
-                                    player.kills++;
-                                    player.gold += 25;
-                                    player.ammoPool += 20;
-                                    saveGameData();
-                                }
-                                break;
-                            }
-                        }
-                    } else {
-                        // Botun mermisi oyuncuya çarparsa
-                        if (b.position.distanceTo(camera.position) < 1.0) {
-                            let damageTaken = player.hasShield ? 5 : 10;
-                            player.health -= damageTaken;
-                            scene.remove(b);
-                            bullets.splice(i, 1);
-                            if (player.health <= 0) gameOver();
-                        }
-                    }
-                }
-
-                for (let i = particles.length - 1; i >= 0; i--) {
-                    let p = particles[i];
-                    p.position.add(p.velocity);
-                    p.life--;
-                    if (p.life <= 0) {
-                        scene.remove(p);
-                        particles.splice(i, 1);
-                    }
-                }
-
-                if (isDuelMode && duelBot) {
-                    duelBot.update();
-                } else {
-                    enemies.forEach(e => e.update());
-                    if (Math.random() < 0.025 && enemies.length < 12) {
-                        let angle = Math.random() * Math.PI * 2;
-                        let radius = 25;
-                        let ex = camera.position.x + Math.cos(angle) * radius;
-                        let ez = camera.position.z + Math.sin(angle) * radius;
-                        enemies.push(new HumanoidEnemy(ex, ez, false));
-                    }
-                }
-
-                document.getElementById('hpDisplay').textContent = Math.max(0, Math.floor(player.health));
-                document.getElementById('ammoDisplay').textContent = player.ammo;
-                document.getElementById('ammoPoolDisplay').textContent = player.ammoPool;
-                document.getElementById('scoreDisplay').textContent = player.score;
-                document.getElementById('killsDisplay').textContent = player.kills;
-                document.getElementById('goldDisplay').textContent = player.gold;
-                document.getElementById('healKitsDisplay').textContent = player.healKits;
-                document.getElementById('shieldDisplay').textContent = player.hasShield ? 'AKTİF' : 'YOK';
             }
 
-            renderer.render(scene, camera);
-        }
-
-        // 1v1 Düello Başlatma
-        function start1v1Duel() {
-            document.getElementById('gameOverScreen').classList.remove('show');
-            restartGame();
-            isDuelMode = true;
-            // Karşında seninle aynı özelliklere sahip özel bir 1v1 botu doğar
-            duelBot = new HumanoidEnemy(camera.position.x + 5, camera.position.z - 5, true);
-        }
-
-        function openShop() {
-            document.getElementById('gameOverScreen').classList.remove('show');
-            document.getElementById('shopModal').classList.add('show');
-            updateShopModal();
-        }
-
-        function closeShop() {
-            document.getElementById('shopModal').classList.remove('show');
-            document.getElementById('gameOverScreen').classList.add('show');
-        }
-
-        function updateShopModal() {
-            document.getElementById('modalGold').textContent = player.gold;
-            document.getElementById('modalDmg').textContent = player.damage;
-            document.getElementById('modalHeal').textContent = player.healKits;
-            document.getElementById('modalShield').textContent = player.hasShield ? 'AKTİF' : 'YOK';
-            
-            document.getElementById('primeStatus').textContent = player.unlockedSkins.prime ? 'SAHİPSİNİZ' : 'KİLİTLİ';
-            document.getElementById('reaverStatus').textContent = player.unlockedSkins.reaver ? 'SAHİPSİNİZ' : 'KİLİTLİ';
-            document.getElementById('skinSelect').value = player.activeSkin;
-        }
-
-        function buyDamage() {
-            if (player.gold >= 100) {
-                player.gold -= 100;
-                player.damage += 15;
-                saveGameData();
-                updateShopModal();
-            } else { alert("Yeterli altının yok!"); }
-        }
-
-        function buyAmmo() {
-            if (player.gold >= 75) {
-                player.gold -= 75;
-                player.maxAmmo += 15;
-                player.ammoPool += 45;
-                saveGameData();
-                updateShopModal();
-            } else { alert("Yeterli altının yok!"); }
-        }
-
-        function buyHealKit() {
-            if (player.gold >= 50) {
-                player.gold -= 50;
-                player.healKits++;
-                saveGameData();
-                updateShopModal();
-            } else { alert("Yeterli altının yok!"); }
-        }
-
-        function buyShield() {
-            if (player.hasShield) { alert("Zaten kalkanın var!"); return; }
-            if (player.gold >= 150) {
-                player.gold -= 150;
-                player.hasShield = true;
-                saveGameData();
-                updateShopModal();
-            } else { alert("Yeterli altının yok! (150 Altın)"); }
-        }
-
-        function buySkin(skinName) {
-            if (player.unlockedSkins[skinName]) { alert("Bu skine zaten sahipsin!"); return; }
-            if (player.gold >= 300) {
-                player.gold -= 300;
-                player.unlockedSkins[skinName] = true;
-                player.activeSkin = skinName;
-                updateWeaponSkinColors();
-                saveGameData();
-                updateShopModal();
-                alert("Skin açıldı ve kuşanıldı!");
-            } else { alert("Yeterli altının yok! (300 Altın)"); }
-        }
-
-        function changeSkin(skinName) {
-            if (player.unlockedSkins[skinName]) {
-                player.activeSkin = skinName;
-                updateWeaponSkinColors();
-                saveGameData();
-            } else {
-                alert("Önce bu skini satın almalısın!");
-                document.getElementById('skinSelect').value = player.activeSkin;
+            if (remove) {
+                scene.remove(b);
+                bullets.splice(i, 1);
             }
         }
+    }
 
-        function gameOver() {
-            gameRunning = false;
-            document.exitPointerLock();
-            document.getElementById('finalScore').textContent = player.score;
-            document.getElementById('finalKills').textContent = player.kills;
-            document.getElementById('finalGold').textContent = player.gold;
-            document.getElementById('gameOverScreen').classList.add('show');
+    function updateParticles(dt) {
+        for (let i = particles.length - 1; i >= 0; i--) {
+            const p = particles[i];
+            p.velocity.y -= 30 * dt;
+            p.position.addScaledVector(p.velocity, dt);
+            p.life -= dt;
+            if (p.life <= 0) { scene.remove(p); particles.splice(i, 1); }
+        }
+    }
+
+    function updateEnemies(dt) {
+        if (isDuelMode) {
+            if (duelBot) duelBot.update(dt);
+            return;
+        }
+        for (let i = 0; i < enemies.length && state === 'playing'; i++) enemies[i].update(dt);
+        if (enemies.length < CFG.maxEnemies && Math.random() < CFG.spawnPerSec * dt) {
+            const sp = findSpawnPoint();
+            if (sp) enemies.push(new HumanoidEnemy(sp.x, sp.z, false));
+        }
+    }
+
+    function updateHUD() {
+        setHud('hpDisplay', Math.max(0, Math.ceil(player.health)));
+        setHud('shieldDisplay', player.armor > 0 ? String(Math.ceil(player.armor)) : (player.hasShield ? 'HAZIR' : 'YOK'));
+        setHud('ammoDisplay', player.ammo);
+        setHud('ammoPoolDisplay', player.ammoPool);
+        setHud('reloadDisplay', player.reloading ? 'ŞARJÖR DEĞİŞİYOR...' : (player.ammo === 0 && player.ammoPool === 0 ? 'MERMİ BİTTİ' : ''));
+        setHud('scoreDisplay', player.score);
+        setHud('killsDisplay', player.kills);
+        setHud('goldDisplay', player.gold);
+        setHud('healKitsDisplay', player.healKits);
+    }
+
+    function animate() {
+        requestAnimationFrame(animate);
+        const dt = Math.min(clock.getDelta(), 0.05);   // sekme değişiminde dev sıçramaları önle
+
+        if (state === 'playing') {
+            updatePlayer(dt);
+            updateBullets(dt);
+            if (pendingDuelWin) {
+                pendingDuelWin = false;
+                player.score += 500;
+                player.kills++;
+                player.gold += CFG.duelGold;
+                player.goldEarned += CFG.duelGold;
+                saveGameData();
+                endRun(true);
+            }
+            if (state === 'playing') updateEnemies(dt);
+            updateParticles(dt);
+            updateHUD();
         }
 
-        function restartGame() {
+        renderer.render(scene, camera);
+    }
+
+    // =====================================================================
+    //  MAĞAZA
+    // =====================================================================
+    function openShop(from) {
+        shopReturn = from;
+        state = 'shop';
+        showScreen('shopModal');
+        updateShopModal();
+    }
+
+    function closeShop() {
+        const screen = { menu: 'menuScreen', paused: 'pauseScreen', over: 'gameOverScreen' }[shopReturn] || 'menuScreen';
+        state = shopReturn;
+        showScreen(screen);
+        updateHUD();
+    }
+
+    const inRun = () => shopReturn === 'paused';
+
+    function shieldStatusText() {
+        if (inRun() && player.armor > 0) return `AKTİF (${Math.ceil(player.armor)})`;
+        if (player.hasShield) return 'SONRAKİ ELDE HAZIR';
+        return 'YOK';
+    }
+
+    function updateShopModal() {
+        $('modalGold').textContent = player.gold;
+        $('modalDmg').textContent = `${player.damage} / ${CFG.maxDamage}`;
+        $('modalMag').textContent = `${player.maxAmmo} / ${CFG.maxMag}`;
+        $('modalHeal').textContent = `${player.healKits} / ${CFG.maxHealKits}`;
+        $('modalShield').textContent = shieldStatusText();
+        $('primeStatus').textContent = player.unlockedSkins.prime ? 'SAHİPSİNİZ' : 'KİLİTLİ';
+        $('reaverStatus').textContent = player.unlockedSkins.reaver ? 'SAHİPSİNİZ' : 'KİLİTLİ';
+        $('skinSelect').value = player.activeSkin;
+    }
+
+    function spend(cost) {
+        if (player.gold < cost) { showToast(`Yeterli altının yok! (${cost} Altın)`); return false; }
+        player.gold -= cost;
+        return true;
+    }
+
+    function afterPurchase(msg) {
+        saveGameData();
+        updateShopModal();
+        updateHUD();
+        if (msg) showToast(msg);
+    }
+
+    function buyDamage() {
+        if (player.damage >= CFG.maxDamage) { showToast('Hasar maksimum seviyede'); return; }
+        if (!spend(CFG.damageCost)) return;
+        player.damage = Math.min(CFG.maxDamage, player.damage + CFG.damageStep);
+        afterPurchase('Hasar artırıldı');
+    }
+
+    function buyAmmo() {
+        if (player.maxAmmo >= CFG.maxMag) { showToast('Şarjör maksimum kapasitede'); return; }
+        if (!spend(CFG.magCost)) return;
+        player.maxAmmo = Math.min(CFG.maxMag, player.maxAmmo + CFG.magStep);
+        afterPurchase('Şarjör kapasitesi artırıldı');
+    }
+
+    function buyHealKit() {
+        if (player.healKits >= CFG.maxHealKits) { showToast('En fazla ' + CFG.maxHealKits + ' can kiti taşıyabilirsin'); return; }
+        if (!spend(CFG.healCost)) return;
+        player.healKits++;
+        afterPurchase('Can kiti alındı');
+    }
+
+    function buyShield() {
+        if (inRun()) {
+            if (player.armor >= CFG.armorAmount) { showToast('Kalkanın zaten dolu'); return; }
+            if (!spend(CFG.shieldCost)) return;
+            player.armor = CFG.armorAmount;
+            afterPurchase('Kalkan kuşanıldı (+50)');
+        } else {
+            if (player.hasShield) { showToast('Sonraki el için kalkanın zaten hazır'); return; }
+            if (!spend(CFG.shieldCost)) return;
+            player.hasShield = true;
+            afterPurchase('Kalkan sonraki elin başında kuşanılacak');
+        }
+    }
+
+    function buySkin(skinName) {
+        if (!SKINS.includes(skinName)) return;
+        if (player.unlockedSkins[skinName]) { showToast('Bu skine zaten sahipsin'); return; }
+        if (!spend(CFG.skinCost)) return;
+        player.unlockedSkins[skinName] = true;
+        player.activeSkin = skinName;
+        updateWeaponSkinColors();
+        afterPurchase('Skin açıldı ve kuşanıldı!');
+    }
+
+    function changeSkin(skinName) {
+        if (SKINS.includes(skinName) && player.unlockedSkins[skinName]) {
+            player.activeSkin = skinName;
+            updateWeaponSkinColors();
             saveGameData();
-            enemies.forEach(e => e.destroy());
-            enemies = [];
-            if (duelBot) { duelBot.destroy(); duelBot = null; }
-            bullets.forEach(b => scene.remove(b));
-            bullets = [];
-            
-            player.health = 100;
-            player.ammo = player.maxAmmo;
-            player.score = 0;
-            player.kills = 0;
-            isDuelMode = false;
-            
-            camera.position.set(0, 1.6, 10);
-            cameraAngleY = 0;
-            cameraAngleX = 0;
-            
-            document.getElementById('gameOverScreen').classList.remove('show');
-            document.getElementById('shopModal').classList.remove('show');
-            gameRunning = true;
+        } else {
+            showToast('Önce bu skini satın almalısın');
+            $('skinSelect').value = player.activeSkin;
         }
+    }
 
-        init();
+    init();
     </script>
 </body>
 </html>
