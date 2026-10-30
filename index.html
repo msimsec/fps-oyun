@@ -106,6 +106,23 @@
         .shop-open-btn:hover { background: #ffcc00; box-shadow: 0 0 15px rgba(255, 170, 0, 0.8); }
         .ghost-btn { background: transparent; color: #00d4ff; border: 1px solid #00d4ff; }
         .ghost-btn:hover { background: rgba(0, 212, 255, 0.15); }
+        .settings-btn { background: #475569; color: #ffffff; }
+        .settings-btn:hover { background: #64748b; box-shadow: 0 0 15px rgba(148, 163, 184, 0.8); }
+
+        /* Ayarlar */
+        .settings-group { margin-bottom: 22px; font-family: 'Courier New', monospace; }
+        .settings-label { color: #00d4ff; font-size: 18px; font-weight: bold; margin-bottom: 10px; }
+        .seg { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+        .seg-btn {
+            padding: 10px 22px; font-size: 15px; font-weight: bold; cursor: pointer;
+            font-family: 'Courier New', monospace; border-radius: 5px;
+            background: transparent; color: #cbd5e1; border: 2px solid #475569; transition: 0.2s;
+        }
+        .seg-btn:hover { border-color: #94a3b8; color: #ffffff; }
+        .seg-btn.active.easy { background: #22c55e; border-color: #22c55e; color: #0b0f19; }
+        .seg-btn.active.normal { background: #00d4ff; border-color: #00d4ff; color: #0b0f19; }
+        .seg-btn.active.hard { background: #ef4444; border-color: #ef4444; color: #ffffff; }
+        .settings-desc { color: #94a3b8; font-size: 13px; margin-top: 8px; min-height: 16px; }
 
         /* Mağaza */
         .shop-modal {
@@ -190,7 +207,9 @@
             <button class="btn restart-btn" onclick="startRun(false)">OYUNA BAŞLA</button>
             <button class="btn duel-btn" onclick="startRun(true)">1v1 DÜELLO ⚔️</button>
             <button class="btn shop-open-btn" onclick="openShop('menu')">MAĞAZA 🛒</button>
+            <button class="btn settings-btn" onclick="openSettings('menu')">AYARLAR ⚙️</button>
         </div>
+        <div class="note" id="difficultyInfo" style="margin-top: 18px;"></div>
     </div>
 
     <!-- Duraklatma -->
@@ -200,6 +219,7 @@
         <div class="menu-buttons">
             <button class="btn restart-btn" onclick="resumeGame()">DEVAM ET</button>
             <button class="btn shop-open-btn" onclick="openShop('paused')">MAĞAZA 🛒</button>
+            <button class="btn settings-btn" onclick="openSettings('paused')">AYARLAR ⚙️</button>
             <button class="btn ghost-btn" onclick="goToMenu()">ANA MENÜ</button>
         </div>
     </div>
@@ -211,13 +231,40 @@
             <div>Skor: <span id="finalScore">0</span> | Vurulan: <span id="finalKills">0</span></div>
             <div>Bu elde kazanılan altın: <span id="finalGold">0</span> 🪙</div>
             <div>Toplam altın: <span id="finalTotalGold">0</span> 🪙</div>
+            <div>Zorluk: <span id="finalDifficulty">-</span></div>
         </div>
         <div class="menu-buttons">
             <button class="btn restart-btn" onclick="startRun(false)">YENİDEN BAŞLA</button>
             <button class="btn duel-btn" onclick="startRun(true)">1v1 DÜELLO AT ⚔️</button>
             <button class="btn shop-open-btn" onclick="openShop('over')">SİLAH MAĞAZASI 🛒</button>
+            <button class="btn settings-btn" onclick="openSettings('over')">AYARLAR ⚙️</button>
             <button class="btn ghost-btn" onclick="goToMenu()">ANA MENÜ</button>
         </div>
+    </div>
+
+    <!-- Ayarlar -->
+    <div class="overlay" id="settingsScreen">
+        <h1 class="cyan">AYARLAR ⚙️</h1>
+        <div class="settings-group">
+            <div class="settings-label">Oyun Zorluğu</div>
+            <div class="seg" id="gameDiffButtons">
+                <button class="seg-btn easy" data-value="easy" onclick="setDifficulty('game', 'easy')">KOLAY</button>
+                <button class="seg-btn normal" data-value="normal" onclick="setDifficulty('game', 'normal')">ORTA</button>
+                <button class="seg-btn hard" data-value="hard" onclick="setDifficulty('game', 'hard')">ZOR</button>
+            </div>
+            <div class="settings-desc" id="gameDiffDesc"></div>
+        </div>
+        <div class="settings-group">
+            <div class="settings-label">1v1 Düello Zorluğu</div>
+            <div class="seg" id="duelDiffButtons">
+                <button class="seg-btn easy" data-value="easy" onclick="setDifficulty('duel', 'easy')">KOLAY</button>
+                <button class="seg-btn normal" data-value="normal" onclick="setDifficulty('duel', 'normal')">ORTA</button>
+                <button class="seg-btn hard" data-value="hard" onclick="setDifficulty('duel', 'hard')">ZOR</button>
+            </div>
+            <div class="settings-desc" id="duelDiffDesc"></div>
+        </div>
+        <div class="note" id="settingsNote"></div>
+        <button class="back-btn" onclick="closeSettings()">Geri Dön</button>
     </div>
 
     <!-- Mağaza -->
@@ -284,18 +331,66 @@
         fireInterval: 0.1,            // ~10 atış/sn (otomatik tüfek)
         reloadTime: 2.0,
         bulletSpeed: 84, bulletLife: 1.2,
-        botBulletSpeed: 45, botBulletLife: 2.0, botBulletDamage: 8, botFireInterval: 0.4,
-        botFirstShot: 0.8, botSpread: 0.05,
-        enemyHealth: 30, enemySpeed: 2.1, duelHealth: 400, duelSpeed: 2.6,
-        meleeDps: 30,                 // yakın temas hasarı (saniyede)
+        botBulletSpeed: 45, botBulletLife: 2.0, enemyRange: 25,
         armorAmount: 50,
         baseDamage: 15, damageStep: 5, maxDamage: 35, damageCost: 100,
         baseMag: 30, magStep: 5, maxMag: 60, magCost: 75,
         startPool: 90, ammoRegen: 4,  // yedek mermi azken saniyede dolan mermi (kilitlenmeyi önler)
         healCost: 50, maxHealKits: 9, shieldCost: 150, skinCost: 300,
-        maxEnemies: 12, spawnPerSec: 1.5, killGold: 25, killAmmo: 20, duelGold: 150
+        killAmmo: 20
     };
     const SKINS = ['classic', 'prime', 'reaver'];
+
+    // =====================================================================
+    //  ZORLUK SEVİYELERİ — her elin başında CFG'ye uygulanır ("Orta" eski varsayılanlar)
+    // =====================================================================
+    const DIFFICULTIES = ['easy', 'normal', 'hard'];
+    const DIFF_LABELS = { easy: 'Kolay', normal: 'Orta', hard: 'Zor' };
+    const GAME_DIFF = {
+        easy: {
+            enemyHealth: 20, enemySpeed: 1.7, maxEnemies: 8, spawnPerSec: 1.0, meleeDps: 20,
+            enemyFireMin: 2.5, enemyFireMax: 4.0, enemyBulletDamage: 3, enemySpread: 0.12, killGold: 20
+        },
+        normal: {
+            enemyHealth: 30, enemySpeed: 2.1, maxEnemies: 12, spawnPerSec: 1.5, meleeDps: 30,
+            enemyFireMin: 1.8, enemyFireMax: 3.0, enemyBulletDamage: 4, enemySpread: 0.08, killGold: 25
+        },
+        hard: {
+            enemyHealth: 45, enemySpeed: 2.7, maxEnemies: 16, spawnPerSec: 2.2, meleeDps: 40,
+            enemyFireMin: 1.2, enemyFireMax: 2.2, enemyBulletDamage: 6, enemySpread: 0.05, killGold: 35
+        }
+    };
+    const DUEL_DIFF = {
+        easy: {
+            duelHealth: 250, duelSpeed: 2.2, botFireInterval: 0.6, botBulletDamage: 6,
+            botSpread: 0.08, botFirstShot: 1.2, duelGold: 75
+        },
+        normal: {
+            duelHealth: 400, duelSpeed: 2.6, botFireInterval: 0.4, botBulletDamage: 8,
+            botSpread: 0.05, botFirstShot: 0.8, duelGold: 150
+        },
+        hard: {
+            duelHealth: 600, duelSpeed: 3.2, botFireInterval: 0.3, botBulletDamage: 10,
+            botSpread: 0.03, botFirstShot: 0.5, duelGold: 300
+        }
+    };
+
+    const SETTINGS_KEY = 'fps_settings_v1';
+    const settings = (() => {
+        let o = null;
+        try { o = JSON.parse(localStorage.getItem(SETTINGS_KEY)); } catch (e) {}
+        return {
+            game: o && DIFFICULTIES.includes(o.game) ? o.game : 'normal',
+            duel: o && DIFFICULTIES.includes(o.duel) ? o.duel : 'normal'
+        };
+    })();
+    function saveSettings() {
+        try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); } catch (e) {}
+    }
+    function applyDifficulty() {
+        Object.assign(CFG, GAME_DIFF[settings.game], DUEL_DIFF[settings.duel]);
+    }
+    applyDifficulty();
 
     // =====================================================================
     //  KAYIT (localStorage) — güvenli okuma, doğrulama, sağlama toplamı
@@ -408,7 +503,7 @@
         });
     }
 
-    // state: 'menu' | 'starting' | 'playing' | 'paused' | 'shop' | 'over'
+    // state: 'menu' | 'starting' | 'playing' | 'paused' | 'shop' | 'settings' | 'over'
     let state = 'menu';
     let shopReturn = 'menu';
     let isDuelMode = false;
@@ -501,7 +596,7 @@
     }
 
     function hideAllScreens() {
-        ['menuScreen', 'pauseScreen', 'gameOverScreen', 'shopModal'].forEach(id => $(id).classList.remove('show'));
+        ['menuScreen', 'pauseScreen', 'gameOverScreen', 'shopModal', 'settingsScreen'].forEach(id => $(id).classList.remove('show'));
     }
     function showScreen(id) { hideAllScreens(); $(id).classList.add('show'); }
 
@@ -744,6 +839,7 @@
     //  OYUN AKIŞI
     // =====================================================================
     function resetWorld(duel) {
+        applyDifficulty();   // ayar değişiklikleri yeni elde geçerli olur
         enemies.forEach(e => e.destroy()); enemies = [];
         if (duelBot) { duelBot.destroy(); duelBot = null; }
         bullets.forEach(b => scene.remove(b)); bullets = [];
@@ -822,6 +918,8 @@
         $('finalKills').textContent = player.kills;
         $('finalGold').textContent = player.goldEarned;
         $('finalTotalGold').textContent = player.gold;
+        $('finalDifficulty').textContent = (isDuelMode ? 'Düello ' : '') +
+            DIFF_LABELS[isDuelMode ? settings.duel : settings.game];
         showScreen('gameOverScreen');
         if (document.pointerLockElement) document.exitPointerLock();
     }
@@ -921,7 +1019,8 @@
             this.health = isDuel ? CFG.duelHealth : CFG.enemyHealth;
             this.maxHealth = this.health;
             this.speed = isDuel ? CFG.duelSpeed : CFG.enemySpeed;
-            this.shootTimer = CFG.botFirstShot;   // ilk atıştan önce kısa bir süre
+            // ilk atıştan önce kısa bir süre (normal düşmanlar aynı anda ateş etmesin diye rastgele)
+            this.shootTimer = isDuel ? CFG.botFirstShot : this.nextFireDelay();
             this.strafeDir = 1;
             this.strafeTimer = 0;
         }
@@ -951,7 +1050,7 @@
                 this.shootTimer -= dt;
                 if (this.shootTimer <= 0) {
                     this.shootTimer = CFG.botFireInterval;
-                    this.shootAtPlayer();
+                    this.shootAtPlayer(CFG.botBulletDamage, CFG.botSpread);
                 }
             } else {
                 if (dist > 1.5) {
@@ -966,20 +1065,45 @@
                 } else {
                     damagePlayer(CFG.meleeDps * dt);   // saniye bazlı yakın temas hasarı
                 }
+
+                this.shootTimer -= dt;
+                if (this.shootTimer <= 0) {
+                    this.shootTimer = this.nextFireDelay();
+                    if (dist > 1.5 && dist < CFG.enemyRange && this.canSeePlayer()) {
+                        this.shootAtPlayer(CFG.enemyBulletDamage, CFG.enemySpread);
+                    }
+                }
             }
         }
 
-        shootAtPlayer() {
+        nextFireDelay() {
+            return CFG.enemyFireMin + Math.random() * (CFG.enemyFireMax - CFG.enemyFireMin);
+        }
+
+        // Arada duvar varsa ateş etmez (mermi boşa duvara gitmesin)
+        canSeePlayer() {
+            const from = new THREE.Vector3(this.group.position.x, 1.4 * CFG.enemyScale, this.group.position.z);
+            const to = camera.position;
+            const steps = Math.ceil(from.distanceTo(to) / 0.5);
+            const pt = new THREE.Vector3();
+            for (let i = 1; i < steps; i++) {
+                pt.lerpVectors(from, to, i / steps);
+                if (pointInWall(pt)) return false;
+            }
+            return true;
+        }
+
+        shootAtPlayer(damage, spread) {
             const origin = new THREE.Vector3(this.group.position.x, 1.4 * CFG.enemyScale, this.group.position.z);
             const target = new THREE.Vector3(camera.position.x, CFG.eyeHeight - 0.3, camera.position.z);
             const dir = target.sub(origin).normalize();
             // küçük sapma: bot her atışı tam isabetle yapmasın
-            dir.x += (Math.random() - 0.5) * CFG.botSpread;
-            dir.y += (Math.random() - 0.5) * CFG.botSpread;
-            dir.z += (Math.random() - 0.5) * CFG.botSpread;
+            dir.x += (Math.random() - 0.5) * spread;
+            dir.y += (Math.random() - 0.5) * spread;
+            dir.z += (Math.random() - 0.5) * spread;
             dir.normalize();
             origin.addScaledVector(dir, 0.6);
-            spawnBullet(origin, dir, CFG.botBulletSpeed, CFG.botBulletDamage, 0xff3333, false, CFG.botBulletLife);
+            spawnBullet(origin, dir, CFG.botBulletSpeed, damage, 0xff3333, false, CFG.botBulletLife);
         }
 
         // Mermi noktası gövdeye/kafaya değiyor mu? (kafa vuruşu 2x hasar)
@@ -1204,11 +1328,51 @@
         updateShopModal();
     }
 
-    function closeShop() {
-        const screen = { menu: 'menuScreen', paused: 'pauseScreen', over: 'gameOverScreen' }[shopReturn] || 'menuScreen';
-        state = shopReturn;
+    function returnTo(from) {
+        const screen = { menu: 'menuScreen', paused: 'pauseScreen', over: 'gameOverScreen' }[from] || 'menuScreen';
+        state = from;
         showScreen(screen);
         updateHUD();
+    }
+
+    function closeShop() { returnTo(shopReturn); }
+
+    // =====================================================================
+    //  AYARLAR
+    // =====================================================================
+    let settingsReturn = 'menu';
+
+    function openSettings(from) {
+        settingsReturn = from;
+        state = 'settings';
+        showScreen('settingsScreen');
+        $('settingsNote').textContent = from === 'paused' ? 'Değişiklikler bir sonraki elde geçerli olur.' : '';
+        updateSettingsScreen();
+    }
+
+    function closeSettings() { returnTo(settingsReturn); }
+
+    function setDifficulty(kind, value) {
+        if (!DIFFICULTIES.includes(value) || (kind !== 'game' && kind !== 'duel')) return;
+        settings[kind] = value;
+        saveSettings();
+        updateSettingsScreen();
+        updateDifficultyInfo();
+    }
+
+    function updateSettingsScreen() {
+        $('gameDiffButtons').querySelectorAll('.seg-btn').forEach(b => b.classList.toggle('active', b.dataset.value === settings.game));
+        $('duelDiffButtons').querySelectorAll('.seg-btn').forEach(b => b.classList.toggle('active', b.dataset.value === settings.duel));
+        const g = GAME_DIFF[settings.game], d = DUEL_DIFF[settings.duel];
+        $('gameDiffDesc').textContent =
+            `Düşman canı ${g.enemyHealth} · Aynı anda en fazla ${g.maxEnemies} düşman · Düşman başına ${g.killGold} altın`;
+        $('duelDiffDesc').textContent =
+            `Bot canı ${d.duelHealth} · ${d.botFireInterval} sn'de bir ${d.botBulletDamage} hasar · Kazanınca ${d.duelGold} altın`;
+    }
+
+    function updateDifficultyInfo() {
+        $('difficultyInfo').textContent =
+            `Zorluk: ${DIFF_LABELS[settings.game]} · Düello: ${DIFF_LABELS[settings.duel]}`;
     }
 
     const inRun = () => shopReturn === 'paused';
@@ -1300,6 +1464,7 @@
     }
 
     init();
+    updateDifficultyInfo();
     </script>
 </body>
 </html>
