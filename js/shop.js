@@ -39,15 +39,31 @@ function updateShopModal() {
     ['shotgun', 'sniper'].forEach(id => {
         $(id + 'Status').textContent = player.ownedWeapons[id] ? 'SAHİPSİNİZ' : 'KİLİTLİ';
     });
-    // Sahip olunan silah ve skinlerin butonunda fiyat yerine "Sahipsin" yazsın
-    const owned = { shotgunStatus: player.ownedWeapons.shotgun, sniperStatus: player.ownedWeapons.sniper,
-                    primeStatus: player.unlockedSkins.prime, reaverStatus: player.unlockedSkins.reaver };
-    Object.entries(owned).forEach(([statusId, has]) => {
-        const btn = $(statusId).closest('.shop-card').querySelector('.buy-btn');
-        if (!btn.dataset.label) btn.dataset.label = btn.textContent;
-        btn.textContent = has ? 'Sahipsin ✓' : btn.dataset.label;
-        btn.classList.toggle('owned', has);
-    });
+    // Yükseltme her silaha kendi çarpanıyla işler; kartta gerçek hasarları göster
+    $('modalDmgDetail').textContent = WEAPON_ORDER.map(id => {
+        const w = WEAPONS[id], d = Math.round(player.damage * w.dmgMul);
+        return `${w.name} ${w.pellets > 1 ? w.pellets + '×' + d : d}`;
+    }).join(' · ');
+
+    // Fiyatlar CFG'den gelir; alınamayan (maksimum/sahip olunan) kalemlerin butonu durumunu yazar
+    const shieldDone = inRun() ? (player.armor >= CFG.armorAmount ? 'Kalkan dolu ✓' : null)
+                               : (player.hasShield ? 'Sonraki ele hazır ✓' : null);
+    setBuyBtn('btnDamage', CFG.damageCost, player.damage >= CFG.maxDamage ? 'Maksimum ✓' : null);
+    setBuyBtn('btnMag', CFG.magCost, player.maxAmmo >= CFG.maxMag ? 'Maksimum ✓' : null);
+    setBuyBtn('btnHeal', CFG.healCost, player.healKits >= CFG.maxHealKits ? 'Çanta dolu ✓' : null);
+    setBuyBtn('btnShield', CFG.shieldCost, shieldDone);
+    setBuyBtn('btnShotgun', WEAPONS.shotgun.cost, player.ownedWeapons.shotgun ? 'Sahipsin ✓' : null);
+    setBuyBtn('btnSniper', WEAPONS.sniper.cost, player.ownedWeapons.sniper ? 'Sahipsin ✓' : null);
+    setBuyBtn('btnPrime', CFG.skinCost, player.unlockedSkins.prime ? 'Sahipsin ✓' : null);
+    setBuyBtn('btnReaver', CFG.skinCost, player.unlockedSkins.reaver ? 'Sahipsin ✓' : null);
+}
+
+function setBuyBtn(id, cost, doneText) {
+    const btn = $(id);
+    btn.textContent = doneText || `Satın Al (${cost} Altın)`;
+    btn.classList.toggle('owned', !!doneText);
+    // Altını yetmeyen kalem soluk görünsün (tıklanınca yine nedenini söyler)
+    btn.classList.toggle('poor', !doneText && player.gold < cost);
 }
 
 function spend(cost) {

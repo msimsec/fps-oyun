@@ -273,3 +273,5 @@ body {
 .gun-body { position: absolute; left: 0; top: 6px; width: 70px; height: 14px; border-radius: 2px; }
 .gun-barrel { position: absolute; left: 70px; top: 10px; width: 34px; height: 5px; border-radius: 2px; }
 .gun-bullet { position: absolute; left: 110px; top: 9px; width: 8px; height: 8px; border-radius: 50%; }
+.buy-btn.poor { opacity: 0.55; }
+.dmg-detail { color: #fcd34d; }
