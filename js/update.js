@@ -165,7 +165,7 @@ function updateHUD() {
     setHud('ammoDisplay', a ? a.ammo : 0);
     setHud('ammoPoolDisplay', a ? (a.pool === Infinity ? '∞' : a.pool) : 0);
     setHud('reloadDisplay', player.reloading ? 'ŞARJÖR DEĞİŞİYOR...' :
-        (a && a.ammo === 0 && a.pool === 0 ? 'MERMİ BİTTİ · 2: TABANCA' : ''));
+        (a && a.ammo === 0 && a.pool === 0 ? 'MERMİ BİTTİ · 1: TABANCA' : ''));
     setHud('weaponSlots', WEAPON_ORDER.map((id, i) =>
         player.ownedWeapons[id] ? (id === player.weapon ? `[${i + 1}]` : ` ${i + 1} `) : ' · ').join(''));
     setHud('scoreDisplay', player.score);

@@ -344,3 +344,8 @@ body {
 .map-name { font-size: 17px; font-weight: bold; color: #ffaa00; }
 .map-desc { font-size: 12px; color: #cbd5e1; line-height: 1.35; }
 .icon-btn { font-size: 12px; white-space: nowrap; font-family: 'Courier New', monospace; }
+
+/* Mağaza kartları: açıklama uzunluğu farklı olsa da butonlar aynı hizada, kartın altında */
+.shop-card { display: flex; flex-direction: column; }
+.shop-card p { flex-grow: 1; }
+.shop-card .buy-btn { margin-top: auto; }

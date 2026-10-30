@@ -45,8 +45,8 @@ Her iki modun zorluğu **Ayarlar** ekranından ayrı ayrı seçilir (Kolay / Ort
 
 | # | Silah | Özellik | Nasıl açılır |
 |---|---|---|---|
-| 1 | Tüfek | Otomatik, 30'luk şarjör (mağazadan büyütülür) | Başlangıçta açık |
-| 2 | Tabanca | Yarı otomatik, 1.4x hasar, **sınırsız yedek mermi** | Başlangıçta açık |
+| 1 | Tabanca | Yarı otomatik, 1.4x hasar, **sınırsız yedek mermi** | Başlangıçta açık |
+| 2 | Tüfek | Otomatik, 30'luk şarjör (mağazadan büyütülür) | Başlangıçta açık |
 | 3 | Pompalı | 8 saçma, yakında çok güçlü, menzili kısa | Mağaza, 250 altın |
 | 4 | Keskin Nişancı | 5x hasar, dürbün | Mağaza, 400 altın |
 
