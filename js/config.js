@@ -80,7 +80,7 @@ function pickEnemyType(waveNum) {
 // =====================================================================
 //  SİLAHLAR — hasar = oyuncunun hasar seviyesi × dmgMul (mağazadaki yükseltme hepsine işler)
 // =====================================================================
-const WEAPON_ORDER = ['rifle', 'pistol', 'shotgun', 'sniper'];
+const WEAPON_ORDER = ['pistol', 'rifle', 'shotgun', 'sniper'];   // 1-4 tuşları bu sırayla
 const WEAPONS = {
     rifle: {
         name: 'Tüfek', auto: true, interval: 0.1, dmgMul: 1, pellets: 1, spread: 0,

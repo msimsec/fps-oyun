@@ -3,8 +3,8 @@
 // =====================================================================
 //  GİRİŞ (klavye düzeninden bağımsız: e.code)
 // =====================================================================
-const WEAPON_KEYS = { Digit1: 'rifle', Digit2: 'pistol', Digit3: 'shotgun', Digit4: 'sniper',
-                      Numpad1: 'rifle', Numpad2: 'pistol', Numpad3: 'shotgun', Numpad4: 'sniper' };
+const WEAPON_KEYS = { Digit1: 'pistol', Digit2: 'rifle', Digit3: 'shotgun', Digit4: 'sniper',
+                      Numpad1: 'pistol', Numpad2: 'rifle', Numpad3: 'shotgun', Numpad4: 'sniper' };
 
 function onKeyDown(e) {
     // Oyun sırasında Space/Enter odaktaki bir menü butonunu tetiklemesin
