@@ -149,7 +149,7 @@ const settings = (() => {
         duel: o && DIFFICULTIES.includes(o.duel) ? o.duel : 'normal',
         sens: o && Number.isFinite(o.sens) ? Math.min(SENS_MAX, Math.max(SENS_MIN, o.sens)) : 1,
         volume: o && Number.isFinite(o.volume) ? Math.min(1, Math.max(0, o.volume)) : 0.6,
-        map: o && ['depot', 'space'].includes(o.map) ? o.map : 'depot'
+        map: o && ['depot', 'space', 'desert'].includes(o.map) ? o.map : 'depot'
     };
 })();
 function saveSettings() {

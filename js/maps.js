@@ -11,7 +11,25 @@ let currentMapId = null;
 let jumpPads = [];
 let mapAnimators = [];          // her karede çağrılan görsel efektler (ör. rampa parlaması)
 
-const MAP_IDS = ['depot', 'space'];
+const MAP_IDS = ['depot', 'space', 'desert'];
+
+// Zeminli bölümlerde düşman doğma noktası: oyuncudan 18-28 birim uzakta, engelsiz ve
+// oyuncuya yürüyerek ulaşılabilen (yol bulma alanında mesafesi olan) bir yer
+function floorSpawn(px, pz) {
+    for (let i = 0; i < 30; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const radius = 18 + Math.random() * 10;
+        const x = px + Math.cos(angle) * radius;
+        const z = pz + Math.sin(angle) * radius;
+        if (Math.abs(x) >= 42 || Math.abs(z) >= 42 || collides(x, z, 1.0)) continue;
+        if (NAV.dist && NAV.mapId === currentMapId) {
+            const ci = navCell(x), cj = navCell(z);
+            if (!navInside(ci, cj) || NAV.dist[navIdx(ci, cj)] < 0) continue;   // kapalı avlu vb.
+        }
+        return { x, y: 0, z };
+    }
+    return null;
+}
 const MAPS = {
     depot: {
         name: 'Depo',
@@ -20,16 +38,7 @@ const MAPS = {
         spawn: { x: 0, y: 0, z: 10, angle: 0 },
         duel: { player: { x: 0, y: 0, z: 12, angle: Math.PI }, bot: { x: 0, y: 0, z: 34 } },
         build: buildDepot,
-        enemySpawn: (px, pz) => {
-            for (let i = 0; i < 20; i++) {
-                const angle = Math.random() * Math.PI * 2;
-                const radius = 18 + Math.random() * 10;
-                const x = px + Math.cos(angle) * radius;
-                const z = pz + Math.sin(angle) * radius;
-                if (Math.abs(x) < 42 && Math.abs(z) < 42 && !collides(x, z, 1.0)) return { x, y: 0, z };
-            }
-            return null;
-        }
+        enemySpawn: floorSpawn
     },
     space: {
         name: 'Space',
@@ -51,6 +60,16 @@ const MAPS = {
             return null;
         }
     }
+};
+
+MAPS.desert = {
+    name: 'Çöl',
+    desc: 'Kum taşı kasaba; dar sokaklar, kemerler, pazar meydanı ve çatısına çıkılan gözetleme evi',
+    floorY: 0, killY: -Infinity, bulletMinY: 0, bulletMaxY: 60, enemyRange: 30,
+    spawn: { x: 0, y: 0, z: 36, angle: 0 },
+    duel: { player: { x: 0, y: 0, z: 20, angle: 0 }, bot: { x: 0, y: 0, z: -10 } },
+    build: buildDesert,
+    enemySpawn: floorSpawn
 };
 
 const curMap = () => MAPS[currentMapId] || MAPS.depot;
@@ -307,4 +326,176 @@ function fellOut() {
     camera.position.set(s.x, s.y + CFG.eyeHeight, s.z);
     player.velY = 0; player.airVX = 0; player.airVZ = 0; player.onGround = true;
     showBanner('BOŞLUĞA DÜŞTÜN!', '-35 can', 1600);
+}
+
+// ---------------------------------------------------------------------
+//  ÇÖL — kum taşı bir kasaba. Yerleşim bu oyuna özgüdür:
+//  ortada pazar meydanı, kuzey-güney ana cadde, iki yanda evler ve ara sokaklar,
+//  kemerli geçitler, palmiyeler ve basamaklarla çatısına çıkılan bir gözetleme evi.
+// ---------------------------------------------------------------------
+function createSandTexture() {
+    const c = document.createElement('canvas');
+    c.width = c.height = 256;
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = '#d6b47a';
+    ctx.fillRect(0, 0, 256, 256);
+    for (let i = 0; i < 2600; i++) {
+        const v = Math.random();
+        ctx.fillStyle = v < 0.5 ? 'rgba(160,120,70,0.25)' : 'rgba(250,230,190,0.3)';
+        ctx.fillRect(Math.random() * 256, Math.random() * 256, 1 + Math.random() * 2, 1 + Math.random() * 2);
+    }
+    const t = new THREE.CanvasTexture(c);
+    t.wrapS = t.wrapT = THREE.RepeatWrapping;
+    return t;
+}
+
+function createSandstoneTexture() {
+    const c = document.createElement('canvas');
+    c.width = c.height = 256;
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = '#b8935e';
+    ctx.fillRect(0, 0, 256, 256);
+    const rows = 8, rh = 256 / rows;
+    for (let r = 0; r < rows; r++) {
+        const off = r % 2 ? 32 : 0;
+        for (let x = -64; x < 256; x += 64) {
+            const v = 200 + Math.floor(Math.random() * 30);
+            ctx.fillStyle = `rgb(${v},${Math.floor(v * 0.83)},${Math.floor(v * 0.58)})`;
+            ctx.fillRect(x + off + 2, r * rh + 2, 60, rh - 4);
+        }
+    }
+    const t = new THREE.CanvasTexture(c);
+    t.wrapS = t.wrapT = THREE.RepeatWrapping;
+    return t;
+}
+
+function buildDesert() {
+    scene.background = new THREE.Color(0xf2d9a7);
+    scene.fog = new THREE.FogExp2(0xeed5a4, 0.011);
+    mapGroup.add(new THREE.HemisphereLight(0xfff1d6, 0xb08850, 0.3));
+
+    const sand = createSandTexture();
+    sand.repeat.set(24, 24);
+    const floor = new THREE.Mesh(new THREE.PlaneGeometry(100, 100), new THREE.MeshStandardMaterial({ map: sand, color: 0xc9b08a, roughness: 1 }));
+    floor.rotation.x = -Math.PI / 2;
+    floor.receiveShadow = true;
+    mapGroup.add(floor);
+
+    const stoneTex = createSandstoneTexture();
+    const stoneMat = (w, h) => {
+        const t = stoneTex.clone(); t.needsUpdate = true; t.repeat.set(Math.max(1, w / 4), Math.max(1, h / 4));
+        return new THREE.MeshStandardMaterial({ map: t, color: 0xdcc8a8, roughness: 0.95 });   // güneşte fazla parlamasın
+    };
+    const doorMat = new THREE.MeshStandardMaterial({ color: 0x5b3a1e, roughness: 0.9 });
+    const windowMat = new THREE.MeshBasicMaterial({ color: 0x2b1d12 });
+    const trimMat = new THREE.MeshStandardMaterial({ color: 0x9c7445, roughness: 0.9 });
+
+    // Kasaba duvarı
+    const B = 45;
+    addWall(0, 4, -B, 90, 8, 2, stoneMat(90, 8));
+    addWall(0, 4, B, 90, 8, 2, stoneMat(90, 8));
+    addWall(-B, 4, 0, 2, 8, 90, stoneMat(90, 8));
+    addWall(B, 4, 0, 2, 8, 90, stoneMat(90, 8));
+
+    // Ev: duvar + çatı kenarı + kapı ve pencereler (kapı merkeze bakan yüzde)
+    const house = (x, z, w, d, h) => {
+        addWall(x, h / 2, z, w, h, d, stoneMat(Math.max(w, d), h));
+        const rim = new THREE.Mesh(new THREE.BoxGeometry(w + 0.3, 0.3, d + 0.3), trimMat);
+        rim.position.set(x, h + 0.15, z);
+        mapGroup.add(rim);
+        const faceX = Math.abs(x) > Math.abs(z);              // merkeze bakan yüz: x mi z mi
+        const sx = -Math.sign(x) || 1, sz = -Math.sign(z) || 1;
+        const door = new THREE.Mesh(new THREE.PlaneGeometry(1.4, 2.4), doorMat);
+        if (faceX) { door.position.set(x + sx * (w / 2 + 0.02), 1.2, z); door.rotation.y = sx > 0 ? Math.PI / 2 : -Math.PI / 2; }
+        else { door.position.set(x, 1.2, z + sz * (d / 2 + 0.02)); door.rotation.y = sz > 0 ? 0 : Math.PI; }
+        mapGroup.add(door);
+        if (h >= 4) {
+            for (const k of [-1, 1]) {
+                const win = new THREE.Mesh(new THREE.PlaneGeometry(0.9, 0.9), windowMat);
+                if (faceX) { win.position.set(x + sx * (w / 2 + 0.02), h - 1.3, z + k * Math.min(2.5, d / 4)); win.rotation.y = door.rotation.y; }
+                else { win.position.set(x + k * Math.min(2.5, w / 4), h - 1.3, z + sz * (d / 2 + 0.02)); win.rotation.y = door.rotation.y; }
+                mapGroup.add(win);
+            }
+        }
+    };
+    // Batı yakası
+    house(-14, -32, 14, 8, 6);
+    house(-31, -31, 10, 12, 5);
+    house(-14, -17, 8, 6, 4);
+    house(-31, -13, 12, 8, 7);
+    house(-21, 15, 10, 8, 5);
+    house(-35, 15, 8, 12, 6);
+    house(-17, 31, 14, 8, 5);
+    house(-35, 34, 10, 8, 4);
+    // Doğu yakası
+    house(17, -33, 12, 8, 6);
+    house(33, -29, 10, 12, 5);
+    house(18, -17, 10, 6, 4);
+    house(35, -6, 8, 10, 6);
+    house(19, 17, 8, 10, 7);
+    house(35, 21, 10, 8, 5);
+    house(21, 34, 12, 6, 4);
+
+    // Kemerli geçitler: iki sütun ve üstte taş kiriş (kirişin altından geçilir, mermi çarpar)
+    const arch = (x, z, alongX, span) => {
+        const m = stoneMat(4, 5);
+        if (alongX) {
+            addWall(x - span / 2, 2.5, z, 1.2, 5, 1.2, m);
+            addWall(x + span / 2, 2.5, z, 1.2, 5, 1.2, m);
+            addWall(x, 5.25, z, span + 1.2, 1, 1.4, m);
+        } else {
+            addWall(x, 2.5, z - span / 2, 1.2, 5, 1.2, m);
+            addWall(x, 2.5, z + span / 2, 1.2, 5, 1.2, m);
+            addWall(x, 5.25, z, 1.4, 1, span + 1.2, m);
+        }
+    };
+    arch(0, -24, true, 8);      // kuzey cadde girişi
+    arch(0, 24, true, 8);       // güney cadde girişi
+    arch(11, 0, false, 6);      // meydandan doğuya
+    arch(-11, 0, false, 6);     // meydandan batıya
+
+    // Pazar meydanı: kuyu (ortadan kaydırılmış, cadde açık kalsın) ve gölgelikli tezgâhlar
+    addWall(6, 0.6, 5, 3, 1.2, 3, stoneMat(3, 1.2));
+    const well = new THREE.Mesh(new THREE.TorusGeometry(1.2, 0.18, 8, 20), trimMat);
+    well.rotation.x = Math.PI / 2; well.position.set(6, 1.25, 5); mapGroup.add(well);
+    const canopyColors = [0xb91c1c, 0x1d4ed8, 0x15803d, 0xb45309];
+    [[-8, -6], [8, -7], [-7, 8]].forEach(([x, z], i) => {
+        addWall(x, 0.55, z, 3, 1.1, 2, crateMaterial);
+        const canopy = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.08, 2.8),
+            new THREE.MeshStandardMaterial({ color: canopyColors[i % canopyColors.length], roughness: 0.8 }));
+        canopy.position.set(x, 2.5, z); canopy.rotation.z = 0.08;
+        mapGroup.add(canopy);
+        [[-1.6, -1.2], [1.6, -1.2], [-1.6, 1.2], [1.6, 1.2]].forEach(([dx, dz]) => {
+            const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 2.5, 6), trimMat);
+            pole.position.set(x + dx, 1.25, z + dz); mapGroup.add(pole);
+        });
+    });
+
+    // Kasalar ve alçak kum torbası siperleri
+    [[-3.5, 14, 1.4, 1, 1.4], [3.5, -14, 1.4, 1, 1.4], [-24, 0, 2, 1, 2], [24, -24, 2, 1, 2], [-24, 24, 2, 1, 2]]
+        .forEach(([x, z, w, h, d]) => addWall(x, h / 2, z, w, h, d, crateMaterial));
+    const sandbag = new THREE.MeshStandardMaterial({ color: 0xa88b5b, roughness: 1 });
+    [[0, -38, 6, 0.9, 1], [-26, -22, 1, 0.9, 5], [27, 10, 1, 0.9, 5]].forEach(([x, z, w, h, d]) => addWall(x, h / 2, z, w, h, d, sandbag));
+
+    // Gözetleme evi: basamaklarla (1 → 2 birim) çatısına (3 birim) çıkılır
+    house(25, 4, 6, 6, 3);
+    addWall(19.2, 0.5, 4, 1.6, 1, 4, crateMaterial);
+    addWall(21, 1, 4, 2, 2, 4, stoneMat(2, 2));
+
+    // Palmiyeler: ince gövde (çarpışmalı) + yapraklar (görsel)
+    const trunkMat = new THREE.MeshStandardMaterial({ color: 0x7a5530, roughness: 1 });
+    const leafMat = new THREE.MeshStandardMaterial({ color: 0x3f7d2c, roughness: 0.9, side: THREE.DoubleSide });
+    [[-6, 14], [6, -16], [-38, -42 + 4], [38, 40], [-40, 2], [40, -40]].forEach(([x, z]) => {
+        walls.push({ x, z, w: 0.6, d: 0.6, h: 6, b: 0 });
+        const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.32, 6, 8), trunkMat);
+        trunk.position.set(x, 3, z); trunk.castShadow = true; mapGroup.add(trunk);
+        for (let k = 0; k < 6; k++) {
+            const leaf = new THREE.Mesh(new THREE.ConeGeometry(0.5, 3, 4), leafMat);
+            const a = (k / 6) * Math.PI * 2;
+            leaf.position.set(x + Math.cos(a) * 1.2, 6, z + Math.sin(a) * 1.2);
+            leaf.rotation.set(Math.sin(a) * 1.2, 0, -Math.cos(a) * 1.2);
+            leaf.castShadow = true;
+            mapGroup.add(leaf);
+        }
+    });
 }

@@ -412,3 +412,5 @@ kbd {
 .banner-title { font-size: clamp(30px, 3.6vw, 46px); }
 .banner-sub { font-size: clamp(13px, 1.4vw, 18px); max-width: 44vw; margin-left: auto; margin-right: auto; }
 .duel-bar { width: min(360px, 40vw); }
+.map-option.map-desert { background: linear-gradient(135deg, #7c5a2a, #3a2a14); }
+.map-picker .map-option { width: 250px; }

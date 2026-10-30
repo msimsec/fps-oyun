@@ -13,6 +13,7 @@ Oyun açılınca **"Kim oynuyor?"** ekranı gelir. Herkes adını yazıp kayıt 
 Ana menüdeki **BÖLÜM SEÇ** kısmından oynanacak harita seçilir (seçim oyuncuya özel kaydedilir):
 
 - **Depo:** Tuğla duvarlı kapalı alan, kasalar ve siperler.
+- **Çöl:** Kum taşı evlerden oluşan bir kasaba. Ortada kuyulu ve gölgelikli tezgâhlı bir pazar meydanı, kuzey-güney ana cadde, iki yanda dar sokaklar, altından geçilen kemerler, palmiyeler ve basamaklarla çatısına çıkılan bir gözetleme evi var.
 - **Space:** Uzay boşluğunda yüzen 6 platform. Platformlar arası yürünemez; turuncu **zıplatma rampaları** oyuncuyu karşı platforma fırlatır. Platformdan düşen 35 can kaybeder ve başlangıç platformuna döner. Düşmanlar platformlarından ayrılmaz, uzaktan ateş eder. Yüksek nişancı kulesine kuzey platformundaki rampayla çıkılır.
 
 ## Oyun modları
