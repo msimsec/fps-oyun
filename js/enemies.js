@@ -3,13 +3,23 @@
 // =====================================================================
 //  DÜŞMAN / 1v1 BOT
 // =====================================================================
+// Düşman tipi renkleri için paylaşılan materyaller
+const typeMatCache = {};
+function typeMat(color) {
+    return typeMatCache[color] || (typeMatCache[color] = new THREE.MeshStandardMaterial({ color, roughness: 0.45 }));
+}
+
 class HumanoidEnemy {
-    // hpMul / speedMul: dalga ilerledikçe düşmanlar güçlenir
-    constructor(x, z, isDuel = false, hpMul = 1, speedMul = 1) {
+    // hpMul / speedMul: dalga ilerledikçe düşmanlar güçlenir; typeId: ENEMY_TYPES anahtarı
+    constructor(x, z, isDuel = false, hpMul = 1, speedMul = 1, typeId = 'grunt') {
         this.isDuel = isDuel;
+        this.type = isDuel ? null : ENEMY_TYPES[typeId] || ENEMY_TYPES.grunt;
+        this.typeId = isDuel ? 'duel' : typeId;
+        this.scale = isDuel ? CFG.enemyScale : this.type.scale;
+        this.radius = 0.6 * this.scale / CFG.enemyScale;   // iri düşmanlar duvara daha erken değer
         this.group = new THREE.Group();
-        const bm = isDuel ? MAT.duelBody : MAT.enemyBody;
-        const hm = isDuel ? MAT.duelHead : MAT.enemyHead;
+        const bm = isDuel ? MAT.duelBody : typeMat(this.type.body);
+        const hm = isDuel ? MAT.duelHead : typeMat(this.type.head);
 
         const body = new THREE.Mesh(GEO.body, bm);
         body.position.y = 0.6; body.castShadow = true;
@@ -18,6 +28,24 @@ class HumanoidEnemy {
         const la = new THREE.Mesh(GEO.arm, bm); la.position.set(-0.6, 0.6, 0);
         const ra = new THREE.Mesh(GEO.arm, bm); ra.position.set(0.6, 0.6, 0);
         this.group.add(body, head, la, ra);
+        // Tipe özgü ayırt edici parçalar
+        if (typeId === 'tank' && !isDuel) {
+            const pad = typeMat(0x1e293b);
+            const lp = new THREE.Mesh(GEO.shoulder, pad); lp.position.set(-0.62, 1.15, 0);
+            const rp = new THREE.Mesh(GEO.shoulder, pad); rp.position.set(0.62, 1.15, 0);
+            const plate = new THREE.Mesh(GEO.chestPlate, pad); plate.position.set(0, 0.7, 0.27);
+            this.group.add(lp, rp, plate);
+        } else if (typeId === 'sniper' && !isDuel) {
+            const gun = new THREE.Mesh(GEO.longGun, typeMat(0x111827));
+            gun.position.set(0.6, 0.85, 0.55);
+            const visor = new THREE.Mesh(GEO.visor, typeMat(0x22d3ee));
+            visor.position.set(0, 1.5, 0.26);
+            this.group.add(gun, visor);
+        } else if (typeId === 'runner' && !isDuel) {
+            const band = new THREE.Mesh(GEO.headband, typeMat(0x111827));
+            band.position.set(0, 1.55, 0);
+            this.group.add(band);
+        }
 
         // Kafanın üstünde can barı (ilk hasardan sonra görünür, hep kameraya döner)
         this.hpBar = new THREE.Group();
@@ -30,12 +58,12 @@ class HumanoidEnemy {
         this.group.add(this.hpBar);
 
         this.group.position.set(x, 0, z);
-        this.group.scale.setScalar(CFG.enemyScale);
+        this.group.scale.setScalar(this.scale);
         scene.add(this.group);
 
-        this.health = Math.round((isDuel ? CFG.duelHealth : CFG.enemyHealth) * hpMul);
+        this.health = Math.round((isDuel ? CFG.duelHealth : CFG.enemyHealth * this.type.hp) * hpMul);
         this.maxHealth = this.health;
-        this.speed = (isDuel ? CFG.duelSpeed : CFG.enemySpeed) * speedMul;
+        this.speed = (isDuel ? CFG.duelSpeed : CFG.enemySpeed * this.type.speed) * speedMul;
         // ilk atıştan önce kısa bir süre (normal düşmanlar aynı anda ateş etmesin diye rastgele)
         this.shootTimer = isDuel ? CFG.botFirstShot : this.nextFireDelay();
         this.strafeDir = 1;
@@ -51,58 +79,71 @@ class HumanoidEnemy {
         this.group.rotation.y = Math.atan2(dx, dz);
 
         if (this.isDuel) {
-            // Mesafeyi koru, sağa-sola kay, düzenli ateş et
-            let mx = 0, mz = 0;
-            if (dist > 10) { mx = nx; mz = nz; }
-            else if (dist < 6) { mx = -nx; mz = -nz; }
-            this.strafeTimer -= dt;
-            if (this.strafeTimer <= 0) {
-                this.strafeDir = Math.random() < 0.5 ? -1 : 1;
-                this.strafeTimer = 0.8 + Math.random() * 1.2;
-            }
-            mx += -nz * this.strafeDir * 0.7;
-            mz += nx * this.strafeDir * 0.7;
-            moveWithCollision(p, mx * this.speed * dt, mz * this.speed * dt, 0.6);
+            this.strafeAndKeepDistance(dt, dist, nx, nz, 6, 10);
 
             this.shootTimer -= dt;
             if (this.shootTimer <= 0) {
                 this.shootTimer = CFG.botFireInterval;
                 this.shootAtPlayer(CFG.botBulletDamage, CFG.botSpread);
             }
+        } else if (this.type.keepDistance) {
+            // Nişancı: yaklaşmaz, belli mesafede yana kayarak ateş eder
+            this.strafeAndKeepDistance(dt, dist, nx, nz, this.type.keepDistance[0], this.type.keepDistance[1]);
+            this.tryShoot(dt, dist);
         } else {
             if (dist > 1.5) {
                 const step = this.speed * dt;
                 const ox = p.x, oz = p.z;
-                moveWithCollision(p, nx * step, nz * step, 0.6);
+                moveWithCollision(p, nx * step, nz * step, this.radius);
                 if (Math.hypot(p.x - ox, p.z - oz) < step * 0.5) {
                     // Duvara takıldı: duvar boyunca yana kay, o yön de kapalıysa yön değiştir
-                    moveWithCollision(p, -nz * this.strafeDir * step, nx * this.strafeDir * step, 0.6);
+                    moveWithCollision(p, -nz * this.strafeDir * step, nx * this.strafeDir * step, this.radius);
                     if (Math.hypot(p.x - ox, p.z - oz) < step * 0.1) this.strafeDir *= -1;
                 }
             } else if (footY() < 1.2) {
                 // Oyuncu yüksek bir kasanın üstündeyse yakın temas hasarı yok (ateş etmeye devam ederler)
-                damagePlayer(CFG.meleeDps * dt);   // saniye bazlı yakın temas hasarı
+                damagePlayer(CFG.meleeDps * this.type.melee * dt);   // saniye bazlı yakın temas hasarı
             }
-
-            this.shootTimer -= dt;
-            if (this.shootTimer <= 0) {
-                this.shootTimer = this.nextFireDelay();
-                if (dist > 1.5 && dist < CFG.enemyRange && this.canSeePlayer()) {
-                    this.shootAtPlayer(CFG.enemyBulletDamage, CFG.enemySpread);
-                }
-            }
+            this.tryShoot(dt, dist);
         }
 
         if (this.hpBar.visible) this.hpBar.lookAt(camera.position);
     }
 
+    // Belli bir mesafe aralığında kal, sağa-sola kay (düello botu ve nişancı)
+    strafeAndKeepDistance(dt, dist, nx, nz, near, far) {
+        const p = this.group.position;
+        let mx = 0, mz = 0;
+        if (dist > far) { mx = nx; mz = nz; }
+        else if (dist < near) { mx = -nx; mz = -nz; }
+        this.strafeTimer -= dt;
+        if (this.strafeTimer <= 0) {
+            this.strafeDir = Math.random() < 0.5 ? -1 : 1;
+            this.strafeTimer = 0.8 + Math.random() * 1.2;
+        }
+        mx += -nz * this.strafeDir * 0.7;
+        mz += nx * this.strafeDir * 0.7;
+        moveWithCollision(p, mx * this.speed * dt, mz * this.speed * dt, this.radius);
+    }
+
+    tryShoot(dt, dist) {
+        this.shootTimer -= dt;
+        if (this.shootTimer > 0) return;
+        this.shootTimer = this.nextFireDelay();
+        const range = this.type.range || CFG.enemyRange;
+        if (dist > 1.5 && dist < range && this.canSeePlayer()) {
+            this.shootAtPlayer(CFG.enemyBulletDamage * this.type.dmg, CFG.enemySpread * this.type.spread);
+        }
+    }
+
     nextFireDelay() {
-        return CFG.enemyFireMin + Math.random() * (CFG.enemyFireMax - CFG.enemyFireMin);
+        const mul = this.type ? this.type.fire : 1;
+        return (CFG.enemyFireMin + Math.random() * (CFG.enemyFireMax - CFG.enemyFireMin)) * mul;
     }
 
     // Arada duvar varsa ateş etmez (mermi boşa duvara gitmesin)
     canSeePlayer() {
-        const from = new THREE.Vector3(this.group.position.x, 1.4 * CFG.enemyScale, this.group.position.z);
+        const from = new THREE.Vector3(this.group.position.x, 1.4 * this.scale, this.group.position.z);
         const to = camera.position;
         const steps = Math.ceil(from.distanceTo(to) / 0.5);
         const pt = new THREE.Vector3();
@@ -114,7 +155,7 @@ class HumanoidEnemy {
     }
 
     shootAtPlayer(damage, spread) {
-        const origin = new THREE.Vector3(this.group.position.x, 1.4 * CFG.enemyScale, this.group.position.z);
+        const origin = new THREE.Vector3(this.group.position.x, 1.4 * this.scale, this.group.position.z);
         const target = new THREE.Vector3(camera.position.x, camera.position.y - 0.3, camera.position.z);
         const dist = origin.distanceTo(target);
         const dir = target.sub(origin).normalize();
@@ -131,7 +172,7 @@ class HumanoidEnemy {
     // Mermi noktası gövdeye/kafaya değiyor mu? (kafa vuruşu 2x hasar)
     hitTest(pt) {
         const p = this.group.position;
-        const k = CFG.enemyScale;
+        const k = this.scale;
         const h = Math.hypot(pt.x - p.x, pt.z - p.z) / k;
         const y = pt.y / k;
         if (y > 1.2 && y < 1.75 && h < 0.35) return 'head';
@@ -178,17 +219,18 @@ function onEnemyKilled(e, hit) {
     const idx = enemies.indexOf(e);
     if (idx !== -1) enemies.splice(idx, 1);
     const head = hit === 'head';
-    const score = head ? 150 : 100;
+    const score = Math.round(100 * e.type.reward) + (head ? 50 : 0);
+    const gold = Math.round(CFG.killGold * e.type.reward);
     player.score += score;
     player.kills++;
     if (head) player.headshots++;
-    player.gold += CFG.killGold;
-    player.goldEarned += CFG.killGold;
+    player.gold += gold;
+    player.goldEarned += gold;
     // Her sahip olunan silaha biraz yedek mermi (tabancanınki zaten sınırsız)
     WEAPON_ORDER.forEach(id => {
         if (player.ownedWeapons[id] && WEAPONS[id].killAmmo) player.arsenal[id].pool += WEAPONS[id].killAmmo;
     });
-    addKillFeed(head ? `KAFA VURUŞU! +${score} · +${CFG.killGold} 🪙` : `Düşman öldü +${score} · +${CFG.killGold} 🪙`, head);
+    addKillFeed(`${head ? 'KAFA VURUŞU! ' : ''}${e.type.name} öldü +${score} · +${gold} 🪙`, head);
     sfx(head ? 'killHead' : 'kill');
     saveGameData();
 }

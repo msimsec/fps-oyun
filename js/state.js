@@ -4,7 +4,8 @@
 //  OYUNCU VE DURUM
 // =====================================================================
 const player = {
-    health: 100, maxHealth: 100, armor: 0,
+    upgrades: save.upgrades,
+    health: 100, maxHealth: 100 + UPGRADES.health.per * save.upgrades.health, armor: 0,
     maxAmmo: save.maxAmmo,          // tüfek şarjörü (mağazadan yükseltilir)
     weapon: 'rifle',
     ownedWeapons: { rifle: true, pistol: true, shotgun: save.weapons.shotgun, sniper: save.weapons.sniper },
@@ -12,7 +13,7 @@ const player = {
     score: 0, kills: 0, headshots: 0, goldEarned: 0,
     gold: save.gold, damage: save.damage, healKits: save.healKits,
     hasShield: save.hasShield, activeSkin: save.activeSkin, unlockedSkins: save.unlockedSkins,
-    reloading: false, reloadTimer: 0, fireCooldown: 0, semiFired: false,
+    reloading: false, reloadTimer: 0, reloadTotal: 1, fireCooldown: 0, semiFired: false,
     velY: 0, onGround: true, zoomed: false
 };
 
@@ -20,7 +21,7 @@ function saveGameData() {
     writeSave({
         gold: player.gold, damage: player.damage, maxAmmo: player.maxAmmo,
         healKits: player.healKits, hasShield: player.hasShield,
-        activeSkin: player.activeSkin, unlockedSkins: player.unlockedSkins,
+        activeSkin: player.activeSkin, unlockedSkins: player.unlockedSkins, upgrades: player.upgrades,
         weapons: { shotgun: player.ownedWeapons.shotgun, sniper: player.ownedWeapons.sniper }
     });
 }
@@ -62,7 +63,12 @@ const GEO = {
     body: new THREE.BoxGeometry(0.9, 1.2, 0.5),
     head: new THREE.BoxGeometry(0.5, 0.5, 0.5),
     arm: new THREE.BoxGeometry(0.3, 1.0, 0.3),
-    hpBar: new THREE.PlaneGeometry(0.9, 0.09)
+    hpBar: new THREE.PlaneGeometry(0.9, 0.09),
+    shoulder: new THREE.BoxGeometry(0.45, 0.22, 0.6),
+    chestPlate: new THREE.BoxGeometry(0.7, 0.6, 0.06),
+    longGun: new THREE.BoxGeometry(0.07, 0.07, 1.1),
+    visor: new THREE.BoxGeometry(0.42, 0.1, 0.04),
+    headband: new THREE.BoxGeometry(0.54, 0.08, 0.54)
 };
 const MAT = {
     enemyBody: new THREE.MeshStandardMaterial({ color: 0xdc2626, roughness: 0.4 }),
@@ -78,6 +84,11 @@ const basicMatCache = {};
 function basicMat(color) {
     return basicMatCache[color] || (basicMatCache[color] = new THREE.MeshBasicMaterial({ color }));
 }
+
+// Yükseltmelerin etkisi
+const speedMul = () => 1 + UPGRADES.speed.per * player.upgrades.speed;
+const reloadMul = () => 1 - UPGRADES.reload.per * player.upgrades.reload;
+function applyMaxHealth() { player.maxHealth = 100 + UPGRADES.health.per * player.upgrades.health; }
 
 // Aktif silah ve cephanesi
 const curWeapon = () => WEAPONS[player.weapon];

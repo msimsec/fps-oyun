@@ -75,7 +75,7 @@ function applyCameraRotation() {
     camera.rotation.x = cameraAngleX;
 }
 
-const SCREENS = ['menuScreen', 'pauseScreen', 'gameOverScreen', 'shopModal', 'settingsScreen', 'recordsScreen'];
+const SCREENS = ['menuScreen', 'pauseScreen', 'gameOverScreen', 'shopModal', 'settingsScreen', 'recordsScreen', 'profileScreen'];
 function hideAllScreens() {
     SCREENS.forEach(id => $(id).classList.remove('show'));
 }

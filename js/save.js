@@ -6,7 +6,7 @@
 //  sağlama toplamı sadece konsoldan "elle" yapılan basit değişiklikleri
 //  geçersiz kılar; gerçek koruma (ör. skor tablosu) sunucu doğrulaması ister.
 // =====================================================================
-const SAVE_KEY = 'fps_save_v2';
+const SAVE_KEY = profileKey('fps_save_v2');
 const SAVE_SALT = 'tfps-7c1e';
 
 function sGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
@@ -35,7 +35,8 @@ function defaultSave() {
     return {
         gold: 0, damage: CFG.baseDamage, maxAmmo: CFG.baseMag, healKits: 0,
         hasShield: false, activeSkin: 'classic',
-        unlockedSkins: { classic: true, prime: false, reaver: false },
+        unlockedSkins: Object.fromEntries(SKINS.map(id => [id, id === 'classic'])),
+        upgrades: Object.fromEntries(UPGRADE_IDS.map(id => [id, 0])),
         weapons: { shotgun: false, sniper: false }   // tüfek ve tabanca her zaman açık
     };
 }
@@ -44,6 +45,7 @@ function sanitizeSave(o) {
     const d = defaultSave();
     if (!o || typeof o !== 'object') return d;
     const skins = (o.unlockedSkins && typeof o.unlockedSkins === 'object') ? o.unlockedSkins : {};
+    const ups = (o.upgrades && typeof o.upgrades === 'object') ? o.upgrades : {};
     const weapons = (o.weapons && typeof o.weapons === 'object') ? o.weapons : {};
     const s = {
         gold: clampInt(o.gold, 0, 0, 1000000),
@@ -52,7 +54,8 @@ function sanitizeSave(o) {
         healKits: clampInt(o.healKits, 0, 0, CFG.maxHealKits),
         hasShield: o.hasShield === true,
         activeSkin: SKINS.includes(o.activeSkin) ? o.activeSkin : 'classic',
-        unlockedSkins: { classic: true, prime: skins.prime === true, reaver: skins.reaver === true },
+        unlockedSkins: Object.fromEntries(SKINS.map(id => [id, id === 'classic' || skins[id] === true])),
+        upgrades: Object.fromEntries(UPGRADE_IDS.map(id => [id, clampInt(ups[id], 0, 0, UPGRADES[id].max)])),
         weapons: { shotgun: weapons.shotgun === true, sniper: weapons.sniper === true }
     };
     if (!s.unlockedSkins[s.activeSkin]) s.activeSkin = 'classic';

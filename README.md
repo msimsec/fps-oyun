@@ -1,13 +1,19 @@
-# 3D Tactical FPS (v1.1)
+# 3D Tactical FPS (v1.2)
 
 Tarayıcıda çalışan, Three.js ile yazılmış birinci şahıs nişancı oyunu. Kurulum veya derleme gerektirmez.
 
 **Oyna:** https://msimsec.github.io/fps-oyun/
 
+## Oyuncu girişi
+
+Oyun açılınca **"Kim oynuyor?"** ekranı gelir. Herkes adını yazıp kayıt olur; her oyuncunun altını, silahları, skinleri, yükseltmeleri, rekorları ve ayarları ayrı tutulur. Menüdeki **Oyuncu değiştir** ile geçiş yapılır. Parola yoktur ve kayıtlar yalnızca o tarayıcıda saklanır (en fazla 8 oyuncu).
+
 ## Oyun modları
 
 - **Dalga modu:** Düşmanlar dalgalar halinde gelir. Her dalga bir öncekinden kalabalık ve güçlüdür. Dalga temizlenince bonus altın, skor ve can verilir, kısa bir moladan sonra sıradaki dalga başlar.
 - **1v1 Düello:** Sağa sola kayan ve sürekli ateş eden mor bota karşı teke tek. Botun canı ekranın üstündeki çubukta görünür.
+
+Dalga modunda 4 düşman tipi vardır: **Er** (kırmızı), **Koşucu** (turuncu, hızlı ama zayıf, 2. dalgadan itibaren), **Nişancı** (mavi, uzakta durup isabetli ateş eder, 3. dalgadan itibaren) ve **Zırhlı** (gri, iri, çok dayanıklı, 2.5 kat ödül, 4. dalgadan itibaren).
 
 Her iki modun zorluğu **Ayarlar** ekranından ayrı ayrı seçilir (Kolay / Orta / Zor).
 
@@ -37,6 +43,16 @@ Her iki modun zorluğu **Ayarlar** ekranından ayrı ayrı seçilir (Kolay / Ort
 
 Kafa vuruşu her silahta 2 kat hasar verir. Mağazadaki "Silah Hasarı" yükseltmesi tüm silahlara işler.
 
+## Kalıcı yükseltmeler ve skinler
+
+| Yükseltme | Seviye başına | En fazla |
+|---|---|---|
+| Can Sınırı | +20 maksimum can | 5 seviye (200 can) |
+| Hareket Hızı | +%6 hız | 5 seviye (+%30) |
+| Hızlı Şarjör | -%10 şarjör değiştirme süresi | 5 seviye (-%50) |
+
+Fiyat her seviyede artar. Skinler (Standart, Kraliyet, Gölge, Kor, Buz, Zehir, Altın) mağazanın altındaki kartlardan satın alınır ve kuşanılır.
+
 ## Dosya yapısı
 
 ```
@@ -44,7 +60,8 @@ index.html        Sayfa iskeleti: HUD, menüler, mağaza, ayarlar, rekorlar
 three.min.js      Three.js r128 (yerel kopya)
 css/style.css     Tüm stiller
 js/
-  config.js       Ayarlar, silah tanımları, zorluk seviyeleri, kullanıcı tercihleri
+  profiles.js     Oyuncu girişi (profiller); kayıt anahtarlarını profile göre ayırır
+  config.js       Ayarlar, silahlar, skinler, yükseltmeler, düşman tipleri, zorluk seviyeleri
   save.js         Kayıt (localStorage + sağlama toplamı, eski sürümden taşıma)
   state.js        Oyuncu ve oyun durumu, paylaşılan geometri/materyaller
   utils.js        Çarpışma, zemin yüksekliği, ekran geçişleri, küçük yardımcılar
@@ -76,4 +93,4 @@ python3 -m http.server 8000
 
 ## Kayıtlar
 
-Altın, yükseltmeler, silahlar, skinler, ayarlar ve rekorlar tarayıcının `localStorage` alanında saklanır. Başka bir tarayıcıya veya cihaza taşınmaz.
+Altın, yükseltmeler, silahlar, skinler, ayarlar ve rekorlar tarayıcının `localStorage` alanında, oyuncu başına ayrı anahtarlarla (`fps_save_v2::<profil>` gibi) saklanır. Başka bir tarayıcıya veya cihaza taşınmaz. v1.1'den kalan kayıt ilk açılışta "Oyuncu 1" profiline taşınır.

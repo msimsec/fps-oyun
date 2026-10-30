@@ -28,7 +28,7 @@ function updatePlayer(dt) {
     const len = Math.hypot(mx, mz);
     const feet = footY();
     if (len > 0) {
-        const speed = CFG.playerSpeed * (isSprinting() ? CFG.sprintMul : 1) * (player.zoomed ? 0.5 : 1);
+        const speed = CFG.playerSpeed * speedMul() * (isSprinting() ? CFG.sprintMul : 1) * (player.zoomed ? 0.5 : 1);
         const s = speed * dt / len;   // çapraz giderken hız artmaz
         moveWithCollision(camera.position, mx * s, mz * s, CFG.playerRadius, feet);
     }
@@ -71,7 +71,7 @@ function updatePlayer(dt) {
     weapon3DGroup.position.z = weaponKick;
     weapon3DGroup.position.x = bob * 0.6;
     if (player.reloading) {
-        const prog = 1 - player.reloadTimer / curWeapon().reload;
+        const prog = 1 - player.reloadTimer / player.reloadTotal;
         weapon3DGroup.position.y = -0.18 * Math.sin(Math.PI * prog);
         weapon3DGroup.rotation.x = -0.5 * Math.sin(Math.PI * prog);
     } else {
@@ -150,6 +150,7 @@ function updateEnemies(dt) {
 function updateHUD() {
     const w = curWeapon(), a = curAmmo();
     setHud('hpDisplay', Math.max(0, Math.ceil(player.health)));
+    setHud('hpMaxDisplay', player.maxHealth);
     setHud('shieldDisplay', player.armor > 0 ? String(Math.ceil(player.armor)) : (player.hasShield ? 'HAZIR' : 'YOK'));
     setHud('weaponName', w.name.toUpperCase());
     setHud('ammoDisplay', a ? a.ammo : 0);

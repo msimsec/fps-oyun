@@ -33,8 +33,6 @@ function updateShopModal() {
     $('modalMag').textContent = `${player.maxAmmo} / ${CFG.maxMag}`;
     $('modalHeal').textContent = `${player.healKits} / ${CFG.maxHealKits}`;
     $('modalShield').textContent = shieldStatusText();
-    $('primeStatus').textContent = player.unlockedSkins.prime ? 'SAHİPSİNİZ' : 'KİLİTLİ';
-    $('reaverStatus').textContent = player.unlockedSkins.reaver ? 'SAHİPSİNİZ' : 'KİLİTLİ';
     renderSkinPicker();
     ['shotgun', 'sniper'].forEach(id => {
         $(id + 'Status').textContent = player.ownedWeapons[id] ? 'SAHİPSİNİZ' : 'KİLİTLİ';
@@ -54,8 +52,38 @@ function updateShopModal() {
     setBuyBtn('btnShield', CFG.shieldCost, shieldDone);
     setBuyBtn('btnShotgun', WEAPONS.shotgun.cost, player.ownedWeapons.shotgun ? 'Sahipsin ✓' : null);
     setBuyBtn('btnSniper', WEAPONS.sniper.cost, player.ownedWeapons.sniper ? 'Sahipsin ✓' : null);
-    setBuyBtn('btnPrime', CFG.skinCost, player.unlockedSkins.prime ? 'Sahipsin ✓' : null);
-    setBuyBtn('btnReaver', CFG.skinCost, player.unlockedSkins.reaver ? 'Sahipsin ✓' : null);
+
+    // Kalıcı yükseltmeler: seviye, şimdiki → sonraki etki, artan fiyat
+    const pct = (v) => Math.round(v * 100) + '%';
+    const effect = {
+        health: (l) => 100 + UPGRADES.health.per * l,
+        speed: (l) => pct(1 + UPGRADES.speed.per * l),
+        reload: (l) => pct(1 - UPGRADES.reload.per * l)
+    };
+    const label = { health: 'Maks. can', speed: 'Hız', reload: 'Şarjör süresi' };
+    UPGRADE_IDS.forEach(id => {
+        const lvl = player.upgrades[id], u = UPGRADES[id], key = id[0].toUpperCase() + id.slice(1);
+        $('up' + key + 'Lvl').textContent = `${lvl} / ${u.max}`;
+        $('up' + key + 'Info').textContent = lvl >= u.max
+            ? `${label[id]}: ${effect[id](lvl)}`
+            : `${label[id]}: ${effect[id](lvl)} → ${effect[id](lvl + 1)}`;
+        setBuyBtn('btnUp' + key, upgradeCost(id, lvl), lvl >= u.max ? 'Maksimum ✓' : null);
+    });
+}
+
+function buyUpgrade(id) {
+    const u = UPGRADES[id];
+    if (!u) return;
+    const lvl = player.upgrades[id];
+    if (lvl >= u.max) { showToast(`${u.name} maksimum seviyede`); return; }
+    if (!spend(upgradeCost(id, lvl))) return;
+    player.upgrades[id] = lvl + 1;
+    if (id === 'health') {
+        applyMaxHealth();
+        if (inRun()) player.health = Math.min(player.maxHealth, player.health + u.per);   // yeni kapasite dolu gelsin
+        else player.health = player.maxHealth;
+    }
+    afterPurchase(`${u.name} seviye ${lvl + 1}`);
 }
 
 function setBuyBtn(id, cost, doneText) {
@@ -130,7 +158,7 @@ function buyWeapon(id) {
 function buySkin(skinName) {
     if (!SKINS.includes(skinName)) return;
     if (player.unlockedSkins[skinName]) { showToast('Bu skine zaten sahipsin'); return; }
-    if (!spend(CFG.skinCost)) return;
+    if (!spend(SKIN_DEFS[skinName].cost)) return;
     player.unlockedSkins[skinName] = true;
     player.activeSkin = skinName;
     updateWeaponSkinColors();
@@ -148,6 +176,12 @@ function changeSkin(skinName) {
     }
 }
 
+// Skin kartına tıklama: sahip olunan skini kuşanır, kilitli olanı satın alır
+function skinCardClick(id) {
+    if (player.unlockedSkins[id]) changeSkin(id);
+    else buySkin(id);
+}
+
 const hexColor = (n) => '#' + n.toString(16).padStart(6, '0');
 
 // Her skin için renk örnekli bir kart: gövde, namlu/detay ve mermi rengi + durum
@@ -156,9 +190,10 @@ function renderSkinPicker() {
         const s = SKIN_DEFS[id];
         const owned = player.unlockedSkins[id];
         const active = player.activeSkin === id;
-        const status = active ? 'SEÇİLİ ✓' : owned ? 'Seçmek için tıkla' : `KİLİTLİ · ${CFG.skinCost} altın`;
+        const poor = !owned && player.gold < s.cost;
+        const status = active ? 'SEÇİLİ ✓' : owned ? 'Seçmek için tıkla' : `Satın al · ${s.cost} altın`;
         const swatch = (c, label) => `<span class="swatch" style="background:${hexColor(c)}" title="${label}"></span>`;
-        return `<button class="skin-option${active ? ' active' : ''}${owned ? '' : ' locked'}" onclick="changeSkin('${id}')">
+        return `<button class="skin-option${active ? ' active' : ''}${owned ? '' : ' locked'}${poor ? ' poor' : ''}" onclick="skinCardClick('${id}')">
             <span class="skin-gun">
                 <span class="gun-body" style="background:${hexColor(s.body)}"></span>
                 <span class="gun-barrel" style="background:${hexColor(s.accent)}"></span>

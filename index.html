@@ -30,7 +30,7 @@
             <div class="banner-title" id="bannerTitle"></div>
             <div class="banner-sub" id="bannerSub"></div>
         </div>
-        <div class="health-hud">CAN: <span id="hpDisplay">100</span>/100 | Kalkan: <span id="shieldDisplay">YOK</span></div>
+        <div class="health-hud">CAN: <span id="hpDisplay">100</span>/<span id="hpMaxDisplay">100</span> | Kalkan: <span id="shieldDisplay">YOK</span></div>
         <div class="ammo-hud">
             <div class="reload-text" id="reloadDisplay"></div>
             <div class="weapon-name" id="weaponName">TÜFEK</div>
@@ -45,10 +45,26 @@
         <div class="kill-feed" id="killFeed"></div>
     </div>
 
+    <!-- Giriş: kim oynuyor? -->
+    <div class="overlay" id="profileScreen">
+        <h1 class="cyan">KİM OYNUYOR?</h1>
+        <div class="profile-list" id="profileList"></div>
+        <div class="profile-new" id="newProfileRow">
+            <input type="text" id="newProfileName" maxlength="16" placeholder="Adını yaz (ör. Ahmet)" autocomplete="off"
+                   onkeydown="if (event.key === 'Enter') createProfile()">
+            <button class="btn restart-btn" onclick="createProfile()">KAYIT OL</button>
+        </div>
+        <div class="note" id="profileNote"></div>
+        <div class="profile-hint">Her oyuncunun altını, silahları, skinleri, rekorları ve ayarları ayrı tutulur. Kayıtlar bu tarayıcıda saklanır.</div>
+        <button class="back-btn" id="profileBack" onclick="closeProfiles()">Geri Dön</button>
+    </div>
+
     <!-- Başlangıç Menüsü -->
     <div class="overlay show" id="menuScreen">
+        <div class="player-tag">👤 <span id="playerName">-</span>
+            <button class="link-btn" onclick="openProfiles()">Oyuncu değiştir</button></div>
         <h1 class="cyan">3D TACTICAL FPS</h1>
-        <div class="version">v1.1</div>
+        <div class="version">v1.2</div>
         <div class="stats-box">
             WASD: Hareket &nbsp;·&nbsp; Shift: Koş &nbsp;·&nbsp; Space: Zıpla &nbsp;·&nbsp; Fare: Nişan<br>
             Sol tık: Ateş &nbsp;·&nbsp; Sağ tık: Dürbün (keskin nişancı) &nbsp;·&nbsp; R: Şarjör<br>
@@ -182,6 +198,21 @@
                 <p>+50 kalkan puanı; hasarı önce kalkan emer, bitince tükenir. Menüden alınırsa sonraki elin başında takılır<br>Durum: <span id="modalShield">YOK</span></p>
                 <button class="buy-btn" id="btnShield" onclick="buyShield()"></button>
             </div>
+            <div class="shop-card upgrade-card">
+                <h3>Can Sınırı</h3>
+                <p>Maksimum canı kalıcı +20 artırır<br>Seviye: <span id="upHealthLvl"></span><br><span class="dmg-detail" id="upHealthInfo"></span></p>
+                <button class="buy-btn" id="btnUpHealth" onclick="buyUpgrade('health')"></button>
+            </div>
+            <div class="shop-card upgrade-card">
+                <h3>Hareket Hızı</h3>
+                <p>Yürüme ve koşma hızını kalıcı +%6 artırır<br>Seviye: <span id="upSpeedLvl"></span><br><span class="dmg-detail" id="upSpeedInfo"></span></p>
+                <button class="buy-btn" id="btnUpSpeed" onclick="buyUpgrade('speed')"></button>
+            </div>
+            <div class="shop-card upgrade-card">
+                <h3>Hızlı Şarjör</h3>
+                <p>Tüm silahlarda şarjör değiştirme süresini kalıcı %10 kısaltır<br>Seviye: <span id="upReloadLvl"></span><br><span class="dmg-detail" id="upReloadInfo"></span></p>
+                <button class="buy-btn" id="btnUpReload" onclick="buyUpgrade('reload')"></button>
+            </div>
             <div class="shop-card weapon-card">
                 <h3>Pompalı (3)</h3>
                 <p>8 saçma, yakında çok güçlü, uzakta etkisiz · 6'lık şarjör<br>Durum: <span id="shotgunStatus">KİLİTLİ</span></p>
@@ -192,19 +223,9 @@
                 <p>5 kat hasar, sağ tıkla dürbün · 5'lik şarjör<br>Durum: <span id="sniperStatus">KİLİTLİ</span></p>
                 <button class="buy-btn" id="btnSniper" onclick="buyWeapon('sniper')"></button>
             </div>
-            <div class="shop-card">
-                <h3>Skin: Kraliyet</h3>
-                <p>Mor/Altın ışıltılı silah skini<br>Durum: <span id="primeStatus">KİLİTLİ</span></p>
-                <button class="buy-btn" id="btnPrime" onclick="buySkin('prime')"></button>
-            </div>
-            <div class="shop-card">
-                <h3>Skin: Gölge</h3>
-                <p>Karanlık mor ruhani silah skini<br>Durum: <span id="reaverStatus">KİLİTLİ</span></p>
-                <button class="buy-btn" id="btnReaver" onclick="buySkin('reaver')"></button>
-            </div>
         </div>
 
-        <div class="skin-picker-title">Aktif Skini Seç</div>
+        <div class="skin-picker-title">Skinler · sahip olduğuna tıklayınca kuşanılır, kilitli olana tıklayınca satın alınır</div>
         <div class="skin-picker" id="skinPicker"></div>
 
         <button class="back-btn" onclick="closeShop()">Geri Dön</button>
@@ -212,6 +233,7 @@
 
     <div id="toast"></div>
 
+    <script src="js/profiles.js"></script>
     <script src="js/config.js"></script>
     <script src="js/save.js"></script>
     <script src="js/state.js"></script>

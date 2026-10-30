@@ -91,7 +91,7 @@ function startReload() {
     const a = curAmmo();
     if (player.reloading || a.ammo >= magSize(player.weapon) || a.pool <= 0) return;
     player.reloading = true;
-    player.reloadTimer = curWeapon().reload;
+    player.reloadTimer = player.reloadTotal = curWeapon().reload * reloadMul();
     setZoom(false);
     sfx('reload');
 }
