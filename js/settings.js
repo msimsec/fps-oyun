@@ -77,7 +77,9 @@ function renderMapPicker() {
         b.onclick = () => setMap(id);
         const name = document.createElement('span'); name.className = 'map-name'; name.textContent = m.name;
         const desc = document.createElement('span'); desc.className = 'map-desc'; desc.textContent = m.desc;
-        b.append(name, desc);
+        const badge = document.createElement('span'); badge.className = 'map-badge';
+        badge.textContent = settings.map === id ? '✓ SEÇİLİ' : 'Seçmek için tıkla';
+        b.append(name, desc, badge);
         box.appendChild(b);
     });
 }

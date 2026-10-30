@@ -152,6 +152,7 @@ function updateEnemies(dt) {
         if (duelBot) duelBot.update(dt);
         return;
     }
+    navUpdate(dt);
     for (let i = 0; i < enemies.length && state === 'playing'; i++) enemies[i].update(dt);
     if (state === 'playing') updateWaves(dt);
 }

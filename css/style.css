@@ -349,3 +349,66 @@ body {
 .shop-card { display: flex; flex-direction: column; }
 .shop-card p { flex-grow: 1; }
 .shop-card .buy-btn { margin-top: auto; }
+
+/* =====================================================================
+   Okunabilirlik ve ekran boyutuna uyum
+   ===================================================================== */
+:root { --ui-font: 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvetica Neue', Arial, sans-serif; }
+
+/* Menü açıkken arkadaki oyun HUD'u görünmesin */
+body.in-menu .hud { visibility: hidden; }
+
+/* Ana menü: kontroller tuş kutucuklarıyla */
+.controls {
+    display: grid; grid-template-columns: repeat(5, auto); gap: 8px 18px; justify-content: center;
+    background: rgba(2, 6, 23, 0.75); border: 1px solid rgba(0, 212, 255, 0.35); border-radius: 10px;
+    padding: 14px 20px; margin-bottom: 22px; font-family: var(--ui-font); font-size: 15px; color: #e2e8f0;
+}
+.controls div { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+kbd {
+    display: inline-block; min-width: 26px; padding: 3px 8px; border-radius: 5px; text-align: center;
+    font-family: 'Courier New', monospace; font-size: 13px; font-weight: bold; color: #0b0f19;
+    background: linear-gradient(#e2e8f0, #cbd5e1); border-bottom: 3px solid #94a3b8;
+}
+@media (max-width: 900px) { .controls { grid-template-columns: repeat(3, auto); } }
+
+/* Bölüm seçici: açık başlık, yönlendirme ve seçili etiketi */
+.map-picker-title { color: #00d4ff; font-family: var(--ui-font); font-size: 20px; font-weight: 700; letter-spacing: 1px; margin-bottom: 2px; text-shadow: 0 0 10px rgba(0, 212, 255, 0.5); }
+.map-picker-sub { color: #cbd5e1; font-family: var(--ui-font); font-size: 14px; margin-bottom: 10px; }
+.map-option { width: 270px; padding: 14px 16px; }
+.map-name { font-family: var(--ui-font); font-size: 20px; }
+.map-desc { font-family: var(--ui-font); font-size: 13.5px; color: #e2e8f0; }
+.map-badge { align-self: flex-start; margin-top: 4px; font-family: var(--ui-font); font-size: 12px; font-weight: 700;
+    padding: 3px 9px; border-radius: 999px; background: rgba(148, 163, 184, 0.2); color: #cbd5e1; }
+.map-option.active .map-badge { background: #22c55e; color: #052e16; }
+
+/* Menü alt bilgi satırı: kutucuk içinde */
+#difficultyInfo { display: inline-block; font-family: var(--ui-font); font-size: 14px; color: #fcd34d;
+    background: rgba(0, 0, 0, 0.55); border: 1px solid rgba(252, 211, 77, 0.35); border-radius: 999px; padding: 6px 14px; }
+
+/* Açıklama metinleri: daha okunaklı yazı tipi */
+.shop-card p, .settings-desc, .profile-hint, .note, .skin-status, .stats-box, .records-table td { font-family: var(--ui-font); }
+.shop-card p { font-size: 12.5px; line-height: 1.45; color: #e5e7eb; }
+.settings-desc { font-size: 13.5px; color: #cbd5e1; }
+
+/* HUD: parlama yerine koyu gölge (açık zeminde de okunur), ekran boyutuyla ölçeklenen yazı */
+.hud { text-shadow: 0 1px 2px #000, 0 0 6px rgba(0, 212, 255, 0.35); }
+.health-hud, .ammo-hud, .score-hud, .gold-hud, .mode-hud { background: rgba(2, 6, 23, 0.78); }
+.health-hud, .ammo-hud { font-size: clamp(14px, 1.45vw, 20px); padding: clamp(6px, 0.8vw, 10px) clamp(10px, 1.4vw, 20px); }
+.score-hud { font-size: clamp(13px, 1.3vw, 18px); padding: clamp(6px, 0.8vw, 10px) clamp(10px, 1.4vw, 20px); }
+.gold-hud { font-size: clamp(14px, 1.55vw, 22px); padding: clamp(5px, 0.6vw, 8px) clamp(10px, 1.4vw, 20px); white-space: nowrap; }
+/* Mod bilgisi ortadaki altın göstergesine kadar uzanmasın; sığmazsa iki satıra iner */
+.mode-hud { font-size: clamp(12px, 1.1vw, 16px); padding: clamp(5px, 0.6vw, 8px) clamp(8px, 1.1vw, 16px);
+    max-width: calc(50vw - 30px - clamp(90px, 9vw, 135px) - 16px); }
+.health-hud, .score-hud, .mode-hud { left: auto; }
+.health-hud { left: clamp(12px, 2.3vw, 30px); bottom: clamp(12px, 2.3vw, 30px); }
+.ammo-hud { right: clamp(12px, 2.3vw, 30px); bottom: clamp(12px, 2.3vw, 30px); }
+.score-hud { right: clamp(12px, 2.3vw, 30px); top: clamp(12px, 2.3vw, 30px); }
+.mode-hud { left: clamp(12px, 2.3vw, 30px); top: clamp(12px, 2.3vw, 30px); }
+.gold-hud { top: clamp(12px, 2.3vw, 30px); }
+/* Öldürme bildirimleri: dar ekranda daha dar, ortadaki duyuruya taşmaz */
+.kill-feed { width: min(340px, 28vw); right: clamp(12px, 2.3vw, 30px); top: clamp(100px, 11vw, 140px); }
+.kill-item { font-size: clamp(11px, 1vw, 13px); }
+.banner-title { font-size: clamp(30px, 3.6vw, 46px); }
+.banner-sub { font-size: clamp(13px, 1.4vw, 18px); max-width: 44vw; margin-left: auto; margin-right: auto; }
+.duel-bar { width: min(360px, 40vw); }
