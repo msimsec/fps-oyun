@@ -286,6 +286,8 @@
         bulletSpeed: 84, bulletLife: 1.2,
         botBulletSpeed: 45, botBulletLife: 2.0, botBulletDamage: 8, botFireInterval: 0.4,
         botFirstShot: 0.8, botSpread: 0.05,
+        // Normal düşmanlar: düello botundan seyrek ve isabetsiz ateş eder
+        enemyFireMin: 1.8, enemyFireMax: 3.0, enemyBulletDamage: 4, enemySpread: 0.08, enemyRange: 25,
         enemyHealth: 30, enemySpeed: 2.1, duelHealth: 400, duelSpeed: 2.6,
         meleeDps: 30,                 // yakın temas hasarı (saniyede)
         armorAmount: 50,
@@ -921,7 +923,8 @@
             this.health = isDuel ? CFG.duelHealth : CFG.enemyHealth;
             this.maxHealth = this.health;
             this.speed = isDuel ? CFG.duelSpeed : CFG.enemySpeed;
-            this.shootTimer = CFG.botFirstShot;   // ilk atıştan önce kısa bir süre
+            // ilk atıştan önce kısa bir süre (normal düşmanlar aynı anda ateş etmesin diye rastgele)
+            this.shootTimer = isDuel ? CFG.botFirstShot : this.nextFireDelay();
             this.strafeDir = 1;
             this.strafeTimer = 0;
         }
@@ -951,7 +954,7 @@
                 this.shootTimer -= dt;
                 if (this.shootTimer <= 0) {
                     this.shootTimer = CFG.botFireInterval;
-                    this.shootAtPlayer();
+                    this.shootAtPlayer(CFG.botBulletDamage, CFG.botSpread);
                 }
             } else {
                 if (dist > 1.5) {
@@ -966,20 +969,45 @@
                 } else {
                     damagePlayer(CFG.meleeDps * dt);   // saniye bazlı yakın temas hasarı
                 }
+
+                this.shootTimer -= dt;
+                if (this.shootTimer <= 0) {
+                    this.shootTimer = this.nextFireDelay();
+                    if (dist > 1.5 && dist < CFG.enemyRange && this.canSeePlayer()) {
+                        this.shootAtPlayer(CFG.enemyBulletDamage, CFG.enemySpread);
+                    }
+                }
             }
         }
 
-        shootAtPlayer() {
+        nextFireDelay() {
+            return CFG.enemyFireMin + Math.random() * (CFG.enemyFireMax - CFG.enemyFireMin);
+        }
+
+        // Arada duvar varsa ateş etmez (mermi boşa duvara gitmesin)
+        canSeePlayer() {
+            const from = new THREE.Vector3(this.group.position.x, 1.4 * CFG.enemyScale, this.group.position.z);
+            const to = camera.position;
+            const steps = Math.ceil(from.distanceTo(to) / 0.5);
+            const pt = new THREE.Vector3();
+            for (let i = 1; i < steps; i++) {
+                pt.lerpVectors(from, to, i / steps);
+                if (pointInWall(pt)) return false;
+            }
+            return true;
+        }
+
+        shootAtPlayer(damage, spread) {
             const origin = new THREE.Vector3(this.group.position.x, 1.4 * CFG.enemyScale, this.group.position.z);
             const target = new THREE.Vector3(camera.position.x, CFG.eyeHeight - 0.3, camera.position.z);
             const dir = target.sub(origin).normalize();
             // küçük sapma: bot her atışı tam isabetle yapmasın
-            dir.x += (Math.random() - 0.5) * CFG.botSpread;
-            dir.y += (Math.random() - 0.5) * CFG.botSpread;
-            dir.z += (Math.random() - 0.5) * CFG.botSpread;
+            dir.x += (Math.random() - 0.5) * spread;
+            dir.y += (Math.random() - 0.5) * spread;
+            dir.z += (Math.random() - 0.5) * spread;
             dir.normalize();
             origin.addScaledVector(dir, 0.6);
-            spawnBullet(origin, dir, CFG.botBulletSpeed, CFG.botBulletDamage, 0xff3333, false, CFG.botBulletLife);
+            spawnBullet(origin, dir, CFG.botBulletSpeed, damage, 0xff3333, false, CFG.botBulletLife);
         }
 
         // Mermi noktası gövdeye/kafaya değiyor mu? (kafa vuruşu 2x hasar)
