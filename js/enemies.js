@@ -74,7 +74,9 @@ class HumanoidEnemy {
         this.air = false;          // havada mı (zıplama / rampa / düşme)
         this.vy = 0; this.avx = 0; this.avz = 0;
         this.jumpCd = 0;
-        this.stuck = 0;            // ne kadardır hiç ilerleyemiyor
+        this.following = false;    // duvar takibinde mi (arada duvar varken; zeminsiz bölümde)
+        this.navCheck = 0; this.directPath = true;
+        this.followTime = 0; this.followCheck = 0;
         this.dodgeTimer = 0; this.dodgeCooldown = 0; this.dodgeDir = 1;
     }
 
@@ -152,22 +154,66 @@ class HumanoidEnemy {
         moveWithCollision(p, dx, dz, this.radius, y, canStand);
     }
 
-    // Oyuncuya (ya da hedefe) doğru yürü. Önü kapalıysa: zıplama yeteneği varsa alçak engelin
-    // üstüne zıpla, yoksa engel boyunca yana kay. Hiç ilerleyemiyorsa yönü her karede değil,
-    // 0.6 sn'de bir değiştir (yoksa yerinde titrer).
+    // Oyuncuya (ya da hedefe) doğru yürü. Arada duvar varsa duvar takibine geçer: hedefe dik
+    // yönde duvar boyunca yürür ve hedefe giden düz yol açılana kadar bunu bırakmaz (yoksa
+    // duvarın ucunda geri kayıp gidip gelir). Yön kapanırsa (köşe) diğer yöne döner, çok uzun
+    // sürerse öbür taraftan dener. Alçak engel önündeyse ve zıplama yeteneği varsa üstüne zıplar.
     chase(dt, dist, nx, nz) {
         const p = this.group.position;
         const step = this.speed * dt;
         const ox = p.x, oz = p.z;
+        // Zeminli bölümlerde (Depo): hedefe düz yol yoksa yol bulma alanının gösterdiği yöne git
+        if (curMap().floorY !== -Infinity && NAV.dist) {
+            this.navCheck -= dt;
+            if (this.navCheck <= 0) { this.navCheck = 0.25; this.directPath = this.pathClear(p.x + nx * dist, p.z + nz * dist); }
+            if (!this.directPath) {
+                const d = navDirection(p.x, p.z);
+                if (d) { nx = d.x; nz = d.z; }
+            }
+            this.move(nx * step, nz * step);
+            const moved = Math.hypot(p.x - ox, p.z - oz);
+            if (moved < step * 0.5 && this.skills.jump && this.jumpCd <= 0 && this.jumpableAhead(nx, nz)) this.jump(nx, nz);
+            return;
+        }
+        if (this.following) {
+            this.followCheck -= dt;
+            this.followTime += dt;
+            if (this.followCheck <= 0) {
+                this.followCheck = 0.2;
+                if (this.pathClear(p.x + nx * dist, p.z + nz * dist)) this.following = false;
+            }
+            if (this.followTime > 8) { this.strafeDir *= -1; this.followTime = 0; }
+            if (this.following) {
+                this.move(-nz * this.strafeDir * step, nx * this.strafeDir * step);
+                if (Math.hypot(p.x - ox, p.z - oz) < step * 0.1) this.strafeDir *= -1;
+                return;
+            }
+        }
         this.move(nx * step, nz * step);
-        if (Math.hypot(p.x - ox, p.z - oz) < step * 0.5) {
-            if (this.skills.jump && this.jumpCd <= 0 && this.jumpableAhead(nx, nz)) { this.jump(nx, nz); return; }
-            this.move(-nz * this.strafeDir * step, nx * this.strafeDir * step);
-            if (Math.hypot(p.x - ox, p.z - oz) < step * 0.1) {
-                this.stuck += dt;
-                if (this.stuck > 0.6) { this.strafeDir *= -1; this.stuck = 0; }
-            } else this.stuck = 0;
-        } else this.stuck = 0;
+        const moved = Math.hypot(p.x - ox, p.z - oz);
+        if (moved < step * 0.5 && this.skills.jump && this.jumpCd <= 0 && this.jumpableAhead(nx, nz)) {
+            this.jump(nx, nz);
+            return;
+        }
+        // Hedefe doğru gerçek ilerleme azsa (duvara dayandı ya da çok yatık kayıyor) duvarı takip et
+        const progress = (p.x - ox) * nx + (p.z - oz) * nz;
+        if (progress < step * 0.35) {
+            this.following = true;
+            this.followCheck = 0.3;
+            this.followTime = 0;
+        }
+    }
+
+    // Bulunduğu yerden (tx, tz) noktasına düz yürünebilir mi (arada engel var mı)
+    pathClear(tx, tz) {
+        const p = this.group.position;
+        const d = Math.hypot(tx - p.x, tz - p.z);
+        const n = Math.ceil(d / 0.5);
+        for (let i = 1; i <= n; i++) {
+            const t = i / n;
+            if (collides(p.x + (tx - p.x) * t, p.z + (tz - p.z) * t, this.radius * 0.9, p.y)) return false;
+        }
+        return true;
     }
 
     // Önünde zıplanarak üstüne çıkılabilecek alçak bir engel (kasa, siper) var mı
@@ -331,6 +377,80 @@ class HumanoidEnemy {
     destroy() { scene.remove(this.group); }
 }
 
+// =====================================================================
+//  YOL BULMA (zeminli bölümler) — oyuncudan yayılan adım mesafesi alanı ("flow field").
+//  Harita 1 m'lik karelere bölünür; oyuncunun karesinden başlayan BFS her kareye oyuncuya
+//  kaç adım uzak olduğunu yazar. Düşman, bulunduğu karenin en yakın komşusuna yürür.
+//  Bütün düşmanlar aynı alanı kullanır; saniyede ~3 kez ya da oyuncu kare değiştirince yenilenir.
+// =====================================================================
+const NAV = { min: -45, n: 90, walk: null, dist: null, timer: 0, mapId: null, pi: -1, pj: -1 };
+const navCell = (v) => Math.floor(v - NAV.min);
+const navIdx = (i, j) => i * NAV.n + j;
+const navInside = (i, j) => i >= 0 && j >= 0 && i < NAV.n && j < NAV.n;
+
+function navBuild() {
+    NAV.walk = new Uint8Array(NAV.n * NAV.n);
+    NAV.dist = new Int32Array(NAV.n * NAV.n);
+    for (let i = 0; i < NAV.n; i++) {
+        for (let j = 0; j < NAV.n; j++) {
+            NAV.walk[navIdx(i, j)] = collides(NAV.min + i + 0.5, NAV.min + j + 0.5, 0.7, 0) ? 0 : 1;
+        }
+    }
+    NAV.mapId = currentMapId;
+    NAV.pi = NAV.pj = -1;
+}
+
+function navUpdate(dt) {
+    if (curMap().floorY === -Infinity) return;
+    if (!NAV.walk || NAV.mapId !== currentMapId) navBuild();
+    NAV.timer -= dt;
+    const ci = navCell(camera.position.x), cj = navCell(camera.position.z);
+    if (NAV.timer > 0 && ci === NAV.pi && cj === NAV.pj) return;
+    NAV.timer = 0.3; NAV.pi = ci; NAV.pj = cj;
+    const dist = NAV.dist;
+    dist.fill(-1);
+    const queue = [];
+    // Oyuncunun karesi yürünemezse (ör. kasanın üstünde) çevresindeki kareler başlangıç olur
+    for (let r = 0; r <= 2 && !queue.length; r++) {
+        for (let i = ci - r; i <= ci + r; i++) for (let j = cj - r; j <= cj + r; j++) {
+            if (navInside(i, j) && NAV.walk[navIdx(i, j)] && dist[navIdx(i, j)] < 0) { dist[navIdx(i, j)] = r; queue.push(navIdx(i, j)); }
+        }
+    }
+    for (let q = 0; q < queue.length; q++) {
+        const k = queue[q], i = Math.floor(k / NAV.n), j = k % NAV.n, d = dist[k] + 1;
+        for (let di = -1; di <= 1; di++) for (let dj = -1; dj <= 1; dj++) {
+            if (!di && !dj) continue;
+            const a = i + di, b = j + dj;
+            if (!navInside(a, b)) continue;
+            const kk = navIdx(a, b);
+            if (!NAV.walk[kk] || dist[kk] >= 0) continue;
+            // Çaprazda köşe kesmesin: iki yan kare de yürünebilir olmalı
+            if (di && dj && (!NAV.walk[navIdx(i + di, j)] || !NAV.walk[navIdx(i, j + dj)])) continue;
+            dist[kk] = d;
+            queue.push(kk);
+        }
+    }
+}
+
+// (x, z)'deki düşmanın gitmesi gereken yön (en yakın komşu kareye), yoksa null
+function navDirection(x, z) {
+    const i = navCell(x), j = navCell(z);
+    let best = -1, bi = 0, bj = 0;
+    const here = navInside(i, j) ? NAV.dist[navIdx(i, j)] : -1;
+    for (let di = -1; di <= 1; di++) for (let dj = -1; dj <= 1; dj++) {
+        if (!di && !dj) continue;
+        const a = i + di, b = j + dj;
+        if (!navInside(a, b)) continue;
+        const d = NAV.dist[navIdx(a, b)];
+        if (d < 0) continue;
+        if (di && dj && (!NAV.walk[navIdx(i + di, j)] || !NAV.walk[navIdx(i, j + dj)])) continue;
+        if (best < 0 || d < best) { best = d; bi = a; bj = b; }
+    }
+    if (best < 0 || (here >= 0 && best >= here)) return null;
+    const tx = NAV.min + bi + 0.5 - x, tz = NAV.min + bj + 0.5 - z, l = Math.hypot(tx, tz) || 1;
+    return { x: tx / l, z: tz / l };
+}
+
 function hitsPlayer(pt) {
     const h = Math.hypot(pt.x - camera.position.x, pt.z - camera.position.z);
     return h < 0.45 && pt.y > footY() && pt.y < camera.position.y + 0.25;
@@ -343,6 +463,7 @@ function findSpawnPoint() {
 function onEnemyKilled(e, hit) {
     e.destroy();
     if (e.isDuel) {
+        if (hit === 'head') player.headshots++;   // düelloyu kafadan bitiren vuruş da sayılsın
         duelBot = null;
         pendingDuelWin = true;
         return;

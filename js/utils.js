@@ -35,7 +35,8 @@ function overlapDepth(x, z, r, feet = 0) {
         if (w.h <= feet + CFG.stepHeight || w.b >= feet + 2) continue;
         const px = Math.min(x - (w.x - w.w / 2 - r), (w.x + w.w / 2 + r) - x);
         const pz = Math.min(z - (w.z - w.d / 2 - r), (w.z + w.d / 2 + r) - z);
-        if (px > 0 && pz > 0) depth = Math.max(depth, Math.min(px, pz));
+        // 1e-6 payı: duvara tam yaslanınca ondalık hatası yüzünden "içeride" sayılmasın
+        if (px > 1e-6 && pz > 1e-6) depth = Math.max(depth, Math.min(px, pz));
     }
     return depth;
 }
@@ -61,15 +62,16 @@ function pointInWall(p) {
     return false;
 }
 // Eksenleri ayrı ayrı deneyerek duvar boyunca kaymayı sağlar. Bir şekilde engelin içinde
-// kalındıysa, içeri daha az girilen yöne harekete izin verilir (sıkışıp kalmayı önler).
+// kalındıysa, daha derine girmeyen her harekete izin verilir: dışarı çıkmak ve engel boyunca
+// kaymak serbest (yalnızca "daha az içeri" şartı, duvar boyunca kaymayı da engelleyip kilitliyordu).
 // canStand verilirse (düşmanlar için) yeni konumun altında zemin olmalı: platformdan düşmezler.
 function moveWithCollision(pos, dx, dz, r, feet = 0, canStand = null) {
     const cur = overlapDepth(pos.x, pos.z, r, feet);
     const nx = overlapDepth(pos.x + dx, pos.z, r, feet);
-    if ((nx === 0 || nx < cur) && (!canStand || canStand(pos.x + dx, pos.z))) pos.x += dx;
+    if (nx <= cur && (!canStand || canStand(pos.x + dx, pos.z))) pos.x += dx;
     const cur2 = overlapDepth(pos.x, pos.z, r, feet);
     const nz = overlapDepth(pos.x, pos.z + dz, r, feet);
-    if ((nz === 0 || nz < cur2) && (!canStand || canStand(pos.x, pos.z + dz))) pos.z += dz;
+    if (nz <= cur2 && (!canStand || canStand(pos.x, pos.z + dz))) pos.z += dz;
 }
 
 function applyCameraRotation() {
@@ -78,10 +80,12 @@ function applyCameraRotation() {
 }
 
 const SCREENS = ['menuScreen', 'pauseScreen', 'gameOverScreen', 'shopModal', 'settingsScreen', 'recordsScreen', 'profileScreen'];
+// Bir menü açıkken oyun HUD'u gizlenir (menünün arkasında silik görünüp karışıklık yaratmasın)
 function hideAllScreens() {
     SCREENS.forEach(id => $(id).classList.remove('show'));
+    document.body.classList.remove('in-menu');
 }
-function showScreen(id) { hideAllScreens(); $(id).classList.add('show'); }
+function showScreen(id) { hideAllScreens(); $(id).classList.add('show'); document.body.classList.add('in-menu'); }
 
 function resetKeys() {
     keys.forward = keys.back = keys.left = keys.right = keys.sprint = false;
