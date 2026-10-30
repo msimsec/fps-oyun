@@ -123,6 +123,9 @@
         .seg-btn.active.normal { background: #00d4ff; border-color: #00d4ff; color: #0b0f19; }
         .seg-btn.active.hard { background: #ef4444; border-color: #ef4444; color: #ffffff; }
         .settings-desc { color: #94a3b8; font-size: 13px; margin-top: 8px; min-height: 16px; }
+        .sens-row { display: flex; gap: 12px; align-items: center; justify-content: center; }
+        .sens-row input[type=range] { width: 260px; accent-color: #00d4ff; cursor: pointer; }
+        .sens-value { color: #ffffff; font-size: 16px; font-weight: bold; min-width: 48px; text-align: left; }
 
         /* Mağaza */
         .shop-modal {
@@ -263,6 +266,14 @@
             </div>
             <div class="settings-desc" id="duelDiffDesc"></div>
         </div>
+        <div class="settings-group">
+            <div class="settings-label">Fare Hassasiyeti</div>
+            <div class="sens-row">
+                <input type="range" id="sensSlider" min="0.2" max="3" step="0.1" oninput="setSensitivity(this.value)">
+                <span class="sens-value" id="sensValue">1.0x</span>
+            </div>
+            <div class="settings-desc">Hemen geçerli olur · Varsayılan 1.0x</div>
+        </div>
         <div class="note" id="settingsNote"></div>
         <button class="back-btn" onclick="closeSettings()">Geri Dön</button>
     </div>
@@ -376,12 +387,14 @@
     };
 
     const SETTINGS_KEY = 'fps_settings_v1';
+    const SENS_MIN = 0.2, SENS_MAX = 3, BASE_SENS = 0.003;   // radyan / piksel (1.0x)
     const settings = (() => {
         let o = null;
         try { o = JSON.parse(localStorage.getItem(SETTINGS_KEY)); } catch (e) {}
         return {
             game: o && DIFFICULTIES.includes(o.game) ? o.game : 'normal',
-            duel: o && DIFFICULTIES.includes(o.duel) ? o.duel : 'normal'
+            duel: o && DIFFICULTIES.includes(o.duel) ? o.duel : 'normal',
+            sens: o && Number.isFinite(o.sens) ? Math.min(SENS_MAX, Math.max(SENS_MIN, o.sens)) : 1
         };
     })();
     function saveSettings() {
@@ -786,8 +799,9 @@
 
     function onMouseMove(e) {
         if (document.pointerLockElement !== canvas || state !== 'playing') return;
-        cameraAngleY -= e.movementX * 0.003;
-        cameraAngleX -= e.movementY * 0.003;
+        const k = BASE_SENS * settings.sens;
+        cameraAngleY -= e.movementX * k;
+        cameraAngleX -= e.movementY * k;
         cameraAngleX = Math.max(-Math.PI / 2.2, Math.min(Math.PI / 2.2, cameraAngleX));
         applyCameraRotation();
     }
@@ -1346,11 +1360,19 @@
         settingsReturn = from;
         state = 'settings';
         showScreen('settingsScreen');
-        $('settingsNote').textContent = from === 'paused' ? 'Değişiklikler bir sonraki elde geçerli olur.' : '';
+        $('settingsNote').textContent = from === 'paused' ? 'Zorluk değişiklikleri bir sonraki elde geçerli olur.' : '';
         updateSettingsScreen();
     }
 
     function closeSettings() { returnTo(settingsReturn); }
+
+    function setSensitivity(value) {
+        const v = Number(value);
+        if (!Number.isFinite(v)) return;
+        settings.sens = Math.round(Math.min(SENS_MAX, Math.max(SENS_MIN, v)) * 10) / 10;
+        saveSettings();
+        $('sensValue').textContent = settings.sens.toFixed(1) + 'x';
+    }
 
     function setDifficulty(kind, value) {
         if (!DIFFICULTIES.includes(value) || (kind !== 'game' && kind !== 'duel')) return;
@@ -1363,6 +1385,8 @@
     function updateSettingsScreen() {
         $('gameDiffButtons').querySelectorAll('.seg-btn').forEach(b => b.classList.toggle('active', b.dataset.value === settings.game));
         $('duelDiffButtons').querySelectorAll('.seg-btn').forEach(b => b.classList.toggle('active', b.dataset.value === settings.duel));
+        $('sensSlider').value = settings.sens;
+        $('sensValue').textContent = settings.sens.toFixed(1) + 'x';
         const g = GAME_DIFF[settings.game], d = DUEL_DIFF[settings.duel];
         $('gameDiffDesc').textContent =
             `Düşman canı ${g.enemyHealth} · Aynı anda en fazla ${g.maxEnemies} düşman · Düşman başına ${g.killGold} altın`;
