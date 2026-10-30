@@ -279,17 +279,20 @@
     //  AYARLAR (tüm hızlar saniye başına — kare hızından bağımsız)
     // =====================================================================
     const CFG = {
-        eyeHeight: 1.6, playerSpeed: 7.2, playerRadius: 0.6,
+        // Göz hizası düşmanın gövdesine denk gelir; kafa vuruşu için hafif yukarı nişan gerekir
+        eyeHeight: 1.4, playerSpeed: 7.2, playerRadius: 0.6, enemyScale: 1.3,
         fireInterval: 0.1,            // ~10 atış/sn (otomatik tüfek)
         reloadTime: 2.0,
         bulletSpeed: 84, bulletLife: 1.2,
-        botBulletSpeed: 45, botBulletLife: 2.0, botBulletDamage: 10, botFireInterval: 1.0,
-        enemyHealth: 30, enemySpeed: 2.1, duelHealth: 100, duelSpeed: 2.6,
+        botBulletSpeed: 45, botBulletLife: 2.0, botBulletDamage: 8, botFireInterval: 0.4,
+        botFirstShot: 0.8, botSpread: 0.05,
+        enemyHealth: 30, enemySpeed: 2.1, duelHealth: 400, duelSpeed: 2.6,
         meleeDps: 30,                 // yakın temas hasarı (saniyede)
         armorAmount: 50,
         baseDamage: 15, damageStep: 5, maxDamage: 35, damageCost: 100,
         baseMag: 30, magStep: 5, maxMag: 60, magCost: 75,
-        startPool: 90, healCost: 50, maxHealKits: 9, shieldCost: 150, skinCost: 300,
+        startPool: 90, ammoRegen: 4,  // yedek mermi azken saniyede dolan mermi (kilitlenmeyi önler)
+        healCost: 50, maxHealKits: 9, shieldCost: 150, skinCost: 300,
         maxEnemies: 12, spawnPerSec: 1.5, killGold: 25, killAmmo: 20, duelGold: 150
     };
     const SKINS = ['classic', 'prime', 'reaver'];
@@ -350,6 +353,11 @@
         return s;
     }
 
+    function writeSave(s) {
+        const data = JSON.stringify(s);
+        sSet(SAVE_KEY, JSON.stringify({ d: data, h: hashStr(SAVE_SALT + data) }));
+    }
+
     function loadSave() {
         const raw = sGet(SAVE_KEY);
         if (raw) {
@@ -370,6 +378,7 @@
                 healKits: sGet('val_healKits'), hasShield: sGet('val_hasShield') === 'true',
                 activeSkin: sGet('val_skin'), unlockedSkins: skins
             });
+            writeSave(migrated);   // eski anahtarlar silinmeden önce yeni kayıt yazılsın
             ['val_gold', 'val_damage', 'val_maxAmmo', 'val_ammoPool', 'val_healKits',
              'val_hasShield', 'val_skin', 'val_unlockedSkins'].forEach(sDel);
             return migrated;
@@ -388,16 +397,15 @@
         score: 0, kills: 0, goldEarned: 0,
         gold: save.gold, damage: save.damage, healKits: save.healKits,
         hasShield: save.hasShield, activeSkin: save.activeSkin, unlockedSkins: save.unlockedSkins,
-        reloading: false, reloadTimer: 0, fireCooldown: 0
+        reloading: false, reloadTimer: 0, fireCooldown: 0, ammoRegenAcc: 0
     };
 
     function saveGameData() {
-        const data = JSON.stringify({
+        writeSave({
             gold: player.gold, damage: player.damage, maxAmmo: player.maxAmmo,
             healKits: player.healKits, hasShield: player.hasShield,
             activeSkin: player.activeSkin, unlockedSkins: player.unlockedSkins
         });
-        sSet(SAVE_KEY, JSON.stringify({ d: data, h: hashStr(SAVE_SALT + data) }));
     }
 
     // state: 'menu' | 'starting' | 'playing' | 'paused' | 'shop' | 'over'
@@ -407,6 +415,7 @@
     let duelBot = null;
     let pendingDuelWin = false;
     let firing = false;
+    let lockTimer = null;
     const keys = { forward: false, back: false, left: false, right: false };
 
     let scene, camera, renderer, canvas;
@@ -696,6 +705,7 @@
     function onPointerLockChange() {
         const locked = document.pointerLockElement === canvas;
         if (locked) {
+            clearTimeout(lockTimer);
             if (state === 'starting' || state === 'paused') {
                 state = 'playing';
                 hideAllScreens();
@@ -713,7 +723,8 @@
             const p = canvas.requestPointerLock();
             if (p && typeof p.catch === 'function') p.catch(lockFailed);
         } catch (e) { lockFailed(); }
-        setTimeout(() => { if (state === 'starting') lockFailed(); }, 1200);
+        clearTimeout(lockTimer);   // önceki isteğin zamanlayıcısı yeni isteği bozmasın
+        lockTimer = setTimeout(() => { if (state === 'starting') lockFailed(); }, 1200);
     }
 
     function lockFailed() {
@@ -745,6 +756,7 @@
         player.ammoPool = CFG.startPool;
         player.score = 0; player.kills = 0; player.goldEarned = 0;
         player.reloading = false; player.reloadTimer = 0; player.fireCooldown = 0;
+        player.ammoRegenAcc = 0;
         weaponKick = 0;
 
         isDuelMode = duel;
@@ -815,7 +827,8 @@
     }
 
     function damagePlayer(amount) {
-        if (state !== 'playing') return;
+        // Bot bu karede öldüyse düello kazanılmıştır; kalan mermiler sonucu değiştirmesin
+        if (state !== 'playing' || pendingDuelWin) return;
         if (player.armor > 0) {
             const absorbed = Math.min(player.armor, amount);
             player.armor -= absorbed;
@@ -832,6 +845,10 @@
             player.healKits--;
             saveGameData();
             showToast('Can dolduruldu');
+        } else if (player.healKits <= 0) {
+            showToast('Can kitin yok (mağazadan alabilirsin)');
+        } else {
+            showToast('Canın zaten dolu');
         }
     }
 
@@ -898,12 +915,13 @@
             this.group.add(body, head, la, ra);
 
             this.group.position.set(x, 0, z);
+            this.group.scale.setScalar(CFG.enemyScale);
             scene.add(this.group);
 
             this.health = isDuel ? CFG.duelHealth : CFG.enemyHealth;
             this.maxHealth = this.health;
             this.speed = isDuel ? CFG.duelSpeed : CFG.enemySpeed;
-            this.shootTimer = 1.5;          // ilk atıştan önce kısa bir süre
+            this.shootTimer = CFG.botFirstShot;   // ilk atıştan önce kısa bir süre
             this.strafeDir = 1;
             this.strafeTimer = 0;
         }
@@ -937,7 +955,14 @@
                 }
             } else {
                 if (dist > 1.5) {
-                    moveWithCollision(p, nx * this.speed * dt, nz * this.speed * dt, 0.6);
+                    const step = this.speed * dt;
+                    const ox = p.x, oz = p.z;
+                    moveWithCollision(p, nx * step, nz * step, 0.6);
+                    if (Math.hypot(p.x - ox, p.z - oz) < step * 0.5) {
+                        // Duvara takıldı: duvar boyunca yana kay, o yön de kapalıysa yön değiştir
+                        moveWithCollision(p, -nz * this.strafeDir * step, nx * this.strafeDir * step, 0.6);
+                        if (Math.hypot(p.x - ox, p.z - oz) < step * 0.1) this.strafeDir *= -1;
+                    }
                 } else {
                     damagePlayer(CFG.meleeDps * dt);   // saniye bazlı yakın temas hasarı
                 }
@@ -945,13 +970,13 @@
         }
 
         shootAtPlayer() {
-            const origin = new THREE.Vector3(this.group.position.x, 1.4, this.group.position.z);
-            const target = new THREE.Vector3(camera.position.x, 1.3, camera.position.z);
+            const origin = new THREE.Vector3(this.group.position.x, 1.4 * CFG.enemyScale, this.group.position.z);
+            const target = new THREE.Vector3(camera.position.x, CFG.eyeHeight - 0.3, camera.position.z);
             const dir = target.sub(origin).normalize();
             // küçük sapma: bot her atışı tam isabetle yapmasın
-            dir.x += (Math.random() - 0.5) * 0.03;
-            dir.y += (Math.random() - 0.5) * 0.03;
-            dir.z += (Math.random() - 0.5) * 0.03;
+            dir.x += (Math.random() - 0.5) * CFG.botSpread;
+            dir.y += (Math.random() - 0.5) * CFG.botSpread;
+            dir.z += (Math.random() - 0.5) * CFG.botSpread;
             dir.normalize();
             origin.addScaledVector(dir, 0.6);
             spawnBullet(origin, dir, CFG.botBulletSpeed, CFG.botBulletDamage, 0xff3333, false, CFG.botBulletLife);
@@ -960,9 +985,11 @@
         // Mermi noktası gövdeye/kafaya değiyor mu? (kafa vuruşu 2x hasar)
         hitTest(pt) {
             const p = this.group.position;
-            const h = Math.hypot(pt.x - p.x, pt.z - p.z);
-            if (pt.y > 1.2 && pt.y < 1.75 && h < 0.35) return 'head';
-            if (pt.y >= 0 && pt.y <= 1.2 && h < 0.7) return 'body';
+            const k = CFG.enemyScale;
+            const h = Math.hypot(pt.x - p.x, pt.z - p.z) / k;
+            const y = pt.y / k;
+            if (y > 1.2 && y < 1.75 && h < 0.35) return 'head';
+            if (y >= 0 && y <= 1.2 && h < 0.7) return 'body';
             return null;
         }
 
@@ -971,7 +998,7 @@
 
     function hitsPlayer(pt) {
         const h = Math.hypot(pt.x - camera.position.x, pt.z - camera.position.z);
-        return h < 0.45 && pt.y > 0 && pt.y < 1.85;
+        return h < 0.45 && pt.y > 0 && pt.y < CFG.eyeHeight + 0.25;
     }
 
     function findSpawnPoint() {
@@ -1039,6 +1066,11 @@
         }
 
         if (player.fireCooldown > 0) player.fireCooldown -= dt;
+        if (player.ammo + player.ammoPool < player.maxAmmo) {
+            player.ammoRegenAcc += CFG.ammoRegen * dt;
+            const add = Math.floor(player.ammoRegenAcc);
+            if (add > 0) { player.ammoPool += add; player.ammoRegenAcc -= add; }
+        }
         if (player.reloading) {
             player.reloadTimer -= dt;
             if (player.reloadTimer <= 0) finishReload();
@@ -1131,7 +1163,7 @@
         setHud('shieldDisplay', player.armor > 0 ? String(Math.ceil(player.armor)) : (player.hasShield ? 'HAZIR' : 'YOK'));
         setHud('ammoDisplay', player.ammo);
         setHud('ammoPoolDisplay', player.ammoPool);
-        setHud('reloadDisplay', player.reloading ? 'ŞARJÖR DEĞİŞİYOR...' : (player.ammo === 0 && player.ammoPool === 0 ? 'MERMİ BİTTİ' : ''));
+        setHud('reloadDisplay', player.reloading ? 'ŞARJÖR DEĞİŞİYOR...' : (player.ammo === 0 && player.ammoPool === 0 ? 'MERMİ DOLUYOR...' : ''));
         setHud('scoreDisplay', player.score);
         setHud('killsDisplay', player.kills);
         setHud('goldDisplay', player.gold);
