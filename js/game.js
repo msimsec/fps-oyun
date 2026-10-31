@@ -17,6 +17,7 @@ function resetWorld(duel) {
     hideBanner();
 
     player.health = player.maxHealth;
+    player.sinceHurt = 0;
     player.armor = 0;
     if (player.hasShield) { player.armor = CFG.armorAmount; player.hasShield = false; }
     resetArsenal();
@@ -125,23 +126,10 @@ function damagePlayer(amount) {
         amount -= absorbed;
     }
     player.health -= amount;
+    player.sinceHurt = 0;
     flashClass('damageFlash', 'on', 150);
     sfx('hurt');
     if (player.health <= 0) { player.health = 0; endRun(false); }
-}
-
-function useHealKit() {
-    if (player.healKits > 0 && player.health < player.maxHealth) {
-        player.health = player.maxHealth;
-        player.healKits--;
-        saveGameData();
-        showToast('Can dolduruldu');
-        sfx('heal');
-    } else if (player.healKits <= 0) {
-        showToast('Can kitin yok (mağazadan alabilirsin)');
-    } else {
-        showToast('Canın zaten dolu');
-    }
 }
 
 // Oyuncuyu bölümün başlangıç noktasına koy

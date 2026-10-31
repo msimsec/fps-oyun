@@ -17,7 +17,6 @@ function onKeyDown(e) {
         case 'ShiftLeft': case 'ShiftRight': keys.sprint = true; break;
         case 'Space': if (state === 'playing') jump(); break;
         case 'KeyR': if (state === 'playing') startReload(); break;
-        case 'KeyH': if (state === 'playing') useHealKit(); break;
         default:
             if (WEAPON_KEYS[e.code] && state === 'playing') selectWeapon(WEAPON_KEYS[e.code]);
     }

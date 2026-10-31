@@ -25,6 +25,8 @@ Dalga modunda 4 düşman tipi vardır: **Er** (kırmızı), **Koşucu** (turuncu
 
 Dalgalar ilerledikçe düşmanlar yetenek kazanır: **2. dalga** zıplama (alçak kasa ve siperlerin üstüne çıkar, kasaya çıkan oyuncunun yanına zıplar), **3. dalga** rampa kullanma (Space'te oyuncunun platformuna en kısa rampa yoluyla gelir), **4. dalga** vurulunca yana kaçma, **5. dalga** keskin nişan (daha isabetli ve sık ateş). Yeni yetenek dalga başında duyurulur.
 
+**Can yenilenmesi:** 4 saniye hasar almazsan can saniyede 10 puan dolmaya başlar (can göstergesi yeşil parlar). Can kiti yoktur; eski kayıtlardaki kitler 50'şer altın olarak iade edilir.
+
 Her iki modun zorluğu **Ayarlar** ekranından ayrı ayrı seçilir (Kolay / Orta / Zor).
 
 ## Kontroller
@@ -39,7 +41,6 @@ Her iki modun zorluğu **Ayarlar** ekranından ayrı ayrı seçilir (Kolay / Ort
 | Sağ tık | Dürbün (keskin nişancı) |
 | R | Şarjör değiştir |
 | 1 2 3 4 / fare tekerleği | Silah değiştir |
-| H | Can kiti kullan |
 | ESC | Duraklat |
 
 ## Silahlar
@@ -80,7 +81,7 @@ js/
   world.js        Sahne, ışıklar, Depo duvarları/kasaları, silah modelleri, başlangıç (init)
   maps.js         Bölümler: Depo ve Space, zıplatma rampaları, boşluğa düşme
   input.js        Klavye/fare, pointer lock
-  game.js         El başlatma/bitirme, hasar alma, can kiti
+  game.js         El başlatma/bitirme, hasar alma
   weapons.js      Atış, şarjör, silah değiştirme, dürbün
   enemies.js      Düşman ve düello botu
   waves.js        Dalga sistemi

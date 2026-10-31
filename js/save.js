@@ -33,7 +33,7 @@ function clampInt(v, def, min, max) {
 
 function defaultSave() {
     return {
-        gold: 0, damage: CFG.baseDamage, maxAmmo: CFG.baseMag, healKits: 0,
+        gold: 0, damage: CFG.baseDamage, maxAmmo: CFG.baseMag,
         hasShield: false, activeSkin: 'classic',
         unlockedSkins: Object.fromEntries(SKINS.map(id => [id, id === 'classic'])),
         upgrades: Object.fromEntries(UPGRADE_IDS.map(id => [id, 0])),
@@ -48,10 +48,10 @@ function sanitizeSave(o) {
     const ups = (o.upgrades && typeof o.upgrades === 'object') ? o.upgrades : {};
     const weapons = (o.weapons && typeof o.weapons === 'object') ? o.weapons : {};
     const s = {
-        gold: clampInt(o.gold, 0, 0, 1000000),
+        // Can kitleri kaldırıldı (can kendiliğinden yenileniyor): eldeki kitler 50 altın olarak iade
+        gold: clampInt(clampInt(o.gold, 0, 0, 1000000) + 50 * clampInt(o.healKits, 0, 0, 9), 0, 0, 1000000),
         damage: clampInt(o.damage, d.damage, CFG.baseDamage, CFG.maxDamage),
         maxAmmo: clampInt(o.maxAmmo, d.maxAmmo, CFG.baseMag, CFG.maxMag),
-        healKits: clampInt(o.healKits, 0, 0, CFG.maxHealKits),
         hasShield: o.hasShield === true,
         activeSkin: SKINS.includes(o.activeSkin) ? o.activeSkin : 'classic',
         unlockedSkins: Object.fromEntries(SKINS.map(id => [id, id === 'classic' || skins[id] === true])),

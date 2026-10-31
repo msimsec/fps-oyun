@@ -15,6 +15,11 @@ function jump() {
 }
 
 function updatePlayer(dt) {
+    // Can yenilenmesi: bir süre hasar alınmazsa can kendiliğinden dolar
+    player.sinceHurt += dt;
+    if (player.sinceHurt >= CFG.regenDelay && player.health < player.maxHealth) {
+        player.health = Math.min(player.maxHealth, player.health + CFG.regenRate * dt);
+    }
     const f = new THREE.Vector3();
     camera.getWorldDirection(f);
     f.y = 0; f.normalize();
@@ -161,6 +166,7 @@ function updateHUD() {
     const w = curWeapon(), a = curAmmo();
     setHud('hpDisplay', Math.max(0, Math.ceil(player.health)));
     setHud('hpMaxDisplay', player.maxHealth);
+    $('healthHud').classList.toggle('regen', player.sinceHurt >= CFG.regenDelay && player.health < player.maxHealth);
     setHud('shieldDisplay', player.armor > 0 ? String(Math.ceil(player.armor)) : (player.hasShield ? 'HAZIR' : 'YOK'));
     setHud('weaponName', w.name.toUpperCase());
     setHud('ammoDisplay', a ? a.ammo : 0);
@@ -172,7 +178,6 @@ function updateHUD() {
     setHud('scoreDisplay', player.score);
     setHud('killsDisplay', player.kills);
     setHud('goldDisplay', player.gold);
-    setHud('healKitsDisplay', player.healKits);
     setHud('modeDisplay', isDuelMode
         ? `${curMap().name} · DÜELLO · ${DIFF_LABELS[run.duel]} · ${formatTime(duelTime)}`
         : `${curMap().name} · DALGA ${wave.num || '-'} · KALAN ${waveRemaining()} · ${DIFF_LABELS[run.game]}`);

@@ -320,6 +320,7 @@ function checkJumpPads() {
 function fellOut() {
     const s = curMap().spawn;
     player.health -= 35;
+    player.sinceHurt = 0;
     flashClass('damageFlash', 'on', 300);
     sfx('hurt');
     if (player.health <= 0) { player.health = 0; endRun(false); return; }

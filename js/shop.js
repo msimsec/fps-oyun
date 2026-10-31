@@ -31,7 +31,6 @@ function updateShopModal() {
     $('modalGold').textContent = player.gold;
     $('modalDmg').textContent = `${player.damage} / ${CFG.maxDamage}`;
     $('modalMag').textContent = `${player.maxAmmo} / ${CFG.maxMag}`;
-    $('modalHeal').textContent = `${player.healKits} / ${CFG.maxHealKits}`;
     $('modalShield').textContent = shieldStatusText();
     renderSkinPicker();
     ['shotgun', 'sniper'].forEach(id => {
@@ -48,7 +47,6 @@ function updateShopModal() {
                                : (player.hasShield ? 'Sonraki ele hazır ✓' : null);
     setBuyBtn('btnDamage', CFG.damageCost, player.damage >= CFG.maxDamage ? 'Maksimum ✓' : null);
     setBuyBtn('btnMag', CFG.magCost, player.maxAmmo >= CFG.maxMag ? 'Maksimum ✓' : null);
-    setBuyBtn('btnHeal', CFG.healCost, player.healKits >= CFG.maxHealKits ? 'Çanta dolu ✓' : null);
     setBuyBtn('btnShield', CFG.shieldCost, shieldDone);
     setBuyBtn('btnShotgun', WEAPONS.shotgun.cost, player.ownedWeapons.shotgun ? 'Sahipsin ✓' : null);
     setBuyBtn('btnSniper', WEAPONS.sniper.cost, player.ownedWeapons.sniper ? 'Sahipsin ✓' : null);
@@ -121,13 +119,6 @@ function buyAmmo() {
     if (!spend(CFG.magCost)) return;
     player.maxAmmo = Math.min(CFG.maxMag, player.maxAmmo + CFG.magStep);
     afterPurchase('Şarjör kapasitesi artırıldı');
-}
-
-function buyHealKit() {
-    if (player.healKits >= CFG.maxHealKits) { showToast('En fazla ' + CFG.maxHealKits + ' can kiti taşıyabilirsin'); return; }
-    if (!spend(CFG.healCost)) return;
-    player.healKits++;
-    afterPurchase('Can kiti alındı');
 }
 
 function buyShield() {

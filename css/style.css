@@ -414,3 +414,6 @@ kbd {
 .duel-bar { width: min(360px, 40vw); }
 .map-option.map-desert { background: linear-gradient(135deg, #7c5a2a, #3a2a14); }
 .map-picker .map-option { width: 250px; }
+
+/* Can yenilenirken can göstergesi yeşil parlar */
+.health-hud.regen { color: #4ade80; box-shadow: 0 0 12px rgba(74, 222, 128, 0.45); }

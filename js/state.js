@@ -11,8 +11,9 @@ const player = {
     ownedWeapons: { rifle: true, pistol: true, shotgun: save.weapons.shotgun, sniper: save.weapons.sniper },
     arsenal: {},                    // silah başına { ammo, pool } — her elin başında doldurulur
     score: 0, kills: 0, headshots: 0, goldEarned: 0,
-    gold: save.gold, damage: save.damage, healKits: save.healKits,
+    gold: save.gold, damage: save.damage,
     hasShield: save.hasShield, activeSkin: save.activeSkin, unlockedSkins: save.unlockedSkins,
+    sinceHurt: 0,                   // son hasardan beri geçen süre (can yenilenmesi için)
     reloading: false, reloadTimer: 0, reloadTotal: 1, fireCooldown: 0, semiFired: false,
     velY: 0, airVX: 0, airVZ: 0, onGround: true, zoomed: false,
     platform: 0                     // Space: oyuncunun son durduğu platform
@@ -21,7 +22,7 @@ const player = {
 function saveGameData() {
     writeSave({
         gold: player.gold, damage: player.damage, maxAmmo: player.maxAmmo,
-        healKits: player.healKits, hasShield: player.hasShield,
+        hasShield: player.hasShield,
         activeSkin: player.activeSkin, unlockedSkins: player.unlockedSkins, upgrades: player.upgrades,
         weapons: { shotgun: player.ownedWeapons.shotgun, sniper: player.ownedWeapons.sniper }
     });

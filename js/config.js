@@ -14,7 +14,9 @@ const CFG = {
     armorAmount: 50,
     baseDamage: 15, damageStep: 5, maxDamage: 35, damageCost: 100,
     baseMag: 30, magStep: 5, maxMag: 60, magCost: 75,
-    healCost: 50, maxHealKits: 9, shieldCost: 150,
+    shieldCost: 150,
+    // Otomatik can yenilenmesi: son hasardan regenDelay sn sonra saniyede regenRate can
+    regenDelay: 4, regenRate: 10,
     // Dalgalar: her dalgada düşman sayısı, canı ve hızı biraz artar
     waveGrowth: 0.35, waveHpGrowth: 0.1, waveSpeedGrowth: 0.03, waveSpeedMax: 1.4,
     waveBreak: 5, waveGoldPerWave: 10, waveScorePerWave: 200, waveHeal: 25

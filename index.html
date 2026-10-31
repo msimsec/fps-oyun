@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>3D Tactical FPS - 1v1 Düello ve Tüfek Skinleri</title>
     <!-- ?v=… : her yayında değiştirilir (tarih); tarayıcı önbellekteki eski CSS/JS dosyalarını kullanmasın -->
-    <link rel="stylesheet" href="css/style.css?v=20261030d">
+    <link rel="stylesheet" href="css/style.css?v=20261031a">
 
     <!-- Three.js r128 — üçüncü taraf CDN yerine oyunla aynı klasörden yüklenir.
          Dosya index.html ile aynı yerden geldiği için CDN ele geçirilme riski yoktur.
@@ -31,7 +31,7 @@
             <div class="banner-title" id="bannerTitle"></div>
             <div class="banner-sub" id="bannerSub"></div>
         </div>
-        <div class="health-hud">CAN: <span id="hpDisplay">100</span>/<span id="hpMaxDisplay">100</span> | Kalkan: <span id="shieldDisplay">YOK</span></div>
+        <div class="health-hud" id="healthHud">CAN: <span id="hpDisplay">100</span>/<span id="hpMaxDisplay">100</span> | Kalkan: <span id="shieldDisplay">YOK</span></div>
         <div class="ammo-hud">
             <div class="reload-text" id="reloadDisplay"></div>
             <div class="weapon-name" id="weaponName">TÜFEK</div>
@@ -41,7 +41,6 @@
         <div class="score-hud">
             <div>SKOR: <span id="scoreDisplay">0</span></div>
             <div>VURULAN: <span id="killsDisplay">0</span></div>
-            <div>H: CAN KİTİ <span id="healKitsDisplay">0</span></div>
         </div>
         <div class="kill-feed" id="killFeed"></div>
     </div>
@@ -75,7 +74,6 @@
             <div><kbd>Sağ tık</kbd> Dürbün</div>
             <div><kbd>R</kbd> Şarjör</div>
             <div><kbd>1-4</kbd> Silah seç</div>
-            <div><kbd>H</kbd> Can kiti</div>
             <div><kbd>ESC</kbd> Duraklat</div>
         </div>
         <div class="note" id="mobileNote"></div>
@@ -201,11 +199,6 @@
                 <button class="buy-btn" id="btnMag" onclick="buyAmmo()"></button>
             </div>
             <div class="shop-card">
-                <h3>Can Kiti</h3>
-                <p>Oyunda 'H' tuşuna basınca canını fuller; eller arasında saklanır<br>Adet: <span id="modalHeal">0</span></p>
-                <button class="buy-btn" id="btnHeal" onclick="buyHealKit()"></button>
-            </div>
-            <div class="shop-card">
                 <h3>Ağır Kalkan</h3>
                 <p>+50 kalkan puanı; hasarı önce kalkan emer, bitince tükenir. Menüden alınırsa sonraki elin başında takılır<br>Durum: <span id="modalShield">YOK</span></p>
                 <button class="buy-btn" id="btnShield" onclick="buyShield()"></button>
@@ -245,24 +238,24 @@
 
     <div id="toast"></div>
 
-    <script src="js/profiles.js?v=20261030d"></script>
-    <script src="js/config.js?v=20261030d"></script>
-    <script src="js/save.js?v=20261030d"></script>
-    <script src="js/state.js?v=20261030d"></script>
-    <script src="js/utils.js?v=20261030d"></script>
-    <script src="js/audio.js?v=20261030d"></script>
-    <script src="js/feedback.js?v=20261030d"></script>
-    <script src="js/world.js?v=20261030d"></script>
-    <script src="js/maps.js?v=20261030d"></script>
-    <script src="js/input.js?v=20261030d"></script>
-    <script src="js/game.js?v=20261030d"></script>
-    <script src="js/weapons.js?v=20261030d"></script>
-    <script src="js/enemies.js?v=20261030d"></script>
-    <script src="js/waves.js?v=20261030d"></script>
-    <script src="js/records.js?v=20261030d"></script>
-    <script src="js/update.js?v=20261030d"></script>
-    <script src="js/shop.js?v=20261030d"></script>
-    <script src="js/settings.js?v=20261030d"></script>
-    <script src="js/main.js?v=20261030d"></script>
+    <script src="js/profiles.js?v=20261031a"></script>
+    <script src="js/config.js?v=20261031a"></script>
+    <script src="js/save.js?v=20261031a"></script>
+    <script src="js/state.js?v=20261031a"></script>
+    <script src="js/utils.js?v=20261031a"></script>
+    <script src="js/audio.js?v=20261031a"></script>
+    <script src="js/feedback.js?v=20261031a"></script>
+    <script src="js/world.js?v=20261031a"></script>
+    <script src="js/maps.js?v=20261031a"></script>
+    <script src="js/input.js?v=20261031a"></script>
+    <script src="js/game.js?v=20261031a"></script>
+    <script src="js/weapons.js?v=20261031a"></script>
+    <script src="js/enemies.js?v=20261031a"></script>
+    <script src="js/waves.js?v=20261031a"></script>
+    <script src="js/records.js?v=20261031a"></script>
+    <script src="js/update.js?v=20261031a"></script>
+    <script src="js/shop.js?v=20261031a"></script>
+    <script src="js/settings.js?v=20261031a"></script>
+    <script src="js/main.js?v=20261031a"></script>
 </body>
 </html>
