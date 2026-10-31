@@ -15,6 +15,10 @@ const CFG = {
     baseDamage: 15, damageStep: 5, maxDamage: 35, damageCost: 100,
     baseMag: 30, magStep: 5, maxMag: 60, magCost: 75,
     shieldCost: 150,
+    // Bomba (G): fitil süresi, atış hızı, patlama yarıçapı ve merkezdeki hasar; el başına ve en fazla adet
+    grenadeFuse: 1.8, grenadeSpeed: 15, grenadeRadius: 6, grenadeDamage: 110, grenadeStart: 2, grenadeMax: 4,
+    // Ölen düşmanın eşya düşürme şansı ve eşyanın yerde kalma süresi (sn)
+    dropChance: 0.35, dropLife: 20,
     // Dalgalar: her dalgada düşman sayısı, canı ve hızı biraz artar
     waveGrowth: 0.35, waveHpGrowth: 0.1, waveSpeedGrowth: 0.03, waveSpeedMax: 1.4,
     waveBreak: 5, waveGoldPerWave: 10, waveScorePerWave: 200
@@ -80,7 +84,7 @@ function pickEnemyType(waveNum) {
 // =====================================================================
 //  SİLAHLAR — hasar = oyuncunun hasar seviyesi × dmgMul (mağazadaki yükseltme hepsine işler)
 // =====================================================================
-const WEAPON_ORDER = ['pistol', 'rifle', 'shotgun', 'sniper'];   // 1-4 tuşları bu sırayla
+const WEAPON_ORDER = ['pistol', 'rifle', 'shotgun', 'sniper', 'smg'];   // 1-5 tuşları bu sırayla
 const WEAPONS = {
     rifle: {
         name: 'Tüfek', auto: true, interval: 0.1, dmgMul: 1, pellets: 1, spread: 0,
@@ -99,6 +103,11 @@ const WEAPONS = {
     sniper: {
         name: 'Keskin Nişancı', auto: false, interval: 1.1, dmgMul: 5, pellets: 1, spread: 0,
         mag: 5, startPool: 15, killAmmo: 2, reload: 2.6, speed: 160, life: 0.8, cost: 400, zoom: true
+    },
+    smg: {
+        // Hafif makineli: çok hızlı ateş, mermi başına az hasar, biraz dağınık; yakın-orta mesafe
+        name: 'Makineli', auto: true, interval: 0.055, dmgMul: 0.5, pellets: 1, spread: 0.018,
+        mag: 40, startPool: 160, killAmmo: 30, reload: 1.6, speed: 80, life: 0.8, cost: 300
     }
 };
 
@@ -150,7 +159,7 @@ const settings = (() => {
         duel: o && DIFFICULTIES.includes(o.duel) ? o.duel : 'normal',
         sens: o && Number.isFinite(o.sens) ? Math.min(SENS_MAX, Math.max(SENS_MIN, o.sens)) : 1,
         volume: o && Number.isFinite(o.volume) ? Math.min(1, Math.max(0, o.volume)) : 0.6,
-        map: o && ['depot', 'space', 'desert'].includes(o.map) ? o.map : 'depot'
+        map: o && ['depot', 'space', 'desert', 'snow'].includes(o.map) ? o.map : 'depot'
     };
 })();
 function saveSettings() {

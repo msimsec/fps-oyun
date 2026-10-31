@@ -84,3 +84,41 @@ function updateDuelBar() {
     $('duelBarFill').style.width = (frac * 100).toFixed(1) + '%';
     setHud('duelBarText', `BOT ${Math.max(0, Math.ceil(duelBot.health))} / ${duelBot.maxHealth}`);
 }
+
+// =====================================================================
+//  HASAR YÖNÜ — vurulunca nişangâhın çevresinde, atışın geldiği yönü gösteren kırmızı yay.
+//  Oyuncu dönünce yay da döner (kaynak noktası dünyada sabit tutulur).
+// =====================================================================
+const hitDirs = [];
+const HIT_DIR_LIFE = 1.2;
+
+function showHitDirection(x, z) {
+    // Aynı yerden gelen hasar (yakın temas her kare) yeni yay açmasın, eskisini tazelesin
+    const near = hitDirs.find(h => Math.hypot(h.x - x, h.z - z) < 2);
+    if (near) { near.age = 0; near.x = x; near.z = z; return; }
+    if (hitDirs.length >= 6) { hitDirs[0].el.remove(); hitDirs.shift(); }
+    const el = document.createElement('div');
+    el.className = 'hit-dir';
+    $('hitDirLayer').appendChild(el);
+    hitDirs.push({ x, z, age: 0, el });
+}
+
+function updateHitDirections(dt) {
+    const cx = camera.position.x, cz = camera.position.z;
+    const fx = -Math.sin(cameraAngleY), fz = -Math.cos(cameraAngleY);   // bakış yönü
+    const rx = Math.cos(cameraAngleY), rz = -Math.sin(cameraAngleY);    // sağ
+    for (let i = hitDirs.length - 1; i >= 0; i--) {
+        const h = hitDirs[i];
+        h.age += dt;
+        if (h.age >= HIT_DIR_LIFE) { h.el.remove(); hitDirs.splice(i, 1); continue; }
+        const dx = h.x - cx, dz = h.z - cz;
+        const a = Math.atan2(dx * rx + dz * rz, dx * fx + dz * fz);       // 0 = önde, + = sağda
+        h.el.style.transform = `translate(-50%, -50%) rotate(${a}rad)`;
+        h.el.style.opacity = String(Math.min(1, 2 * (1 - h.age / HIT_DIR_LIFE)));
+    }
+}
+
+function clearHitDirections() {
+    hitDirs.forEach(h => h.el.remove());
+    hitDirs.length = 0;
+}

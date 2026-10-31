@@ -14,6 +14,12 @@ function resetWorld(duel) {
     particles.forEach(p => scene.remove(p)); particles = [];
     clearFloaters();
     clearKillFeed();
+    clearHitDirections();
+    clearCorpses();
+    clearGrenades();
+    clearDrops();
+    player.grenades = CFG.grenadeStart; player.grenadeCd = 0;
+    runStats.pickups = 0; runStats.bestBlast = 0; runStats.cleanWave = false; runStats.duelWon = false;
     hideBanner();
 
     player.health = player.maxHealth;
@@ -117,8 +123,9 @@ function endRun(won) {
     if (document.pointerLockElement) document.exitPointerLock();
 }
 
-// pierce: kalkanı delip geçer (boşluğa düşme); flashMs: kırmızı ekran süresi
-function damagePlayer(amount, pierce = false, flashMs = 150) {
+// pierce: kalkanı delip geçer (boşluğa düşme); flashMs: kırmızı ekran süresi;
+// src: hasarın geldiği nokta {x, z} (ekranda yön oku gösterilir)
+function damagePlayer(amount, pierce = false, flashMs = 150, src = null) {
     // Bot bu karede öldüyse düello kazanılmıştır; kalan mermiler sonucu değiştirmesin
     if (state !== 'playing' || pendingDuelWin) return;
     if (!pierce && player.armor > 0) {
@@ -128,7 +135,9 @@ function damagePlayer(amount, pierce = false, flashMs = 150) {
     }
     player.health -= amount;
     player.sinceHurt = 0;
+    if (!isDuelMode) wave.hurt = true;
     flashClass('damageFlash', 'on', flashMs);
+    if (src) showHitDirection(src.x, src.z);
     sfx('hurt');
     if (player.health <= 0) { player.health = 0; endRun(false); }
 }

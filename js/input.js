@@ -3,8 +3,8 @@
 // =====================================================================
 //  GİRİŞ (klavye düzeninden bağımsız: e.code)
 // =====================================================================
-const WEAPON_KEYS = { Digit1: 'pistol', Digit2: 'rifle', Digit3: 'shotgun', Digit4: 'sniper',
-                      Numpad1: 'pistol', Numpad2: 'rifle', Numpad3: 'shotgun', Numpad4: 'sniper' };
+const WEAPON_KEYS = { Digit1: 'pistol', Digit2: 'rifle', Digit3: 'shotgun', Digit4: 'sniper', Digit5: 'smg',
+                      Numpad1: 'pistol', Numpad2: 'rifle', Numpad3: 'shotgun', Numpad4: 'sniper', Numpad5: 'smg' };
 
 function onKeyDown(e) {
     // Oyun sırasında Space/Enter odaktaki bir menü butonunu tetiklemesin
@@ -17,6 +17,7 @@ function onKeyDown(e) {
         case 'ShiftLeft': case 'ShiftRight': keys.sprint = true; break;
         case 'Space': if (state === 'playing') jump(); break;
         case 'KeyR': if (state === 'playing') startReload(); break;
+        case 'KeyG': if (state === 'playing') throwGrenade(); break;
         default:
             if (WEAPON_KEYS[e.code] && state === 'playing') selectWeapon(WEAPON_KEYS[e.code]);
     }

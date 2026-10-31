@@ -11,7 +11,7 @@ let currentMapId = null;
 let jumpPads = [];
 let mapAnimators = [];          // her karede çağrılan görsel efektler (ör. rampa parlaması)
 
-const MAP_IDS = ['depot', 'space', 'desert'];
+const MAP_IDS = ['depot', 'space', 'desert', 'snow'];
 
 // Zeminli bölümlerde düşman doğma noktası: oyuncudan 18-28 birim uzakta, engelsiz ve
 // oyuncuya yürüyerek ulaşılabilen (yol bulma alanında mesafesi olan) bir yer
@@ -72,6 +72,16 @@ MAPS.desert = {
     enemySpawn: floorSpawn
 };
 
+MAPS.snow = {
+    name: 'Kar Üssü',
+    desc: 'Karlı dağdaki askerî üs; konteynerler, yakıt tankları, kışla ve basamaklı gözetleme kulesi',
+    floorY: 0, killY: -Infinity, bulletMinY: 0, bulletMaxY: 60, enemyRange: 30,
+    spawn: { x: 0, y: 0, z: 34, angle: 0 },
+    duel: { player: { x: 0, y: 0, z: 18, angle: 0 }, bot: { x: 0, y: 0, z: -12 } },
+    build: buildSnow,
+    enemySpawn: floorSpawn
+};
+
 const curMap = () => MAPS[currentMapId] || MAPS.depot;
 
 function addWall(x, y, z, w, h, d, material) {
@@ -95,6 +105,8 @@ function buildMap(id) {
     walls = [];
     jumpPads = [];
     mapAnimators = [];
+    // Önceki bölümden kalan cesetler, bombalar ve yerdeki eşyalar yeni bölüme taşınmasın
+    clearCorpses(); clearGrenades(); clearDrops();
     currentMapId = id;
     MAPS[id].build();
 }
@@ -495,5 +507,198 @@ function buildDesert() {
             leaf.castShadow = true;
             mapGroup.add(leaf);
         }
+    });
+}
+
+// ---------------------------------------------------------------------
+//  KAR ÜSSÜ — karlı bir dağ yamacındaki askerî üs. Yerleşim bu oyuna özgüdür:
+//  kuzeyde komuta binası, iki yanda kışlalar, ortada açık avlu ve konteyner yığınları,
+//  batıda yakıt tankları, doğuda basamaklarla çıkılan gözetleme kulesi. Kar yağar.
+// ---------------------------------------------------------------------
+function createSnowTexture() {
+    const c = document.createElement('canvas');
+    c.width = c.height = 256;
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = '#eef3f8';
+    ctx.fillRect(0, 0, 256, 256);
+    for (let i = 0; i < 2200; i++) {
+        ctx.fillStyle = Math.random() < 0.5 ? 'rgba(170,190,215,0.25)' : 'rgba(255,255,255,0.6)';
+        ctx.fillRect(Math.random() * 256, Math.random() * 256, 1 + Math.random() * 3, 1 + Math.random() * 2);
+    }
+    const t = new THREE.CanvasTexture(c);
+    t.wrapS = t.wrapT = THREE.RepeatWrapping;
+    return t;
+}
+
+function createConcreteTexture() {
+    const c = document.createElement('canvas');
+    c.width = c.height = 256;
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = '#7b8794';
+    ctx.fillRect(0, 0, 256, 256);
+    for (let i = 0; i < 1500; i++) {
+        const v = 100 + Math.floor(Math.random() * 60);
+        ctx.fillStyle = `rgba(${v},${v + 6},${v + 14},0.35)`;
+        ctx.fillRect(Math.random() * 256, Math.random() * 256, 2, 2);
+    }
+    ctx.fillStyle = 'rgba(0,0,0,0.18)';
+    for (let k = 0; k < 256; k += 64) { ctx.fillRect(0, k, 256, 2); ctx.fillRect(k, 0, 2, 256); }
+    const t = new THREE.CanvasTexture(c);
+    t.wrapS = t.wrapT = THREE.RepeatWrapping;
+    return t;
+}
+
+function buildSnow() {
+    scene.background = new THREE.Color(0xc9d5e2);
+    scene.fog = new THREE.FogExp2(0xd6e0ea, 0.017);
+    mapGroup.add(new THREE.HemisphereLight(0xeaf2ff, 0x8a9bb0, 0.35));
+
+    const snowTex = createSnowTexture();
+    snowTex.repeat.set(20, 20);
+    const floor = new THREE.Mesh(new THREE.PlaneGeometry(100, 100),
+        new THREE.MeshStandardMaterial({ map: snowTex, color: 0xc9d3df, roughness: 1 }));
+    floor.rotation.x = -Math.PI / 2;
+    floor.receiveShadow = true;
+    mapGroup.add(floor);
+
+    const concTex = createConcreteTexture();
+    const concMat = (w, h) => {
+        const t = concTex.clone(); t.needsUpdate = true; t.repeat.set(Math.max(1, w / 4), Math.max(1, h / 4));
+        return new THREE.MeshStandardMaterial({ map: t, roughness: 0.9 });
+    };
+    const snowCapMat = new THREE.MeshStandardMaterial({ color: 0xf5f8fc, roughness: 1 });
+    const metalMat = new THREE.MeshStandardMaterial({ color: 0x4b5563, roughness: 0.5, metalness: 0.6 });
+    const windowMat = new THREE.MeshBasicMaterial({ color: 0xfde68a });     // ışığı yanan pencereler
+    // Çatısı karla kaplı yapı (kar örtüsü yalnızca görsel)
+    const building = (x, z, w, d, h, mat) => {
+        addWall(x, h / 2, z, w, h, d, mat || concMat(Math.max(w, d), h));
+        const cap = new THREE.Mesh(new THREE.BoxGeometry(w + 0.4, 0.35, d + 0.4), snowCapMat);
+        cap.position.set(x, h + 0.17, z);
+        mapGroup.add(cap);
+    };
+    const windows = (x, z, w, d, h, faceZ) => {
+        // faceZ: pencerelerin baktığı yön (+1 güney, -1 kuzey); yoksa x yüzlerine
+        const n = Math.max(1, Math.floor((faceZ ? w : d) / 4));
+        for (let k = 0; k < n; k++) {
+            const off = -((faceZ ? w : d) / 2) + (k + 0.5) * ((faceZ ? w : d) / n);
+            const win = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 0.8), windowMat);
+            if (faceZ) { win.position.set(x + off, h - 1.4, z + faceZ * (d / 2 + 0.02)); win.rotation.y = faceZ > 0 ? 0 : Math.PI; }
+            else { const sx = -Math.sign(x) || 1; win.position.set(x + sx * (w / 2 + 0.02), h - 1.4, z + off); win.rotation.y = sx > 0 ? Math.PI / 2 : -Math.PI / 2; }
+            mapGroup.add(win);
+        }
+    };
+
+    // Üs çiti: beton duvar
+    const B = 45;
+    addWall(0, 3.5, -B, 90, 7, 2, concMat(90, 7));
+    addWall(0, 3.5, B, 90, 7, 2, concMat(90, 7));
+    addWall(-B, 3.5, 0, 2, 7, 90, concMat(90, 7));
+    addWall(B, 3.5, 0, 2, 7, 90, concMat(90, 7));
+
+    // Kuzeyde komuta binası, iki yanda kışlalar
+    building(0, -32, 18, 8, 7); windows(0, -32, 18, 8, 7, 1);
+    building(-32, -18, 8, 18, 4); windows(-32, -18, 8, 18, 4, 0);
+    building(32, -20, 8, 14, 4); windows(32, -20, 8, 14, 4, 0);
+    building(-31, 22, 10, 10, 5); windows(-31, 22, 10, 10, 5, 0);
+
+    // Konteyner yığınları (renkli, oluklu görünüm için iki ton)
+    const contColors = [0xb91c1c, 0x1d4ed8, 0x15803d, 0xc2410c, 0x0f766e];
+    let ci = 0;
+    const container = (x, z, alongX, y = 0) => {
+        const w = alongX ? 6 : 2.5, d = alongX ? 2.5 : 6, h = 2.6;
+        const col = contColors[ci++ % contColors.length];
+        addWall(x, y + h / 2, z, w, h, d, new THREE.MeshStandardMaterial({ color: col, roughness: 0.7, metalness: 0.3 }));
+        const cap = new THREE.Mesh(new THREE.BoxGeometry(w + 0.1, 0.15, d + 0.1), snowCapMat);
+        cap.position.set(x, y + h + 0.07, z);
+        mapGroup.add(cap);
+    };
+    container(-12, -12, true);
+    container(-12, -12, true, 2.6);     // üst üste iki konteyner (yüzen değil: alttaki taşır)
+    container(13, -9, false);
+    container(-15, 8, false);
+    container(14, 12, true);
+    container(-6, 22, true);
+    container(20, 30, false);
+    container(-22, -36, true);
+
+    // Batıda yakıt tankları (yuvarlak görünüm, kare çarpışma)
+    [[-36, 2], [-36, 9]].forEach(([x, z]) => {
+        walls.push({ x, z, w: 4.4, d: 4.4, h: 4, b: 0 });
+        const tank = new THREE.Mesh(new THREE.CylinderGeometry(2.2, 2.2, 4, 20), metalMat);
+        tank.position.set(x, 2, z); tank.castShadow = true; mapGroup.add(tank);
+        const top = new THREE.Mesh(new THREE.CylinderGeometry(2.25, 2.25, 0.25, 20), snowCapMat);
+        top.position.set(x, 4.1, z); mapGroup.add(top);
+        const band = new THREE.Mesh(new THREE.CylinderGeometry(2.25, 2.25, 0.3, 20),
+            new THREE.MeshStandardMaterial({ color: 0xfacc15, roughness: 0.6 }));
+        band.position.set(x, 2.6, z); mapGroup.add(band);
+    });
+
+    // Alçak siperler: kum torbası/beton bariyer (üstlerinden atlanır) ve kar yığınları
+    const barrierMat = new THREE.MeshStandardMaterial({ color: 0x9ca3af, roughness: 0.9 });
+    [[-10, 4, 6, 1], [-6, -2, 1, 5], [7, -2, 1, 5], [26, 6, 1, 6], [-24, -2, 6, 1], [6, -22, 6, 1], [-8, 32, 5, 1]]
+        .forEach(([x, z, w, d]) => addWall(x, 0.5, z, w, 1, d, barrierMat));
+    [[-20, 30, 3, 0.3, 3], [24, -4, 3, 0.3, 4], [0, -18, 4, 0.3, 2.5]]
+        .forEach(([x, z, w, h, d]) => {
+            addWall(x, h / 2, z, w, h, d, snowCapMat);           // üstünde yürünebilir kar tümseği
+        });
+    // Kasalar
+    [[-26, 14, 1.4, 1, 1.4], [27, -36, 2, 1, 2], [-38, -38, 2, 1.2, 2], [38, 38, 2, 1, 2]]
+        .forEach(([x, z, w, h, d]) => addWall(x, h / 2, z, w, h, d, crateMaterial));
+
+    // Doğuda gözetleme kulesi: basamaklar (1 → 2) ile 3 birimlik platforma çıkılır
+    addWall(36, 1.5, 18, 6, 3, 6, concMat(6, 3));
+    addWall(30.2, 0.5, 18, 1.6, 1, 4, crateMaterial);
+    addWall(32, 1, 18, 2, 2, 4, concMat(2, 2));
+    // Kulenin korkulukları (alçak, görsel + çarpışmalı) ve çatı direkleri
+    [[36, 15.2, 6, 0.2], [36, 20.8, 6, 0.2], [38.8, 18, 0.2, 6]].forEach(([x, z, w, d]) =>
+        addWall(x, 3.45, z, w, 0.9, d, metalMat));
+    [[33.4, 15.4], [38.6, 15.4], [33.4, 20.6], [38.6, 20.6]].forEach(([x, z]) => {
+        const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 3, 6), metalMat);
+        pole.position.set(x, 4.5, z); mapGroup.add(pole);
+    });
+    const roof = new THREE.Mesh(new THREE.BoxGeometry(6.4, 0.25, 6.4), snowCapMat);
+    roof.position.set(36, 6.1, 18); mapGroup.add(roof);
+
+    // Telsiz anteni (yalnızca görsel; tabanı çarpışmalı)
+    addWall(20, 0.5, -30, 2, 1, 2, concMat(2, 1));
+    const mast = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.2, 16, 6), metalMat);
+    mast.position.set(20, 9, -30); mapGroup.add(mast);
+    const beacon = new THREE.Mesh(new THREE.SphereGeometry(0.3, 10, 8), new THREE.MeshBasicMaterial({ color: 0xff2222 }));
+    beacon.position.set(20, 17.2, -30); mapGroup.add(beacon);
+
+    // Çam ağaçları (çit dışında, sadece manzara)
+    const pineMat = new THREE.MeshStandardMaterial({ color: 0x1f4d3a, roughness: 0.9 });
+    for (let i = 0; i < 28; i++) {
+        const a = (i / 28) * Math.PI * 2, r = 52 + (i % 3) * 5;
+        const x = Math.cos(a) * r, z = Math.sin(a) * r, s = 0.8 + (i % 4) * 0.2;
+        const tree = new THREE.Mesh(new THREE.ConeGeometry(2.4 * s, 9 * s, 8), pineMat);
+        tree.position.set(x, 4.5 * s, z); mapGroup.add(tree);
+        const tip = new THREE.Mesh(new THREE.ConeGeometry(1.1 * s, 2.6 * s, 8), snowCapMat);
+        tip.position.set(x, 8 * s, z); mapGroup.add(tip);
+    }
+
+    // Kar yağışı: oyuncunun çevresinde düşen noktalar (yere inen tanecik tekrar yukarıdan başlar)
+    const N = 1600, R = 30, pos = new Float32Array(N * 3);
+    for (let i = 0; i < N; i++) {
+        pos[i * 3] = (Math.random() - 0.5) * 2 * R;
+        pos[i * 3 + 1] = Math.random() * 18;
+        pos[i * 3 + 2] = (Math.random() - 0.5) * 2 * R;
+    }
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    const flakes = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0xffffff, size: 0.12, transparent: true, opacity: 0.9 }));
+    mapGroup.add(flakes);
+    let t = 0;
+    mapAnimators.push((dt) => {
+        t += dt;
+        flakes.position.set(camera.position.x, 0, camera.position.z);   // yağış oyuncuyla gelir
+        const arr = geo.attributes.position.array;
+        for (let i = 0; i < N; i++) {
+            let y = arr[i * 3 + 1] - dt * (1.6 + (i % 5) * 0.25);
+            if (y < 0) y += 18;
+            arr[i * 3 + 1] = y;
+            arr[i * 3] += Math.sin(t * 0.7 + i) * dt * 0.3;               // hafif rüzgâr salınımı
+        }
+        geo.attributes.position.needsUpdate = true;
     });
 }

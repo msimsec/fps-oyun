@@ -37,7 +37,7 @@ function defaultSave() {
         hasShield: false, activeSkin: 'classic',
         unlockedSkins: Object.fromEntries(SKINS.map(id => [id, id === 'classic'])),
         upgrades: Object.fromEntries(UPGRADE_IDS.map(id => [id, 0])),
-        weapons: { shotgun: false, sniper: false }   // tüfek ve tabanca her zaman açık
+        weapons: { shotgun: false, sniper: false, smg: false }   // tüfek ve tabanca her zaman açık
     };
 }
 
@@ -56,7 +56,7 @@ function sanitizeSave(o) {
         activeSkin: SKINS.includes(o.activeSkin) ? o.activeSkin : 'classic',
         unlockedSkins: Object.fromEntries(SKINS.map(id => [id, id === 'classic' || skins[id] === true])),
         upgrades: Object.fromEntries(UPGRADE_IDS.map(id => [id, clampInt(ups[id], 0, 0, UPGRADES[id].max)])),
-        weapons: { shotgun: weapons.shotgun === true, sniper: weapons.sniper === true }
+        weapons: { shotgun: weapons.shotgun === true, sniper: weapons.sniper === true, smg: weapons.smg === true }
     };
     if (!s.unlockedSkins[s.activeSkin]) s.activeSkin = 'classic';
     return s;

@@ -136,7 +136,7 @@ function updateBullets(dt) {
                     break;
                 }
             } else if (hitsPlayer(b.position)) {
-                damagePlayer(b.damage);
+                damagePlayer(b.damage, false, 150, { x: b.srcX, z: b.srcZ });
                 remove = true;
             }
         }
@@ -181,6 +181,7 @@ function updateHUD() {
         (a && a.ammo === 0 && a.pool === 0 ? 'MERMİ BİTTİ · 1: TABANCA' : ''));
     setHud('weaponSlots', WEAPON_ORDER.map((id, i) =>
         player.ownedWeapons[id] ? (id === player.weapon ? `[${i + 1}]` : ` ${i + 1} `) : ' · ').join(''));
+    setHud('grenadeDisplay', String(player.grenades));
     setHud('scoreDisplay', player.score);
     setHud('killsDisplay', player.kills);
     setHud('goldDisplay', player.gold);
@@ -204,11 +205,16 @@ function animate() {
             player.kills++;
             player.gold += CFG.duelGold;
             player.goldEarned += CFG.duelGold;
+            runStats.duelWon = true;
+            checkAchievements();
             saveGameData();
             endRun(true);
         }
         if (state === 'playing') updateEnemies(dt);
         updateParticles(dt);
+        updateCorpses(dt);
+        if (state === 'playing') { updateGrenades(dt); updateDrops(dt); }
+        updateHitDirections(dt);
         updateHUD();
     }
     updateFloaters(dt);
