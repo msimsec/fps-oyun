@@ -8,11 +8,13 @@ const player = {
     health: 100, maxHealth: 100 + UPGRADES.health.per * save.upgrades.health, armor: 0,
     maxAmmo: save.maxAmmo,          // tüfek şarjörü (mağazadan yükseltilir)
     weapon: 'rifle',
-    ownedWeapons: { rifle: true, pistol: true, shotgun: save.weapons.shotgun, sniper: save.weapons.sniper },
+    ownedWeapons: { rifle: true, pistol: true, shotgun: save.weapons.shotgun, sniper: save.weapons.sniper, smg: save.weapons.smg },
     arsenal: {},                    // silah başına { ammo, pool } — her elin başında doldurulur
     score: 0, kills: 0, headshots: 0, goldEarned: 0,
-    gold: save.gold, damage: save.damage, healKits: save.healKits,
+    gold: save.gold, damage: save.damage,
     hasShield: save.hasShield, activeSkin: save.activeSkin, unlockedSkins: save.unlockedSkins,
+    grenades: 0, grenadeCd: 0,
+    sinceHurt: 0, regenOn: false,   // son hasardan beri geçen süre, can şu an doluyor mu
     reloading: false, reloadTimer: 0, reloadTotal: 1, fireCooldown: 0, semiFired: false,
     velY: 0, airVX: 0, airVZ: 0, onGround: true, zoomed: false,
     platform: 0                     // Space: oyuncunun son durduğu platform
@@ -21,9 +23,9 @@ const player = {
 function saveGameData() {
     writeSave({
         gold: player.gold, damage: player.damage, maxAmmo: player.maxAmmo,
-        healKits: player.healKits, hasShield: player.hasShield,
+        hasShield: player.hasShield,
         activeSkin: player.activeSkin, unlockedSkins: player.unlockedSkins, upgrades: player.upgrades,
-        weapons: { shotgun: player.ownedWeapons.shotgun, sniper: player.ownedWeapons.sniper }
+        weapons: { shotgun: player.ownedWeapons.shotgun, sniper: player.ownedWeapons.sniper, smg: player.ownedWeapons.smg }
     });
 }
 
@@ -40,8 +42,10 @@ let firing = false;
 let lockTimer = null;
 const keys = { forward: false, back: false, left: false, right: false, sprint: false };
 
-// Dalga durumu (yalnızca normal mod)
-const wave = { num: 0, toSpawn: 0, breakTimer: 0, inBreak: false };
+// Dalga durumu (yalnızca normal mod); hurt: bu dalgada hasar alındı mı (başarım için)
+const wave = { num: 0, toSpawn: 0, breakTimer: 0, inBreak: false, hurt: false };
+// Bu eldeki istatistikler (başarımlar için)
+const runStats = { pickups: 0, bestBlast: 0, cleanWave: false, duelWon: false };
 
 let scene, camera, renderer, canvas;
 let enemies = [], bullets = [], particles = [], walls = [];

@@ -14,9 +14,16 @@ function resetWorld(duel) {
     particles.forEach(p => scene.remove(p)); particles = [];
     clearFloaters();
     clearKillFeed();
+    clearHitDirections();
+    clearCorpses();
+    clearGrenades();
+    clearDrops();
+    player.grenades = CFG.grenadeStart; player.grenadeCd = 0;
+    runStats.pickups = 0; runStats.bestBlast = 0; runStats.cleanWave = false; runStats.duelWon = false;
     hideBanner();
 
     player.health = player.maxHealth;
+    player.sinceHurt = 0; player.regenOn = false;
     player.armor = 0;
     if (player.hasShield) { player.armor = CFG.armorAmount; player.hasShield = false; }
     resetArsenal();
@@ -116,32 +123,23 @@ function endRun(won) {
     if (document.pointerLockElement) document.exitPointerLock();
 }
 
-function damagePlayer(amount) {
+// pierce: kalkanı delip geçer (boşluğa düşme); flashMs: kırmızı ekran süresi;
+// src: hasarın geldiği nokta {x, z} (ekranda yön oku gösterilir)
+function damagePlayer(amount, pierce = false, flashMs = 150, src = null) {
     // Bot bu karede öldüyse düello kazanılmıştır; kalan mermiler sonucu değiştirmesin
     if (state !== 'playing' || pendingDuelWin) return;
-    if (player.armor > 0) {
+    if (!pierce && player.armor > 0) {
         const absorbed = Math.min(player.armor, amount);
         player.armor -= absorbed;
         amount -= absorbed;
     }
     player.health -= amount;
-    flashClass('damageFlash', 'on', 150);
+    player.sinceHurt = 0;
+    if (!isDuelMode) wave.hurt = true;
+    flashClass('damageFlash', 'on', flashMs);
+    if (src) showHitDirection(src.x, src.z);
     sfx('hurt');
     if (player.health <= 0) { player.health = 0; endRun(false); }
-}
-
-function useHealKit() {
-    if (player.healKits > 0 && player.health < player.maxHealth) {
-        player.health = player.maxHealth;
-        player.healKits--;
-        saveGameData();
-        showToast('Can dolduruldu');
-        sfx('heal');
-    } else if (player.healKits <= 0) {
-        showToast('Can kitin yok (mağazadan alabilirsin)');
-    } else {
-        showToast('Canın zaten dolu');
-    }
 }
 
 // Oyuncuyu bölümün başlangıç noktasına koy

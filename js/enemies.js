@@ -28,6 +28,7 @@ class HumanoidEnemy {
         const la = new THREE.Mesh(GEO.arm, bm); la.position.set(-0.6, 0.6, 0);
         const ra = new THREE.Mesh(GEO.arm, bm); ra.position.set(0.6, 0.6, 0);
         this.group.add(body, head, la, ra);
+        this.head = head;
         // Tipe özgü ayırt edici parçalar
         if (typeId === 'tank' && !isDuel) {
             const pad = typeMat(0x1e293b);
@@ -137,7 +138,7 @@ class HumanoidEnemy {
                 else this.chase(dt, dist, nx, nz);
             } else if (rise < 1.2 && rise > -1) {
                 // Oyuncu yüksek bir kasanın üstündeyse yakın temas hasarı yok (ateş etmeye devam ederler)
-                damagePlayer(CFG.meleeDps * this.type.melee * dt);   // saniye bazlı yakın temas hasarı
+                damagePlayer(CFG.meleeDps * this.type.melee * dt, false, 150, p);   // saniye bazlı yakın temas hasarı
             }
             this.tryShoot(dt, dist);
         }
@@ -461,15 +462,17 @@ function findSpawnPoint() {
 }
 
 function onEnemyKilled(e, hit) {
-    e.destroy();
+    makeCorpse(e, hit === 'head');
     if (e.isDuel) {
         if (hit === 'head') player.headshots++;   // düelloyu kafadan bitiren vuruş da sayılsın
         duelBot = null;
         pendingDuelWin = true;
+        achKill();
         return;
     }
     const idx = enemies.indexOf(e);
     if (idx !== -1) enemies.splice(idx, 1);
+    maybeDrop(e.group.position.x, e.group.position.y, e.group.position.z);
     const head = hit === 'head';
     const score = Math.round(100 * e.type.reward) + (head ? 50 : 0);
     const gold = Math.round(CFG.killGold * e.type.reward);
@@ -485,6 +488,7 @@ function onEnemyKilled(e, hit) {
     addKillFeed(`${head ? 'KAFA VURUŞU! ' : ''}${e.type.name} öldü +${score} · +${gold} 🪙`, head);
     sfx(head ? 'killHead' : 'kill');
     saveGameData();
+    achKill();
 }
 
 function createParticles(pos, colorHex, count = 6) {
@@ -501,4 +505,42 @@ function createParticles(pos, colorHex, count = 6) {
         scene.add(p);
         particles.push(p);
     }
+}
+
+// =====================================================================
+//  ÖLÜM EFEKTİ — ölen düşman geriye doğru yığılır, kısa süre yerde kalır, sonra zemine gömülür.
+//  Ceset artık düşman listesinde değildir (mermiler içinden geçer).
+//  Kafadan vurulduysa kafa kopar: kafa gizlenir, yerine parçacık patlaması çıkar.
+// =====================================================================
+let corpses = [];
+
+function makeCorpse(e, head) {
+    const g = e.group;
+    e.hpBar.visible = false;
+    if (head) {
+        e.head.visible = false;
+        const hp = new THREE.Vector3(g.position.x, g.position.y + 1.45 * e.scale, g.position.z);
+        createParticles(hp, e.isDuel ? 0xc084fc : (e.type ? e.type.head : 0xf87171), 14);
+    }
+    g.rotation.order = 'YXZ';            // devrilme düşmanın kendi ekseninde olsun
+    corpses.push({ group: g, t: 0, landed: false });
+    // Aynı anda çok ceset birikmesin
+    if (corpses.length > 12) { scene.remove(corpses[0].group); corpses.shift(); }
+}
+
+function updateCorpses(dt) {
+    for (let i = corpses.length - 1; i >= 0; i--) {
+        const c = corpses[i];
+        c.t += dt;
+        const fall = Math.min(1, c.t / 0.45);
+        c.group.rotation.x = -Math.PI / 2 * fall * fall;       // hızlanarak yere düşer
+        if (fall >= 1 && !c.landed) { c.landed = true; sfx('bodyFall'); }
+        if (c.t > 2.2) c.group.position.y -= dt * 1.2;          // yavaşça gömülür
+        if (c.t > 3.4) { scene.remove(c.group); corpses.splice(i, 1); }
+    }
+}
+
+function clearCorpses() {
+    corpses.forEach(c => scene.remove(c.group));
+    corpses = [];
 }

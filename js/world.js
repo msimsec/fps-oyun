@@ -173,7 +173,18 @@ function createWeaponModels() {
     addPart(sniper, box(0.08, 0.16, 0.36), gripMat, 0.25, -0.25, -0.06);
     addPart(sniper, box(0.06, 0.13, 0.07), gripMat, 0.25, -0.33, -0.27, 0.35);
 
-    Object.assign(weaponModels, { rifle, pistol, shotgun, sniper });
+    // Makineli: kısa gövde, namlu kılıfı, uzun düz şarjör, ön tutamak, kısa dipçik
+    const smg = new THREE.Group();
+    addPart(smg, box(0.09, 0.12, 0.4), B, 0.24, -0.21, -0.42);
+    addPart(smg, cyl(0.032, 0.22, 8), gripMat, 0.24, -0.2, -0.72, R);
+    addPart(smg, cyl(0.016, 0.1), A, 0.24, -0.2, -0.86, R);
+    addPart(smg, box(0.05, 0.26, 0.07), gripMat, 0.24, -0.38, -0.5, 0.08);
+    addPart(smg, box(0.06, 0.15, 0.07), gripMat, 0.24, -0.33, -0.27, 0.3);
+    addPart(smg, box(0.05, 0.11, 0.05), gripMat, 0.24, -0.3, -0.66);
+    addPart(smg, box(0.07, 0.08, 0.12), gripMat, 0.24, -0.22, -0.17);
+    addPart(smg, box(0.03, 0.03, 0.14), A, 0.24, -0.135, -0.45);
+
+    Object.assign(weaponModels, { rifle, pistol, shotgun, sniper, smg });
     WEAPON_ORDER.forEach(id => {
         const m = weaponModels[id];
         // Kameraya çok yakın parçalar ekranı kaplamasın: biraz küçült ve ileri it

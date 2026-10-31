@@ -10,7 +10,7 @@
 const PROFILES_KEY = 'fps_profiles_v1';
 const PROFILE_CHOSEN_KEY = 'fps_profile_chosen';   // sessionStorage: bu sekmede giriş yapıldı mı
 const MAX_PROFILES = 20, NAME_MAX = 16;
-const PROFILE_DATA_KEYS = ['fps_save_v2', 'fps_records_v1', 'fps_settings_v1'];
+const PROFILE_DATA_KEYS = ['fps_save_v2', 'fps_records_v1', 'fps_records_v2', 'fps_settings_v1', 'fps_achievements_v1'];
 
 function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
 function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
@@ -69,9 +69,11 @@ function profileSummary(id) {
         const wrap = JSON.parse(lsGet(`fps_save_v2::${id}`));
         if (wrap && typeof wrap.d === 'string') gold = Math.max(0, Math.floor(Number(JSON.parse(wrap.d).gold)) || 0);
     } catch (e) {}
+    const bestOf = (r) => { if (r && r.game) Object.values(r.game).forEach(g => { best = Math.max(best, Number(g && g.score) || 0); }); };
     try {
-        const r = JSON.parse(lsGet(`fps_records_v1::${id}`));
-        if (r && r.game) Object.values(r.game).forEach(g => { best = Math.max(best, Number(g && g.score) || 0); });
+        const r2 = JSON.parse(lsGet(`fps_records_v2::${id}`));   // bölüm başına rekorlar
+        if (r2 && typeof r2 === 'object') Object.values(r2).forEach(bestOf);
+        else bestOf(JSON.parse(lsGet(`fps_records_v1::${id}`)));
     } catch (e) {}
     return { gold, best };
 }
