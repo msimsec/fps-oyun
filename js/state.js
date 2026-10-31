@@ -13,7 +13,7 @@ const player = {
     score: 0, kills: 0, headshots: 0, goldEarned: 0,
     gold: save.gold, damage: save.damage,
     hasShield: save.hasShield, activeSkin: save.activeSkin, unlockedSkins: save.unlockedSkins,
-    sinceHurt: 0,                   // son hasardan beri geçen süre (can yenilenmesi için)
+    sinceHurt: 0, regenOn: false,   // son hasardan beri geçen süre, can şu an doluyor mu
     reloading: false, reloadTimer: 0, reloadTotal: 1, fireCooldown: 0, semiFired: false,
     velY: 0, airVX: 0, airVZ: 0, onGround: true, zoomed: false,
     platform: 0                     // Space: oyuncunun son durduğu platform

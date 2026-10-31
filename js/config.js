@@ -15,11 +15,9 @@ const CFG = {
     baseDamage: 15, damageStep: 5, maxDamage: 35, damageCost: 100,
     baseMag: 30, magStep: 5, maxMag: 60, magCost: 75,
     shieldCost: 150,
-    // Otomatik can yenilenmesi: son hasardan regenDelay sn sonra saniyede regenRate can
-    regenDelay: 4, regenRate: 10,
     // Dalgalar: her dalgada düşman sayısı, canı ve hızı biraz artar
     waveGrowth: 0.35, waveHpGrowth: 0.1, waveSpeedGrowth: 0.03, waveSpeedMax: 1.4,
-    waveBreak: 5, waveGoldPerWave: 10, waveScorePerWave: 200, waveHeal: 25
+    waveBreak: 5, waveGoldPerWave: 10, waveScorePerWave: 200
 };
 // Skin renkleri: silah gövdesi, namlu/detaylar ve mermi (mağazadaki önizleme de bunları kullanır)
 const SKIN_DEFS = {
@@ -109,21 +107,22 @@ const WEAPONS = {
 // =====================================================================
 const DIFFICULTIES = ['easy', 'normal', 'hard'];
 const DIFF_LABELS = { easy: 'Kolay', normal: 'Orta', hard: 'Zor' };
+// regenDelay/regenRate: otomatik can yenilenmesi — son hasardan regenDelay sn sonra saniyede regenRate can
 const GAME_DIFF = {
     easy: {
         enemyHealth: 16, enemySpeed: 1.5, maxEnemies: 7, spawnPerSec: 0.8, meleeDps: 16,
         enemyFireMin: 3.0, enemyFireMax: 4.5, enemyBulletDamage: 2, enemySpread: 0.14, killGold: 20,
-        waveBase: 5
+        waveBase: 5, regenDelay: 3, regenRate: 14
     },
     normal: {
         enemyHealth: 25, enemySpeed: 1.9, maxEnemies: 10, spawnPerSec: 1.2, meleeDps: 24,
         enemyFireMin: 2.2, enemyFireMax: 3.5, enemyBulletDamage: 3, enemySpread: 0.10, killGold: 25,
-        waveBase: 6
+        waveBase: 6, regenDelay: 4, regenRate: 10
     },
     hard: {
         enemyHealth: 38, enemySpeed: 2.4, maxEnemies: 14, spawnPerSec: 1.8, meleeDps: 32,
         enemyFireMin: 1.5, enemyFireMax: 2.6, enemyBulletDamage: 5, enemySpread: 0.065, killGold: 35,
-        waveBase: 8
+        waveBase: 8, regenDelay: 5, regenRate: 7
     }
 };
 const DUEL_DIFF = {

@@ -18,14 +18,14 @@ Ana menüdeki **BÖLÜM SEÇ** kısmından oynanacak harita seçilir (seçim oyu
 
 ## Oyun modları
 
-- **Dalga modu:** Düşmanlar dalgalar halinde gelir. Her dalga bir öncekinden kalabalık ve güçlüdür. Dalga temizlenince bonus altın, skor ve can verilir, kısa bir moladan sonra sıradaki dalga başlar.
+- **Dalga modu:** Düşmanlar dalgalar halinde gelir. Her dalga bir öncekinden kalabalık ve güçlüdür. Dalga temizlenince bonus altın ve skor verilir, kısa bir moladan sonra sıradaki dalga başlar.
 - **1v1 Düello:** Sağa sola kayan ve sürekli ateş eden mor bota karşı teke tek. Botun canı ekranın üstündeki çubukta görünür.
 
 Dalga modunda 4 düşman tipi vardır: **Er** (kırmızı), **Koşucu** (turuncu, hızlı ama zayıf, 2. dalgadan itibaren), **Nişancı** (mavi, uzakta durup isabetli ateş eder, 3. dalgadan itibaren) ve **Zırhlı** (gri, iri, çok dayanıklı, 2.5 kat ödül, 4. dalgadan itibaren).
 
 Dalgalar ilerledikçe düşmanlar yetenek kazanır: **2. dalga** zıplama (alçak kasa ve siperlerin üstüne çıkar, kasaya çıkan oyuncunun yanına zıplar), **3. dalga** rampa kullanma (Space'te oyuncunun platformuna en kısa rampa yoluyla gelir), **4. dalga** vurulunca yana kaçma, **5. dalga** keskin nişan (daha isabetli ve sık ateş). Yeni yetenek dalga başında duyurulur.
 
-**Can yenilenmesi:** 4 saniye hasar almazsan can saniyede 10 puan dolmaya başlar (can göstergesi yeşil parlar). Can kiti yoktur; eski kayıtlardaki kitler 50'şer altın olarak iade edilir.
+**Can yenilenmesi (dalga modu):** Bir süre hasar almazsan can kendiliğinden dolar; can göstergesi yeşil parlar ve kısa bir ses çalar. Kolay: 3 sn sonra saniyede 14, Orta: 4 sn sonra saniyede 10, Zor: 5 sn sonra saniyede 7 can. Düelloda can yenilenmez. Can kiti yoktur; eski kayıtlardaki kitler 50'şer altın olarak iade edilir.
 
 Her iki modun zorluğu **Ayarlar** ekranından ayrı ayrı seçilir (Kolay / Orta / Zor).
 

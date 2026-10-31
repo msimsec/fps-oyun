@@ -55,12 +55,11 @@ function waveCleared() {
     player.gold += gold;
     player.goldEarned += gold;
     player.score += score;
-    player.health = Math.min(player.maxHealth, player.health + CFG.waveHeal);
     saveGameData();
     wave.inBreak = true;
     wave.breakTimer = CFG.waveBreak;
     showBanner(`DALGA ${wave.num} TAMAMLANDI`, '', 0);
-    addKillFeed(`Dalga bonusu +${score} · +${gold} 🪙 · +${CFG.waveHeal} can`, true);
+    addKillFeed(`Dalga bonusu +${score} · +${gold} 🪙`, true);
     sfx('waveClear');
 }
 

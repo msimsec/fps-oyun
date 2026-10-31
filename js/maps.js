@@ -319,11 +319,8 @@ function checkJumpPads() {
 // Boşluğa düşen oyuncu: can kaybı ve başlangıç platformuna geri dönüş
 function fellOut() {
     const s = curMap().spawn;
-    player.health -= 35;
-    player.sinceHurt = 0;
-    flashClass('damageFlash', 'on', 300);
-    sfx('hurt');
-    if (player.health <= 0) { player.health = 0; endRun(false); return; }
+    damagePlayer(35, true, 300);
+    if (state !== 'playing') return;              // düşüş öldürdüyse el bitti
     camera.position.set(s.x, s.y + CFG.eyeHeight, s.z);
     player.velY = 0; player.airVX = 0; player.airVZ = 0; player.onGround = true;
     showBanner('BOŞLUĞA DÜŞTÜN!', '-35 can', 1600);

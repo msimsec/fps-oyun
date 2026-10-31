@@ -14,12 +14,18 @@ function jump() {
     sfx('jump');
 }
 
+const isRegenerating = () => !isDuelMode && player.sinceHurt >= CFG.regenDelay &&
+    player.health < player.maxHealth;
+
 function updatePlayer(dt) {
-    // Can yenilenmesi: bir süre hasar alınmazsa can kendiliğinden dolar
+    // Can yenilenmesi (yalnızca dalga modu): bir süre hasar alınmazsa can kendiliğinden dolar
     player.sinceHurt += dt;
-    if (player.sinceHurt >= CFG.regenDelay && player.health < player.maxHealth) {
+    const regen = isRegenerating();
+    if (regen) {
+        if (!player.regenOn) sfx('heal');       // dolmaya başladığı an kısa bir ses
         player.health = Math.min(player.maxHealth, player.health + CFG.regenRate * dt);
     }
+    player.regenOn = regen;
     const f = new THREE.Vector3();
     camera.getWorldDirection(f);
     f.y = 0; f.normalize();
@@ -166,7 +172,7 @@ function updateHUD() {
     const w = curWeapon(), a = curAmmo();
     setHud('hpDisplay', Math.max(0, Math.ceil(player.health)));
     setHud('hpMaxDisplay', player.maxHealth);
-    $('healthHud').classList.toggle('regen', player.sinceHurt >= CFG.regenDelay && player.health < player.maxHealth);
+    $('healthHud').classList.toggle('regen', isRegenerating());
     setHud('shieldDisplay', player.armor > 0 ? String(Math.ceil(player.armor)) : (player.hasShield ? 'HAZIR' : 'YOK'));
     setHud('weaponName', w.name.toUpperCase());
     setHud('ammoDisplay', a ? a.ammo : 0);
