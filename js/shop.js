@@ -31,10 +31,9 @@ function updateShopModal() {
     $('modalGold').textContent = player.gold;
     $('modalDmg').textContent = `${player.damage} / ${CFG.maxDamage}`;
     $('modalMag').textContent = `${player.maxAmmo} / ${CFG.maxMag}`;
-    $('modalHeal').textContent = `${player.healKits} / ${CFG.maxHealKits}`;
     $('modalShield').textContent = shieldStatusText();
     renderSkinPicker();
-    ['shotgun', 'sniper'].forEach(id => {
+    ['shotgun', 'sniper', 'smg'].forEach(id => {
         $(id + 'Status').textContent = player.ownedWeapons[id] ? 'SAHİPSİNİZ' : 'KİLİTLİ';
     });
     // Yükseltme her silaha kendi çarpanıyla işler; kartta gerçek hasarları göster
@@ -48,10 +47,10 @@ function updateShopModal() {
                                : (player.hasShield ? 'Sonraki ele hazır ✓' : null);
     setBuyBtn('btnDamage', CFG.damageCost, player.damage >= CFG.maxDamage ? 'Maksimum ✓' : null);
     setBuyBtn('btnMag', CFG.magCost, player.maxAmmo >= CFG.maxMag ? 'Maksimum ✓' : null);
-    setBuyBtn('btnHeal', CFG.healCost, player.healKits >= CFG.maxHealKits ? 'Çanta dolu ✓' : null);
     setBuyBtn('btnShield', CFG.shieldCost, shieldDone);
     setBuyBtn('btnShotgun', WEAPONS.shotgun.cost, player.ownedWeapons.shotgun ? 'Sahipsin ✓' : null);
     setBuyBtn('btnSniper', WEAPONS.sniper.cost, player.ownedWeapons.sniper ? 'Sahipsin ✓' : null);
+    setBuyBtn('btnSmg', WEAPONS.smg.cost, player.ownedWeapons.smg ? 'Sahipsin ✓' : null);
 
     // Kalıcı yükseltmeler: seviye, şimdiki → sonraki etki, artan fiyat
     const pct = (v) => Math.round(v * 100) + '%';
@@ -121,13 +120,6 @@ function buyAmmo() {
     if (!spend(CFG.magCost)) return;
     player.maxAmmo = Math.min(CFG.maxMag, player.maxAmmo + CFG.magStep);
     afterPurchase('Şarjör kapasitesi artırıldı');
-}
-
-function buyHealKit() {
-    if (player.healKits >= CFG.maxHealKits) { showToast('En fazla ' + CFG.maxHealKits + ' can kiti taşıyabilirsin'); return; }
-    if (!spend(CFG.healCost)) return;
-    player.healKits++;
-    afterPurchase('Can kiti alındı');
 }
 
 function buyShield() {

@@ -414,3 +414,35 @@ kbd {
 .duel-bar { width: min(360px, 40vw); }
 .map-option.map-desert { background: linear-gradient(135deg, #7c5a2a, #3a2a14); }
 .map-picker .map-option { width: 250px; }
+
+/* Can yenilenirken can göstergesi yeşil parlar */
+.health-hud.regen { color: #4ade80; box-shadow: 0 0 12px rgba(74, 222, 128, 0.45); }
+.records-tabs { margin-bottom: 14px; }
+.seg-btn.active.map { background: #00d4ff; border-color: #00d4ff; color: #0b0f19; }
+
+/* Hasar yönü: nişangâhın çevresinde, atışın geldiği tarafta kırmızı yay */
+#hitDirLayer { position: absolute; left: 50%; top: 50%; width: 0; height: 0; pointer-events: none; }
+.hit-dir {
+    position: absolute; left: 0; top: 0; width: min(34vh, 260px); height: min(34vh, 260px);
+    border-radius: 50%; border: 7px solid transparent; border-top-color: rgba(239, 68, 68, 0.95);
+    filter: drop-shadow(0 0 6px rgba(239, 68, 68, 0.9));
+}
+.grenade-line { font-size: 0.8em; color: #a3e635; margin-top: 2px; }
+
+/* Başarımlar */
+.ach-btn { background: #7c3aed; color: #ffffff; }
+.ach-btn:hover { background: #8b5cf6; box-shadow: 0 0 15px rgba(139, 92, 246, 0.8); }
+.ach-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; width: min(980px, 92vw); margin-bottom: 14px; }
+.ach-card {
+    background: rgba(15, 23, 42, 0.9); border: 2px solid #334155; border-radius: 10px; padding: 12px 14px;
+    font-family: var(--ui-font); text-align: left; display: flex; flex-direction: column; gap: 6px; opacity: 0.85;
+}
+.ach-card.done { border-color: #a78bfa; box-shadow: 0 0 10px rgba(167, 139, 250, 0.4); opacity: 1; }
+.ach-name { color: #e2e8f0; font-weight: 700; font-size: 16px; }
+.ach-card.done .ach-name { color: #c4b5fd; }
+.ach-desc { color: #94a3b8; font-size: 14px; }
+.ach-reward { color: #fbbf24; font-size: 13px; margin-top: auto; }
+.ach-progress { display: block; height: 6px; background: #1e293b; border-radius: 3px; overflow: hidden; }
+.ach-progress span { display: block; height: 100%; background: #8b5cf6; }
+.ach-progress-text { color: #cbd5e1; font-size: 12px; }
+.map-option.map-snow { background: linear-gradient(135deg, #64748b, #1e293b); }

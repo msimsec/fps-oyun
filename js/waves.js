@@ -18,11 +18,13 @@ function startNextWave() {
     wave.num++;
     wave.toSpawn = waveSize(wave.num);
     wave.inBreak = false;
+    wave.hurt = false;
     // Bu dalgada ilk kez çıkan düşman tipi varsa duyur
     const fresh = Object.values(ENEMY_TYPES).filter(t => t.minWave === wave.num).map(t => t.name);
     // Bu dalgada kazanılan düşman yetenekleri (rampası olmayan bölümde rampa yeteneği duyurulmaz)
     const skills = ENEMY_SKILLS.filter(k => k.wave === wave.num && (!k.needsPads || jumpPads.length)).map(k => k.text);
     const extra = (fresh.length ? ` · Yeni: ${fresh.join(', ')}!` : '') + (skills.length ? ` · ${skills.join(' ')}` : '');
+    checkAchievements();          // "N. dalgaya ulaş" başarımları
     showBanner(`DALGA ${wave.num}`, `${wave.toSpawn} düşman geliyor` + extra, extra ? 3600 : 2200);
     sfx('waveStart');
 }
@@ -55,12 +57,15 @@ function waveCleared() {
     player.gold += gold;
     player.goldEarned += gold;
     player.score += score;
-    player.health = Math.min(player.maxHealth, player.health + CFG.waveHeal);
+    if (!wave.hurt) runStats.cleanWave = true;
+    checkAchievements();
+    const bomb = player.grenades < CFG.grenadeMax;
+    if (bomb) player.grenades++;
     saveGameData();
     wave.inBreak = true;
     wave.breakTimer = CFG.waveBreak;
     showBanner(`DALGA ${wave.num} TAMAMLANDI`, '', 0);
-    addKillFeed(`Dalga bonusu +${score} · +${gold} 🪙 · +${CFG.waveHeal} can`, true);
+    addKillFeed(`Dalga bonusu +${score} · +${gold} 🪙${bomb ? ' · +1 bomba' : ''}`, true);
     sfx('waveClear');
 }
 

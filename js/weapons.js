@@ -11,6 +11,7 @@ function spawnBullet(origin, dir, speed, damage, color, isPlayer, life, geo = GE
     b.damage = damage;
     b.colorHex = color;
     b.isPlayer = isPlayer;
+    b.srcX = origin.x; b.srcZ = origin.z;     // hasar yönü göstergesi için atışın geldiği yer
     scene.add(b);
     bullets.push(b);
 }
@@ -81,7 +82,7 @@ function tryShoot() {
         spawnBullet(origin, d, w.speed, damage, skinBulletColor(), true, w.life,
             w.pellets > 1 ? GEO.pellet : GEO.bullet);
     }
-    weaponKick = player.weapon === 'sniper' || player.weapon === 'shotgun' ? 0.16 : 0.08;
+    weaponKick = player.weapon === 'sniper' || player.weapon === 'shotgun' ? 0.16 : player.weapon === 'smg' ? 0.05 : 0.08;
     sfx('shoot_' + player.weapon);
 
     if (a.ammo === 0) startReload();

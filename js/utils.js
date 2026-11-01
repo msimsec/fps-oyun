@@ -79,7 +79,7 @@ function applyCameraRotation() {
     camera.rotation.x = cameraAngleX;
 }
 
-const SCREENS = ['menuScreen', 'pauseScreen', 'gameOverScreen', 'shopModal', 'settingsScreen', 'recordsScreen', 'profileScreen'];
+const SCREENS = ['menuScreen', 'pauseScreen', 'gameOverScreen', 'shopModal', 'settingsScreen', 'recordsScreen', 'profileScreen', 'achievementsScreen'];
 // Bir menü açıkken oyun HUD'u gizlenir (menünün arkasında silik görünüp karışıklık yaratmasın)
 function hideAllScreens() {
     SCREENS.forEach(id => $(id).classList.remove('show'));
