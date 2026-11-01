@@ -7,8 +7,7 @@
 const HELP_SECTIONS = [
     { id: 'start', title: '🚀 Başlarken', lines: () => [
         `Oyun açılınca "Kim oynuyor?" ekranı gelir. Yeni oyuncuysan adını ve ${PW_MIN}-${PW_MAX} karakterlik bir parola yazıp KAYIT OL'a bas.`,
-        'Kayıtlıysan listeden adına tıkla ve parolanı yaz. Parola basittir: harf, rakam, ne istersen olabilir.',
-        'Adını değiştirmek (✎ Ad), parolanı değiştirmek (🔑 Parola) ya da oyuncuyu silmek (🗑 Sil) için de parolan sorulur.',
+        'Kayıtlıysan listeden adına tıkla ve parolanı yaz (ayrıntılar "Oyuncu ve Parola" konusunda).',
         `Her oyuncunun altını, silahları, skinleri, yükseltmeleri, rekorları, başarımları ve ayarları ayrı tutulur (en fazla ${MAX_PROFILES} oyuncu).`,
         'Kayıtlar yalnızca bu tarayıcıda saklanır; başka bir bilgisayara ya da tarayıcıya taşınmaz. Parolanı unutursan geri getirilemez.',
         'Ana menüde BÖLÜM SEÇ kısmından oynamak istediğin haritaya tıkla; seçili olanın üstünde "✓ SEÇİLİ" yazar.',
@@ -16,6 +15,18 @@ const HELP_SECTIONS = [
         'Oyun başlayınca fare ekrana kilitlenir. Kilitlenmezse ekrana bir kez tıkla.',
         'ESC oyunu duraklatır. Duraklatma menüsünden devam edebilir, mağazaya, ayarlara ya da ana menüye gidebilirsin.',
         'Oyun klavye ve fare ile oynanır; dokunmatik ekranlarda oynanamaz.'
+    ] },
+    { id: 'account', title: '👤 Oyuncu ve Parola', lines: () => [
+        `Kayıt olurken adını ve ${PW_MIN}-${PW_MAX} karakterlik bir parola yazarsın. Parola basittir: harf, rakam, ne istersen olabilir; zorunlu kural yoktur.`,
+        'Giriş için listeden adına tıkla; açılan pencereye parolanı yazıp Enter\'a bas (Esc ya da İptal pencereyi kapatır).',
+        'Parolayı yanlış yazarsan "Parola yanlış." uyarısı çıkar. "Parolayı göster" kutusuyla yazdığını görebilirsin.',
+        'Aynı tarayıcı sekmesinde bir kez giriş yaptıysan, sayfayı yenilesen de tekrar parola sorulmaz. Yeni sekmede yeniden sorulur.',
+        'Ana menünün sol üstünde oynayan oyuncunun adı yazar; "Oyuncu değiştir" ile giriş ekranına dönersin.',
+        'Oyuncu kartındaki ✎ Ad adını, 🔑 Parola parolanı değiştirir, 🗑 Sil oyuncuyu tüm kaydıyla siler. Üçü de o oyuncunun parolasını ister.',
+        'Parolan değiştirilirken yanlış yazılmasın diye yeni parola iki kez sorulur.',
+        'Parolası olmayan eski oyuncuların kartında "⚠ parola yok" yazar; oyun açılır açılmaz parola belirlemeleri istenir, belirlemeden oynanamaz.',
+        'Parolanın kendisi saklanmaz, yalnızca şifrelenmiş özeti tutulur. Parolanı unutursan geri getirilemez.',
+        'Bu parola, aynı bilgisayarı kullananların birbirinin kaydına girmesini önleyen basit bir kilittir; gerçek bir hesap güvenliği değildir.'
     ] },
     { id: 'controls', title: '🎮 Kontroller', lines: () => [
         'W A S D (ya da ok tuşları): ileri, geri, sola, sağa yürü.',
@@ -60,6 +71,7 @@ const HELP_SECTIONS = [
             const how = w.cost ? `mağazada ${w.cost} altın` : 'başlangıçta açık';
             return `${w.name} (${i + 1} tuşu): ${kind}, ${w.dmgMul}x hasar, ${mag}; ${how}.`;
         }),
+        'Taramalı Tabanca tamamen siyah, tırtıklı kabzalı AR tipi bir silahtır; skin seçimi gövdesinin rengini değiştirmez, yalnızca mermi rengi skine göre değişir.',
         'Tabancanın yedek mermisi sınırsızdır; diğer silahların mermisi bitse bile tabancayla savaşmaya devam edebilirsin.',
         'Her öldürdüğün düşman, sahip olduğun silahlara biraz yedek mermi verir.',
         'Kafa vuruşu her silahta 2 kat hasar verir; nişangâh kırmızı yanar. Göğsün biraz üstüne nişan al.',
@@ -88,7 +100,9 @@ const HELP_SECTIONS = [
         }[t.name] || ''}${t.minWave ? ` ${t.minWave}. dalgadan itibaren çıkar.` : ''}`),
         'Dalgalar ilerledikçe düşmanlar yeni yetenekler kazanır (dalga başında duyurulur):',
         ...ENEMY_SKILLS.map(k => `${k.wave}. dalga: ${k.text}${k.needsPads ? ' (yalnızca rampalı bölümde, Space)' : ''}`),
-        'Düşman yakına gelince temas hasarı verir; mesafeni koru.'
+        'Düşman yakına gelince temas hasarı verir; mesafeni koru.',
+        'Ölen düşman geriye doğru devrilir, birkaç saniye yerde kalır, sonra toprağa gömülür. Kafadan öldürülürse kafası parçalanır.',
+        'Cesetler engel değildir: mermiler içinden geçer, üstünden yürüyebilirsin.'
     ] },
     { id: 'drops', title: '🎁 Yerden Toplananlar', lines: () => [
         `Ölen düşman %${Math.round(CFG.dropChance * 100)} ihtimalle yere dönen, parlayan bir eşya bırakır.`,
@@ -122,7 +136,8 @@ const HELP_SECTIONS = [
         `Ağır Kalkan (${CFG.shieldCost} altın): +${CFG.armorAmount} kalkan.`,
         ...UPGRADE_IDS.map(id => `${UPGRADES[id].name}: kalıcı yükseltme, ${UPGRADES[id].max} seviye; her seviyede fiyat artar (ilk seviye ${upgradeCost(id, 0)} altın).`),
         'Silahlar (Pompalı, Keskin Nişancı, Taramalı Tabanca) bir kez alınır ve kalıcı olarak açılır.',
-        'Skinler silahın ve mermilerin rengini değiştirir. Sahip olduğun skine tıklayınca kuşanılır, kilitli olana tıklayınca satın alınır.'
+        'Skinler silahın ve mermilerin rengini değiştirir (Taramalı Tabanca her zaman siyah kalır, yalnızca mermisi renk alır).',
+        'Sahip olduğun skine tıklayınca kuşanılır, kilitli olana tıklayınca satın alınır.'
     ] },
     { id: 'progress', title: '🏆 Rekorlar ve Başarımlar', lines: () => [
         'REKORLAR ekranında her bölüm için ayrı sekme vardır; her zorluk seviyesinin en iyi skoru, en uzak dalgası ve düello sonuçları yazar.',

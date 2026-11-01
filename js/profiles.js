@@ -79,7 +79,8 @@ function profileChosenThisTab() {
 function markProfileChosen() {
     try { sessionStorage.setItem(PROFILE_CHOSEN_KEY, profiles.current || ''); } catch (e) {}
 }
-const needsLogin = () => !currentProfile() || !profileChosenThisTab();
+// Parolası olmayan (eski) oyuncu, bu sekmede giriş yapmış olsa bile önce parola belirlemeli
+const needsLogin = () => !currentProfile() || !profileChosenThisTab() || !currentProfile().pw;
 
 // Başka bir profilin özetini (altın, en iyi skor) kendi kaydından okur
 function profileSummary(id) {
@@ -108,8 +109,10 @@ function openProfiles() {
     if (document.pointerLockElement) document.exitPointerLock();
     state = 'profiles';
     showScreen('profileScreen');
-    $('profileBack').style.display = profileChosenThisTab() && currentProfile() ? '' : 'none';
-    $('profileNote').textContent = '';
+    $('profileBack').style.display = needsLogin() ? 'none' : '';
+    const cur = currentProfile();
+    $('profileNote').textContent = cur && !cur.pw && profileChosenThisTab()
+        ? `${cur.name}, artık her oyuncunun parolası var. Adına tıklayıp ${PW_MIN}-${PW_MAX} karakterlik bir parola belirle.` : '';
     renderProfiles();
     setTimeout(() => $('newProfileName').focus(), 0);
 }
@@ -165,7 +168,6 @@ function loginProfile(id) {
     refreshProfiles();
     const p = profiles.list.find(x => x.id === id);
     if (!p) return;
-    if (id === profiles.current && profileChosenThisTab()) { closeProfiles(); return; }
     if (!p.pw) {
         askPassword({
             title: `${p.name} için parola belirle`,
@@ -175,6 +177,7 @@ function loginProfile(id) {
         });
         return;
     }
+    if (id === profiles.current && profileChosenThisTab()) { closeProfiles(); return; }
     askPassword({
         title: `${p.name} · Giriş`, text: 'Parolanı yaz.', ok: 'GİRİŞ',
         onOk: (pw) => { if (!pwCheck(p, pw)) return 'Parola yanlış.'; selectProfile(id); }
