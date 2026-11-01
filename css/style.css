@@ -446,3 +446,27 @@ kbd {
 .ach-progress span { display: block; height: 100%; background: #8b5cf6; }
 .ach-progress-text { color: #cbd5e1; font-size: 12px; }
 .map-option.map-snow { background: linear-gradient(135deg, #64748b, #1e293b); }
+
+/* Yardım ekranı */
+.help-btn { background: #0e7490; color: #ffffff; }
+.help-btn:hover { background: #0891b2; box-shadow: 0 0 15px rgba(8, 145, 178, 0.8); }
+.help-sub { color: #cbd5e1; font-family: var(--ui-font); font-size: 15px; margin: -6px 0 14px; }
+.help-tabs { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; width: min(1000px, 94vw); margin-bottom: 14px; }
+.help-tab {
+    background: rgba(15, 23, 42, 0.9); color: #cbd5e1; border: 2px solid #334155; border-radius: 999px;
+    padding: 7px 14px; font-family: var(--ui-font); font-size: 14px; cursor: pointer;
+}
+.help-tab:hover { border-color: #00d4ff; color: #ffffff; }
+.help-tab.active { background: #00d4ff; border-color: #00d4ff; color: #0b0f19; font-weight: 700; }
+.help-content {
+    width: min(860px, 92vw); max-height: 52vh; overflow-y: auto; text-align: left;
+    background: rgba(2, 6, 23, 0.85); border: 1px solid rgba(0, 212, 255, 0.35); border-radius: 12px;
+    padding: 16px 22px; margin-bottom: 14px; font-family: var(--ui-font);
+}
+.help-title { color: #ffaa00; font-size: 22px; margin: 0 0 10px; }
+.help-body { margin: 0; padding-left: 26px; color: #e2e8f0; font-size: 16px; line-height: 1.55; }
+.help-body li { margin-bottom: 8px; }
+.help-body li::marker { color: #00d4ff; font-weight: 700; }
+.help-page { color: #94a3b8; font-family: var(--ui-font); align-self: center; min-width: 60px; text-align: center; }
+.btn:disabled { opacity: 0.35; cursor: default; box-shadow: none; }
+#helpScreen .back-btn { margin-top: 12px; }

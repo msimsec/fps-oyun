@@ -36,6 +36,8 @@ Dalgalar ilerledikçe düşmanlar yetenek kazanır: **2. dalga** zıplama (alça
 
 Her iki modun zorluğu **Ayarlar** ekranından ayrı ayrı seçilir (Kolay / Orta / Zor).
 
+**Yardım:** Ayarlar ekranındaki **YARDIM ❓** butonu, oyunun nasıl oynandığını 14 konu başlığında (Başlarken, Kontroller, Oyun Modları, Can ve Kalkan, Silahlar, Bomba, Düşmanlar, Yerden Toplananlar, Bölümler, Skor ve Altın, Mağaza, Rekorlar ve Başarımlar, Ayarlar, İpuçları) satır satır anlatır. Metindeki sayılar oyunun ayarlarından okunur, oyun değişince yardım da güncel kalır.
+
 ## Kontroller
 
 | Tuş | İşlev |
@@ -122,6 +124,7 @@ js/
   update.js       Oyun döngüsü, hareket/zıplama, HUD
   shop.js         Mağaza
   settings.js     Ayarlar ekranı
+  help.js         Yardım ekranı (konu konu oyun rehberi)
   main.js         Başlatma
 ```
 
