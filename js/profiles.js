@@ -241,18 +241,37 @@ function changePassword(id) {
 }
 
 function doRename(p) {
-    const name = cleanName(prompt('Yeni ad:', p.name));
-    if (!name || name === p.name) return;
-    if (nameTaken(name, p.id)) { $('profileNote').textContent = `"${name}" adı zaten kayıtlı.`; return; }
-    p.name = name;
-    saveProfiles();
-    renderProfiles();
-    updatePlayerTag();
+    setTimeout(() => askDialog({
+        title: 'Ad değiştir', text: `"${p.name}" için yeni adı yaz.`, ok: 'KAYDET',
+        input: { value: p.name, maxlength: NAME_MAX, placeholder: 'Yeni ad' },
+        onOk: (raw) => {
+            const name = cleanName(raw);
+            if (!name) return 'Lütfen bir ad yaz.';
+            if (name === p.name) return;
+            refreshProfiles();
+            if (nameTaken(name, p.id)) return `"${name}" adı zaten kayıtlı.`;
+            const q = profiles.list.find(x => x.id === p.id);
+            if (!q) return;
+            q.name = name;
+            saveProfiles();
+            renderProfiles();
+            updatePlayerTag();
+        }
+    }), 0);
 }
 
 function doDelete(p) {
-    const id = p.id;
-    if (!confirm(`"${p.name}" ve tüm kaydı (altın, silahlar, rekorlar) silinsin mi? Bu geri alınamaz.`)) return;
+    // Parola penceresi kapandıktan sonra ayrıca sor: hiçbir oyuncu soru sorulmadan silinmez
+    setTimeout(() => askDialog({
+        title: `"${p.name}" silinsin mi?`,
+        text: 'Bu oyuncunun altını, silahları, skinleri, rekorları, başarımları ve ayarları tamamen silinir. Bu işlem geri alınamaz.',
+        ok: 'EVET, SİL', danger: true,
+        onOk: () => { reallyDelete(p.id); }
+    }), 0);
+}
+
+function reallyDelete(id) {
+    refreshProfiles();
     PROFILE_DATA_KEYS.forEach(k => lsDel(`${k}::${id}`));
     profiles.list = profiles.list.filter(x => x.id !== id);
     if (profiles.current === id) {

@@ -489,3 +489,6 @@ kbd {
 .pw-panel input:focus { border-color: #00d4ff; }
 .pw-show { color: #94a3b8; font-size: 13px; cursor: pointer; }
 .pw-error { color: #f87171; font-size: 14px; min-height: 18px; }
+.btn.danger-btn { background: #dc2626; color: #ffffff; }
+.btn.danger-btn:hover { background: #ef4444; box-shadow: 0 0 15px rgba(239, 68, 68, 0.8); }
+#dialogBox { z-index: 400; }   /* menülerin (100) ve mağazanın (200) üstünde */

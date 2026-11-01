@@ -97,3 +97,43 @@ function formatTime(sec) {
     const m = Math.floor(sec / 60), s = sec - m * 60;
     return `${m}:${s < 10 ? '0' : ''}${s.toFixed(1)}`;
 }
+
+// =====================================================================
+//  ONAY / GİRİŞ PENCERESİ — tarayıcının confirm()/prompt() kutuları yerine.
+//  Bazı tarayıcılar o kutuları engelleyip soru sormadan "evet" sayabiliyor; bu pencere hep görünür.
+//  opts: { title, text, ok, danger, input: { value, maxlength, placeholder }, onOk(değer) → hata metni ya da undefined }
+// =====================================================================
+let dialogReq = null;
+
+function askDialog(opts) {
+    dialogReq = opts;
+    $('dlgTitle').textContent = opts.title;
+    $('dlgText').textContent = opts.text || '';
+    const ok = $('dlgOk');
+    ok.textContent = opts.ok || 'TAMAM';
+    ok.classList.toggle('danger-btn', !!opts.danger);
+    const inp = $('dlgInput');
+    inp.style.display = opts.input ? '' : 'none';
+    if (opts.input) {
+        inp.value = opts.input.value || '';
+        inp.maxLength = opts.input.maxlength || 40;
+        inp.placeholder = opts.input.placeholder || '';
+    }
+    $('dlgError').textContent = '';
+    $('dialogBox').classList.add('show');
+    // Silme gibi tehlikeli işlerde odak "Vazgeç"te: yanlışlıkla Enter'a basmak silmesin
+    setTimeout(() => (opts.input ? inp : opts.danger ? $('dlgCancel') : ok).focus(), 0);
+}
+
+function submitDialog() {
+    if (!dialogReq) return;
+    const req = dialogReq;
+    const err = req.onOk(req.input ? $('dlgInput').value : true);
+    if (err) { $('dlgError').textContent = err; return; }
+    if (dialogReq === req) closeDialog();
+}
+
+function closeDialog() {
+    dialogReq = null;
+    $('dialogBox').classList.remove('show');
+}
