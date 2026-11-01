@@ -20,7 +20,7 @@ const HELP_SECTIONS = [
         `Shift: koş (yalnızca ileri giderken). Koşarken görüş açısı genişler ama isabet biraz bozulur.`,
         'Space: zıpla. 1 birim yüksekliğindeki kasalara zıplayarak çıkabilirsin; çok alçak basamaklara yürüyerek çıkılır.',
         'Fare: nişan al. Hassasiyeti Ayarlar\'dan değiştirebilirsin.',
-        'Sol tık: ateş et. Otomatik silahlarda (Tüfek, Makineli) basılı tutunca seri atar; diğerleri her tıkta bir atar.',
+        'Sol tık: ateş et. Otomatik silahlarda (Tüfek, Taramalı Tabanca) basılı tutunca seri atar; diğerleri her tıkta bir atar.',
         'Sağ tık: dürbün (yalnızca Keskin Nişancı). Dürbünle bakarken yavaş yürürsün ama isabet tamdır.',
         'R: şarjör değiştir. Şarjör boşalınca kendiliğinden de değişir.',
         'G: bomba at.',
@@ -119,7 +119,7 @@ const HELP_SECTIONS = [
         `Gelişmiş Tüfek Şarjörü (${CFG.magCost} altın): tüfek şarjörü +${CFG.magStep}.`,
         `Ağır Kalkan (${CFG.shieldCost} altın): +${CFG.armorAmount} kalkan.`,
         ...UPGRADE_IDS.map(id => `${UPGRADES[id].name}: kalıcı yükseltme, ${UPGRADES[id].max} seviye; her seviyede fiyat artar (ilk seviye ${upgradeCost(id, 0)} altın).`),
-        'Silahlar (Pompalı, Keskin Nişancı, Makineli) bir kez alınır ve kalıcı olarak açılır.',
+        'Silahlar (Pompalı, Keskin Nişancı, Taramalı Tabanca) bir kez alınır ve kalıcı olarak açılır.',
         'Skinler silahın ve mermilerin rengini değiştirir. Sahip olduğun skine tıklayınca kuşanılır, kilitli olana tıklayınca satın alınır.'
     ] },
     { id: 'progress', title: '🏆 Rekorlar ve Başarımlar', lines: () => [

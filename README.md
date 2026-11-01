@@ -61,7 +61,7 @@ Her iki modun zorluğu **Ayarlar** ekranından ayrı ayrı seçilir (Kolay / Ort
 | 2 | Tüfek | Otomatik, 30'luk şarjör (mağazadan büyütülür) | Başlangıçta açık |
 | 3 | Pompalı | 8 saçma, yakında çok güçlü, menzili kısa | Mağaza, 250 altın |
 | 4 | Keskin Nişancı | 5x hasar, dürbün | Mağaza, 400 altın |
-| 5 | Makineli | Çok hızlı otomatik ateş, 0.5x hasar, 40'lık şarjör | Mağaza, 300 altın |
+| 5 | Taramalı Tabanca | Tamamı siyah AR tipi; çok hızlı otomatik ateş, 0.5x hasar, 40'lık şarjör | Mağaza, 300 altın |
 
 Kafa vuruşu her silahta 2 kat hasar verir. Mağazadaki "Silah Hasarı" yükseltmesi tüm silahlara işler.
 

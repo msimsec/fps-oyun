@@ -173,16 +173,45 @@ function createWeaponModels() {
     addPart(sniper, box(0.08, 0.16, 0.36), gripMat, 0.25, -0.25, -0.06);
     addPart(sniper, box(0.06, 0.13, 0.07), gripMat, 0.25, -0.33, -0.27, 0.35);
 
-    // Makineli: kısa gövde, namlu kılıfı, uzun düz şarjör, ön tutamak, kısa dipçik
+    // Taramalı Tabanca: AR tipi kısa karabina, tamamı siyah (skin rengi gövdeyi değiştirmez).
+    // Kabza ve şarjör tırtıklı (taramalı) dokuda; dipçikte yatay kanallar, el kundağında
+    // havalandırma yarıkları, üstte ray ve katlanır gez-arpacık, namlu ucunda alev gizleyici.
+    const blackMat = new THREE.MeshStandardMaterial({ color: 0x141414, roughness: 0.5, metalness: 0.45 });
+    const darkMat = new THREE.MeshStandardMaterial({ color: 0x050505, roughness: 0.8, metalness: 0.2 });
+    const knurlMat = new THREE.MeshStandardMaterial({ map: createKnurlTexture(), color: 0x4a4a4a, roughness: 0.9, metalness: 0.1 });
+    const K = blackMat, D = darkMat;
     const smg = new THREE.Group();
-    addPart(smg, box(0.09, 0.12, 0.4), B, 0.24, -0.21, -0.42);
-    addPart(smg, cyl(0.032, 0.22, 8), gripMat, 0.24, -0.2, -0.72, R);
-    addPart(smg, cyl(0.016, 0.1), A, 0.24, -0.2, -0.86, R);
-    addPart(smg, box(0.05, 0.26, 0.07), gripMat, 0.24, -0.38, -0.5, 0.08);
-    addPart(smg, box(0.06, 0.15, 0.07), gripMat, 0.24, -0.33, -0.27, 0.3);
-    addPart(smg, box(0.05, 0.11, 0.05), gripMat, 0.24, -0.3, -0.66);
-    addPart(smg, box(0.07, 0.08, 0.12), gripMat, 0.24, -0.22, -0.17);
-    addPart(smg, box(0.03, 0.03, 0.14), A, 0.24, -0.135, -0.45);
+    // Dipçik: gövde, kanallar ve tamponlu arka yüz
+    addPart(smg, box(0.075, 0.13, 0.16), K, 0.24, -0.25, -0.1);
+    for (let i = 0; i < 3; i++) addPart(smg, box(0.078, 0.012, 0.11), D, 0.24, -0.215 - i * 0.03, -0.11);
+    addPart(smg, box(0.08, 0.15, 0.025), knurlMat, 0.24, -0.255, -0.01);
+    addPart(smg, cyl(0.024, 0.14), K, 0.24, -0.2, -0.24, R);               // tampon borusu
+    // Alt ve üst gövde, kovan penceresi, kurma kolu
+    addPart(smg, box(0.075, 0.09, 0.28), K, 0.24, -0.245, -0.44);
+    addPart(smg, box(0.08, 0.075, 0.3), K, 0.24, -0.172, -0.45);
+    addPart(smg, box(0.004, 0.035, 0.08), D, 0.282, -0.175, -0.44);
+    addPart(smg, box(0.03, 0.02, 0.04), D, 0.24, -0.13, -0.3);
+    // Üst ray (tüm boy) ve diş sırası
+    addPart(smg, box(0.035, 0.018, 0.72), K, 0.24, -0.125, -0.66);
+    for (let i = 0; i < 12; i++) addPart(smg, box(0.04, 0.008, 0.02), D, 0.24, -0.113, -0.34 - i * 0.055);
+    // El kundağı ve yan yarıklar
+    addPart(smg, box(0.085, 0.085, 0.38), K, 0.24, -0.175, -0.8);
+    for (let i = 0; i < 5; i++) {
+        addPart(smg, box(0.088, 0.018, 0.04), D, 0.24, -0.19, -0.66 - i * 0.07);
+    }
+    addPart(smg, box(0.03, 0.02, 0.3), K, 0.24, -0.225, -0.8);              // alt ray
+    // Namlu ve alev gizleyici
+    addPart(smg, cyl(0.016, 0.12), K, 0.24, -0.17, -1.04, R);
+    addPart(smg, cyl(0.024, 0.07, 8), D, 0.24, -0.17, -1.12, R);
+    // Katlanır gez ve arpacık
+    addPart(smg, box(0.035, 0.045, 0.02), K, 0.24, -0.095, -0.35);
+    addPart(smg, box(0.035, 0.05, 0.02), K, 0.24, -0.093, -0.98);
+    // Taramalı kabza, tetik ve tetik korkuluğu
+    addPart(smg, box(0.06, 0.16, 0.075), knurlMat, 0.24, -0.33, -0.33, 0.3);
+    addPart(smg, box(0.01, 0.04, 0.012), D, 0.24, -0.305, -0.4);
+    addPart(smg, box(0.012, 0.01, 0.09), K, 0.24, -0.335, -0.41);
+    // Tırtıklı şarjör (hafif öne eğik)
+    addPart(smg, box(0.055, 0.22, 0.085), knurlMat, 0.24, -0.38, -0.5, -0.12);
 
     Object.assign(weaponModels, { rifle, pistol, shotgun, sniper, smg });
     WEAPON_ORDER.forEach(id => {
@@ -198,6 +227,25 @@ function createWeaponModels() {
     updateWeaponSkinColors();
     camera.add(weapon3DGroup);
     scene.add(camera);
+}
+
+// Kabza ve şarjör için tırtıklı (çapraz taramalı) doku
+function createKnurlTexture() {
+    const c = document.createElement('canvas');
+    c.width = c.height = 64;
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = '#3a3a3a';
+    ctx.fillRect(0, 0, 64, 64);
+    ctx.strokeStyle = '#0a0a0a';
+    ctx.lineWidth = 2;
+    for (let k = -64; k <= 64; k += 8) {
+        ctx.beginPath(); ctx.moveTo(k, 0); ctx.lineTo(k + 64, 64); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(k + 64, 0); ctx.lineTo(k, 64); ctx.stroke();
+    }
+    const t = new THREE.CanvasTexture(c);
+    t.wrapS = t.wrapT = THREE.RepeatWrapping;
+    t.repeat.set(2, 3);
+    return t;
 }
 
 function updateWeaponSkinColors() {
