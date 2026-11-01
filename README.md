@@ -6,7 +6,7 @@ Tarayıcıda çalışan, Three.js ile yazılmış birinci şahıs nişancı oyun
 
 ## Oyuncu girişi
 
-Oyun açılınca **"Kim oynuyor?"** ekranı gelir. Herkes adını yazıp kayıt olur; her oyuncunun altını, silahları, skinleri, yükseltmeleri, rekorları ve ayarları ayrı tutulur. Menüdeki **Oyuncu değiştir** ile geçiş yapılır. Parola yoktur ve kayıtlar yalnızca o tarayıcıda saklanır (en fazla 20 oyuncu).
+Oyun açılınca **"Kim oynuyor?"** ekranı gelir. Herkes adını ve 4-8 karakterlik basit bir parola yazıp kayıt olur (harf, rakam, ne istersen; zorunlu kural yok). Sonraki girişlerde oyuncuya tıklayınca parola sorulur; ad değiştirme, parola değiştirme (🔑) ve silme için de parola gerekir. Parolası olmayan eski oyuncular ilk girişte parola belirler. Her oyuncunun altını, silahları, skinleri, yükseltmeleri, rekorları ve ayarları ayrı tutulur. Menüdeki **Oyuncu değiştir** ile geçiş yapılır. Kayıtlar yalnızca o tarayıcıda saklanır (en fazla 20 oyuncu). Parolanın kendisi değil, yalnızca özeti saklanır; unutulan parola geri getirilemez. Bu, aynı bilgisayarı kullananlar için basit bir kilittir, gerçek bir hesap güvenliği değildir.
 
 ## Bölümler
 
