@@ -6,9 +6,11 @@
 // =====================================================================
 const HELP_SECTIONS = [
     { id: 'start', title: '🚀 Başlarken', lines: () => [
-        'Oyun açılınca "Kim oynuyor?" ekranı gelir. Adını yazıp KAYIT OL\'a bas ya da listeden adına tıkla.',
+        `Oyun açılınca "Kim oynuyor?" ekranı gelir. Yeni oyuncuysan adını ve ${PW_MIN}-${PW_MAX} karakterlik bir parola yazıp KAYIT OL'a bas.`,
+        'Kayıtlıysan listeden adına tıkla ve parolanı yaz. Parola basittir: harf, rakam, ne istersen olabilir.',
+        'Adını değiştirmek (✎ Ad), parolanı değiştirmek (🔑 Parola) ya da oyuncuyu silmek (🗑 Sil) için de parolan sorulur.',
         `Her oyuncunun altını, silahları, skinleri, yükseltmeleri, rekorları, başarımları ve ayarları ayrı tutulur (en fazla ${MAX_PROFILES} oyuncu).`,
-        'Kayıtlar yalnızca bu tarayıcıda saklanır; başka bir bilgisayara ya da tarayıcıya taşınmaz. Parola yoktur.',
+        'Kayıtlar yalnızca bu tarayıcıda saklanır; başka bir bilgisayara ya da tarayıcıya taşınmaz. Parolanı unutursan geri getirilemez.',
         'Ana menüde BÖLÜM SEÇ kısmından oynamak istediğin haritaya tıkla; seçili olanın üstünde "✓ SEÇİLİ" yazar.',
         'OYUNA BAŞLA dalga modunu, 1v1 DÜELLO bota karşı teke tek maçı başlatır.',
         'Oyun başlayınca fare ekrana kilitlenir. Kilitlenmezse ekrana bir kez tıkla.',

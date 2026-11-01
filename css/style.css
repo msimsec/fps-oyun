@@ -470,3 +470,22 @@ kbd {
 .help-page { color: #94a3b8; font-family: var(--ui-font); align-self: center; min-width: 60px; text-align: center; }
 .btn:disabled { opacity: 0.35; cursor: default; box-shadow: none; }
 #helpScreen .back-btn { margin-top: 12px; }
+
+/* Parola */
+.profile-new { flex-wrap: wrap; justify-content: center; }
+.profile-new #newProfilePw { width: 200px; }
+.pw-box { display: none; position: fixed; inset: 0; background: rgba(2, 6, 23, 0.8); z-index: 50; align-items: center; justify-content: center; }
+.pw-box.show { display: flex; }
+.pw-panel {
+    background: #0f172a; border: 2px solid #00d4ff; border-radius: 12px; padding: 22px 26px; width: min(420px, 90vw);
+    display: flex; flex-direction: column; gap: 10px; font-family: var(--ui-font); box-shadow: 0 0 25px rgba(0, 212, 255, 0.35);
+}
+.pw-title { color: #ffaa00; font-size: 20px; font-weight: 700; }
+.pw-text { color: #cbd5e1; font-size: 14px; }
+.pw-panel input[type=password], .pw-panel input[type=text] {
+    padding: 10px 14px; font-size: 18px; letter-spacing: 2px; background: #020617; color: #e2e8f0;
+    border: 2px solid #334155; border-radius: 6px; outline: none;
+}
+.pw-panel input:focus { border-color: #00d4ff; }
+.pw-show { color: #94a3b8; font-size: 13px; cursor: pointer; }
+.pw-error { color: #f87171; font-size: 14px; min-height: 18px; }

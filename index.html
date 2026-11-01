@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>3D Tactical FPS - 1v1 Düello ve Tüfek Skinleri</title>
     <!-- ?v=… : her yayında değiştirilir (tarih); tarayıcı önbellekteki eski CSS/JS dosyalarını kullanmasın -->
-    <link rel="stylesheet" href="css/style.css?v=20261101b">
+    <link rel="stylesheet" href="css/style.css?v=20261101c">
 
     <!-- Three.js r128 — üçüncü taraf CDN yerine oyunla aynı klasörden yüklenir.
          Dosya index.html ile aynı yerden geldiği için CDN ele geçirilme riski yoktur.
@@ -53,12 +53,33 @@
         <div class="profile-list" id="profileList"></div>
         <div class="profile-new" id="newProfileRow">
             <input type="text" id="newProfileName" maxlength="16" placeholder="Adını yaz (ör. Ahmet)" autocomplete="off"
+                   onkeydown="if (event.key === 'Enter') $('newProfilePw').focus()">
+            <input type="password" id="newProfilePw" maxlength="8" placeholder="Parola (4-8 karakter)" autocomplete="new-password"
                    onkeydown="if (event.key === 'Enter') createProfile()">
             <button class="btn restart-btn" onclick="createProfile()">KAYIT OL</button>
         </div>
         <div class="note" id="profileNote"></div>
-        <div class="profile-hint">Her oyuncunun altını, silahları, skinleri, rekorları ve ayarları ayrı tutulur. Kayıtlar bu tarayıcıda saklanır.</div>
+        <div class="profile-hint">Her oyuncunun altını, silahları, skinleri, rekorları ve ayarları ayrı tutulur. Kayıtlar bu tarayıcıda saklanır.
+            Parola 4-8 karakter olur (harf, rakam, ne istersen); unutulursa geri getirilemez.</div>
         <button class="back-btn" id="profileBack" onclick="closeProfiles()">Geri Dön</button>
+
+        <!-- Parola penceresi -->
+        <div class="pw-box" id="pwBox">
+            <div class="pw-panel">
+                <div class="pw-title" id="pwTitle"></div>
+                <div class="pw-text" id="pwText"></div>
+                <input type="password" id="pwInput" maxlength="8" autocomplete="off"
+                       onkeydown="if (event.key === 'Enter') submitPassword(); if (event.key === 'Escape') closePassword();">
+                <input type="password" id="pwInput2" maxlength="8" placeholder="Parolayı tekrar yaz" autocomplete="off"
+                       onkeydown="if (event.key === 'Enter') submitPassword(); if (event.key === 'Escape') closePassword();">
+                <label class="pw-show"><input type="checkbox" id="pwShow" onchange="togglePwShow()"> Parolayı göster</label>
+                <div class="pw-error" id="pwError"></div>
+                <div class="menu-buttons">
+                    <button class="btn restart-btn" id="pwOk" onclick="submitPassword()">TAMAM</button>
+                    <button class="btn ghost-btn" onclick="closePassword()">İptal</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Başlangıç Menüsü -->
@@ -278,27 +299,27 @@
 
     <div id="toast"></div>
 
-    <script src="js/profiles.js?v=20261101b"></script>
-    <script src="js/config.js?v=20261101b"></script>
-    <script src="js/save.js?v=20261101b"></script>
-    <script src="js/state.js?v=20261101b"></script>
-    <script src="js/utils.js?v=20261101b"></script>
-    <script src="js/audio.js?v=20261101b"></script>
-    <script src="js/feedback.js?v=20261101b"></script>
-    <script src="js/world.js?v=20261101b"></script>
-    <script src="js/maps.js?v=20261101b"></script>
-    <script src="js/input.js?v=20261101b"></script>
-    <script src="js/game.js?v=20261101b"></script>
-    <script src="js/weapons.js?v=20261101b"></script>
-    <script src="js/enemies.js?v=20261101b"></script>
-    <script src="js/items.js?v=20261101b"></script>
-    <script src="js/waves.js?v=20261101b"></script>
-    <script src="js/records.js?v=20261101b"></script>
-    <script src="js/achievements.js?v=20261101b"></script>
-    <script src="js/update.js?v=20261101b"></script>
-    <script src="js/shop.js?v=20261101b"></script>
-    <script src="js/settings.js?v=20261101b"></script>
-    <script src="js/help.js?v=20261101b"></script>
-    <script src="js/main.js?v=20261101b"></script>
+    <script src="js/profiles.js?v=20261101c"></script>
+    <script src="js/config.js?v=20261101c"></script>
+    <script src="js/save.js?v=20261101c"></script>
+    <script src="js/state.js?v=20261101c"></script>
+    <script src="js/utils.js?v=20261101c"></script>
+    <script src="js/audio.js?v=20261101c"></script>
+    <script src="js/feedback.js?v=20261101c"></script>
+    <script src="js/world.js?v=20261101c"></script>
+    <script src="js/maps.js?v=20261101c"></script>
+    <script src="js/input.js?v=20261101c"></script>
+    <script src="js/game.js?v=20261101c"></script>
+    <script src="js/weapons.js?v=20261101c"></script>
+    <script src="js/enemies.js?v=20261101c"></script>
+    <script src="js/items.js?v=20261101c"></script>
+    <script src="js/waves.js?v=20261101c"></script>
+    <script src="js/records.js?v=20261101c"></script>
+    <script src="js/achievements.js?v=20261101c"></script>
+    <script src="js/update.js?v=20261101c"></script>
+    <script src="js/shop.js?v=20261101c"></script>
+    <script src="js/settings.js?v=20261101c"></script>
+    <script src="js/help.js?v=20261101c"></script>
+    <script src="js/main.js?v=20261101c"></script>
 </body>
 </html>
