@@ -6,7 +6,7 @@ Tarayıcıda çalışan, Three.js ile yazılmış birinci şahıs nişancı oyun
 
 ## Oyuncu girişi
 
-Oyun açılınca **"Kim oynuyor?"** ekranı gelir. Herkes adını ve 4-8 karakterlik basit bir parola yazıp kayıt olur (harf, rakam, ne istersen; zorunlu kural yok). Sonraki girişlerde oyuncuya tıklayınca parola sorulur; ad değiştirme, parola değiştirme (🔑) ve silme için de parola gerekir. Parolası olmayan eski oyuncular ilk girişte parola belirler. Her oyuncunun altını, silahları, skinleri, yükseltmeleri, rekorları ve ayarları ayrı tutulur. Menüdeki **Oyuncu değiştir** ile geçiş yapılır. Kayıtlar yalnızca o tarayıcıda saklanır (en fazla 20 oyuncu). Parolanın kendisi değil, yalnızca özeti saklanır; unutulan parola geri getirilemez. Bu, aynı bilgisayarı kullananlar için basit bir kilittir, gerçek bir hesap güvenliği değildir.
+Oyun açılınca **"Kim oynuyor?"** ekranı gelir. Herkes adını ve 4-8 karakterlik basit bir parola yazıp kayıt olur (harf, rakam, ne istersen; zorunlu kural yok). Sonraki girişlerde oyuncuya tıklayınca parola sorulur; ad değiştirme, parola değiştirme (🔑) ve silme için de parola gerekir. Parolası olmayan eski oyuncular, oyun açılır açılmaz parola belirlemeden oynayamaz. Her oyuncunun altını, silahları, skinleri, yükseltmeleri, rekorları ve ayarları ayrı tutulur. Menüdeki **Oyuncu değiştir** ile geçiş yapılır. Kayıtlar yalnızca o tarayıcıda saklanır (en fazla 20 oyuncu). Parolanın kendisi değil, yalnızca özeti saklanır; unutulan parola geri getirilemez. Bu, aynı bilgisayarı kullananlar için basit bir kilittir, gerçek bir hesap güvenliği değildir.
 
 ## Bölümler
 
@@ -36,7 +36,7 @@ Dalgalar ilerledikçe düşmanlar yetenek kazanır: **2. dalga** zıplama (alça
 
 Her iki modun zorluğu **Ayarlar** ekranından ayrı ayrı seçilir (Kolay / Orta / Zor).
 
-**Yardım:** Ayarlar ekranındaki **YARDIM ❓** butonu, oyunun nasıl oynandığını 14 konu başlığında (Başlarken, Kontroller, Oyun Modları, Can ve Kalkan, Silahlar, Bomba, Düşmanlar, Yerden Toplananlar, Bölümler, Skor ve Altın, Mağaza, Rekorlar ve Başarımlar, Ayarlar, İpuçları) satır satır anlatır. Metindeki sayılar oyunun ayarlarından okunur, oyun değişince yardım da güncel kalır.
+**Yardım:** Ayarlar ekranındaki **YARDIM ❓** butonu, oyunun nasıl oynandığını 15 konu başlığında (Başlarken, Oyuncu ve Parola, Kontroller, Oyun Modları, Can ve Kalkan, Silahlar, Bomba, Düşmanlar, Yerden Toplananlar, Bölümler, Skor ve Altın, Mağaza, Rekorlar ve Başarımlar, Ayarlar, İpuçları) satır satır anlatır. Metindeki sayılar oyunun ayarlarından okunur, oyun değişince yardım da güncel kalır.
 
 ## Kontroller
 

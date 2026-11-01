@@ -47,7 +47,7 @@ function updateGrenades(dt) {
             p.y = ground;
             g.vy = Math.abs(g.vy) > 2 ? -g.vy * 0.35 : 0;
             g.vx *= 0.6; g.vz *= 0.6;
-        } else if (pointInWall({ x: p.x, y: ny, z: p.z })) {
+        } else if (pointInWall({ x: p.x, y: ny, z: p.z }) || ny > curMap().bulletMaxY - 0.2) {
             g.vy = -g.vy * 0.3;              // tavana / kirişin altına çarptı
         } else {
             p.y = ny;
@@ -136,6 +136,9 @@ let drops = [];
 
 function maybeDrop(x, y, z) {
     if (Math.random() >= CFG.dropChance) return;
+    // Düşman havada öldüyse eşya altındaki zemine düşer; altı boşluksa (Space) hiç düşmez
+    y = groundHeight(x, z, y, 0.3);
+    if (!Number.isFinite(y)) return;
     let r = Math.random() * DROP_IDS.reduce((s, id) => s + DROP_TYPES[id].weight, 0);
     let type = DROP_IDS[0];
     for (const id of DROP_IDS) { r -= DROP_TYPES[id].weight; if (r <= 0) { type = id; break; } }

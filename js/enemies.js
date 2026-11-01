@@ -523,7 +523,7 @@ function makeCorpse(e, head) {
         createParticles(hp, e.isDuel ? 0xc084fc : (e.type ? e.type.head : 0xf87171), 14);
     }
     g.rotation.order = 'YXZ';            // devrilme düşmanın kendi ekseninde olsun
-    corpses.push({ group: g, t: 0, landed: false });
+    corpses.push({ group: g, t: 0, landed: false, vy: 0 });
     // Aynı anda çok ceset birikmesin
     if (corpses.length > 12) { scene.remove(corpses[0].group); corpses.shift(); }
 }
@@ -532,6 +532,16 @@ function updateCorpses(dt) {
     for (let i = corpses.length - 1; i >= 0; i--) {
         const c = corpses[i];
         c.t += dt;
+        // Havada öldüyse (zıplarken / rampadan uçarken) önce yere düşsün
+        const p = c.group.position;
+        if (c.t <= 2.2) {
+            const ground = groundHeight(p.x, p.z, p.y, 0.3);
+            if (p.y > ground + 0.01) {
+                c.vy -= CFG.gravity * dt;
+                p.y = Math.max(ground, p.y + c.vy * dt);
+            } else c.vy = 0;
+            if (p.y < curMap().killY) { scene.remove(c.group); corpses.splice(i, 1); continue; }
+        }
         const fall = Math.min(1, c.t / 0.45);
         c.group.rotation.x = -Math.PI / 2 * fall * fall;       // hızlanarak yere düşer
         if (fall >= 1 && !c.landed) { c.landed = true; sfx('bodyFall'); }
