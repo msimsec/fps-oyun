@@ -105,8 +105,9 @@ const WEAPONS = {
         mag: 5, startPool: 15, killAmmo: 2, reload: 2.6, speed: 160, life: 0.8, cost: 400, zoom: true
     },
     smg: {
-        // Hafif makineli: çok hızlı ateş, mermi başına az hasar, biraz dağınık; yakın-orta mesafe
-        name: 'Makineli', auto: true, interval: 0.055, dmgMul: 0.5, pellets: 1, spread: 0.018,
+        // Taramalı tabanca (AR tipi kısa karabina görünümü): çok hızlı ateş, mermi başına az hasar,
+        // biraz dağınık; yakın-orta mesafe
+        name: 'Taramalı Tabanca', auto: true, interval: 0.055, dmgMul: 0.5, pellets: 1, spread: 0.018,
         mag: 40, startPool: 160, killAmmo: 30, reload: 1.6, speed: 80, life: 0.8, cost: 300
     }
 };
