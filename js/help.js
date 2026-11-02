@@ -23,6 +23,7 @@ const HELP_SECTIONS = [
         'Aynı tarayıcı sekmesinde bir kez giriş yaptıysan, sayfayı yenilesen de tekrar parola sorulmaz. Yeni sekmede yeniden sorulur.',
         'Ana menünün sol üstünde oynayan oyuncunun adı yazar; "Oyuncu değiştir" ile giriş ekranına dönersin.',
         'Oyuncu kartındaki ✎ Ad adını, 🔑 Parola parolanı değiştirir, 🗑 Sil oyuncuyu tüm kaydıyla siler. Üçü de o oyuncunun parolasını ister.',
+        'Silmeden önce ayrıca "silinsin mi?" diye sorulur; EVET, SİL\'e basmadan hiçbir oyuncu silinmez. Vazgeç ya da Esc iptal eder.',
         'Parolan değiştirilirken yanlış yazılmasın diye yeni parola iki kez sorulur.',
         'Parolası olmayan eski oyuncuların kartında "⚠ parola yok" yazar; oyun açılır açılmaz parola belirlemeleri istenir, belirlemeden oynanamaz.',
         'Parolanın kendisi saklanmaz, yalnızca şifrelenmiş özeti tutulur. Parolanı unutursan geri getirilemez.',
@@ -142,6 +143,7 @@ const HELP_SECTIONS = [
     { id: 'progress', title: '🏆 Rekorlar ve Başarımlar', lines: () => [
         'REKORLAR ekranında her bölüm için ayrı sekme vardır; her zorluk seviyesinin en iyi skoru, en uzak dalgası ve düello sonuçları yazar.',
         'Rekor kırınca oyun sonu ekranında "YENİ REKOR" yazar.',
+        'Rekor ekranındaki Sıfırla yalnızca seçili bölümün rekorlarını siler; önce onay sorulur.',
         `BAŞARIMLAR ekranında ${ACHIEVEMENTS.length} başarım vardır; her biri bir kez açılır ve altın ödülü verir.`,
         'Açılan başarım ekranın sağında duyurulur ve altını hemen hesabına eklenir.',
         'Bazı başarımlarda ilerleme çubuğu vardır (ör. toplam vurulan düşman).',

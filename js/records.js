@@ -106,9 +106,16 @@ function openRecords(from, mapId) {
 function closeRecords() { returnTo(recordsReturn); }
 
 function resetRecords() {
-    if (!confirm(`${MAPS[recordsMap].name} bölümünün rekorları silinsin mi?`)) return;
-    records[recordsMap] = emptyDiffRecords();
-    saveRecords();
-    openRecords(recordsReturn);
-    showToast('Rekorlar sıfırlandı');
+    const mapId = recordsMap;
+    askDialog({
+        title: `${MAPS[mapId].name} rekorları silinsin mi?`,
+        text: 'Bu bölümün tüm zorluk seviyelerindeki skor, dalga ve düello rekorları sıfırlanır. Diğer bölümler etkilenmez.',
+        ok: 'EVET, SIFIRLA', danger: true,
+        onOk: () => {
+            records[mapId] = emptyDiffRecords();
+            saveRecords();
+            openRecords(recordsReturn, mapId);
+            showToast('Rekorlar sıfırlandı');
+        }
+    });
 }
