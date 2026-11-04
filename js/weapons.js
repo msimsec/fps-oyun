@@ -16,14 +16,14 @@ function spawnBullet(origin, dir, speed, damage, color, isPlayer, life, geo = GE
     bullets.push(b);
 }
 
-// Her elin başında: tüm silahlar dolu şarjör + başlangıç yedeği, tüfek elde
+// Her elin başında: tüm silahlar dolu şarjör + başlangıç yedeği, yaylı tüfek elde
 function resetArsenal() {
     WEAPON_ORDER.forEach(id => {
         player.arsenal[id] = { ammo: magSize(id), pool: WEAPONS[id].startPool };
     });
     player.reloading = false; player.reloadTimer = 0; player.fireCooldown = 0;
     setZoom(false);
-    showWeapon('rifle');
+    showWeapon('crossbow');
 }
 
 function showWeapon(id) {
@@ -72,6 +72,13 @@ function tryShoot() {
     // Koşarken ve havadayken isabet biraz bozulur (dürbünle bakarken bozulmaz)
     const extra = player.zoomed ? 0 : (isSprinting() ? 0.02 : 0) + (player.onGround ? 0 : 0.03);
     const spread = w.spread + extra;
+    if (w.bolt) {
+        spawnBolt(origin, dir, w.speed, damage, w.gravity, w.life);
+        weaponKick = 0.12;
+        sfx('shoot_crossbow');
+        if (a.ammo === 0) startReload();
+        return;
+    }
     if (w.rocket) {
         spawnRocket(origin, dir, w.speed, damage, w.blastRadius, w.life);
         weaponKick = 0.22;

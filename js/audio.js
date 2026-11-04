@@ -59,7 +59,8 @@ function noise(dur, vol = 0.3, freq = 2000, type = 'lowpass', freqEnd = null, de
 }
 
 const SFX = {
-    shoot_rifle: () => { noise(0.09, 0.35, 3000, 'lowpass', 600); tone(150, 0.06, 'square', 0.12, 60); },
+    shoot_crossbow: () => { tone(520, 0.05, 'triangle', 0.18, 140); noise(0.12, 0.2, 1800, 'bandpass', 600); tone(90, 0.12, 'sine', 0.12, 60, 0.02); },
+    boltHit: () => { noise(0.05, 0.2, 900, 'lowpass'); tone(160, 0.05, 'square', 0.08, 90); },
     shoot_pistol: () => { noise(0.07, 0.3, 4000, 'lowpass', 900); tone(220, 0.05, 'square', 0.12, 90); },
     shoot_shotgun: () => { noise(0.3, 0.6, 2000, 'lowpass', 250); tone(90, 0.2, 'sawtooth', 0.25, 40); },
     shoot_smg: () => { noise(0.06, 0.26, 3600, 'lowpass', 900); tone(190, 0.04, 'square', 0.08, 80); },

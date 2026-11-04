@@ -34,7 +34,7 @@ const HELP_SECTIONS = [
         `Shift: koş (yalnızca ileri giderken). Koşarken görüş açısı genişler ama isabet biraz bozulur.`,
         'Space: zıpla. 1 birim yüksekliğindeki kasalara zıplayarak çıkabilirsin; çok alçak basamaklara yürüyerek çıkılır.',
         'Fare: nişan al. Hassasiyeti Ayarlar\'dan değiştirebilirsin.',
-        'Sol tık: ateş et. Otomatik silahlarda (Tüfek, Taramalı Tabanca) ve Testereli Eldiven\'de basılı tutunca sürekli çalışır; diğerleri her tıkta bir atar.',
+        'Sol tık: ateş et. Otomatik silahta (Taramalı Tabanca) ve Testereli Eldiven\'de basılı tutunca sürekli çalışır; diğerleri her tıkta bir atar.',
         'Sağ tık: dürbün (yalnızca Keskin Nişancı). Dürbünle bakarken yavaş yürürsün ama isabet tamdır.',
         'R: şarjör değiştir. Şarjör boşalınca kendiliğinden de değişir.',
         'G: bomba at.',
@@ -69,12 +69,13 @@ const HELP_SECTIONS = [
             const w = WEAPONS[id];
             const how = w.cost ? `mağazada ${w.cost} altın` : 'başlangıçta açık';
             if (w.melee) return `${w.name} (${i + 1} tuşu): yakın dövüş, basılı tutunca dönen testere önündeki düşmanı keser (${w.range} birim menzil), ${w.dmgMul}x hasar, mermi harcamaz; ${how}.`;
-            const kind = w.rocket ? `roket, ${w.blastRadius} birimlik patlama` : w.pellets > 1 ? `${w.pellets} saçma` : (w.auto ? 'otomatik' : 'yarı otomatik');
-            const mag = id === 'rifle' ? `${numSuffix(CFG.baseMag)} şarjör (mağazadan ${CFG.maxMag}'a kadar büyür)` : `${numSuffix(w.mag)} şarjör`;
+            const kind = w.bolt ? 'ok atar, tek atış, tam isabetli' : w.rocket ? `roket, ${w.blastRadius} birimlik patlama` : w.pellets > 1 ? `${w.pellets} saçma` : (w.auto ? 'otomatik' : 'yarı otomatik');
+            const mag = id === 'smg' ? `${numSuffix(w.mag)} şarjör (mağazadan ${maxSmgMag()}'a kadar büyür)` : `${numSuffix(w.mag)} şarjör`;
             return `${w.name} (${i + 1} tuşu): ${kind}, ${w.dmgMul}x hasar, ${mag}; ${how}.`;
         }),
         'Silahlarını eldivenli ellerin tutar: tabancayı iki elle, tüfekleri bir el kabzada bir el önde tutarsın.',
         'Testereli Eldiven her zaman sendedir; mermi bitince ya da düşman dibine geldiğinde 1 tuşuyla geç. Kafaya denk gelen kesik 2 kat hasar verir.',
+        'Yaylı Tüfek: yay gücüyle ok atar. Her atıştan sonra kirişi yeniden gerer (yavaş), ama bir ok çoğu düşmanı tek başına indirir; kafaya 2 kat. Ok uzakta hafifçe düşer, uzaktaki hedefe biraz yukarı nişan al. Duvara saplanan ok bir süre orada kalır.',
         'Roketatar: roket bir duvara, zemine ya da düşmana değince patlar; patlama çevredeki herkese hasar verir, duvar arkası korunur. Çok yakına atarsan sana da yarı hasar verir.',
         'Taramalı Tabanca tamamen siyah, tırtıklı kabzalı AR tipi bir silahtır; skin seçimi gövdesinin rengini değiştirmez, yalnızca mermi rengi skine göre değişir.',
         'Tabancanın yedek mermisi sınırsızdır; diğer silahların mermisi bitse bile tabancayla savaşmaya devam edebilirsin.',
@@ -111,10 +112,11 @@ const HELP_SECTIONS = [
     ] },
     { id: 'drops', title: '🎁 Yerden Toplananlar', lines: () => [
         `Ölen düşman %${Math.round(CFG.dropChance * 100)} ihtimalle yere dönen, parlayan bir eşya bırakır.`,
-        'Sarı kutu = Cephane: sahip olduğun her silaha bir şarjör yedek mermi.',
-        'Mavi elmas = Kalkan: +25 kalkan (kalkanın doluysa alınmaz).',
-        'Sarı para = Altın: bir düşman öldürme ödülü kadar altın.',
-        'Yeşil top = Bomba: +1 bomba (çantan doluysa alınmaz).',
+        'Her eşyanın üstünde ne olduğunu yazan renkli bir etiket, altında da aynı renkte parlayan bir halka vardır.',
+        '🔫 CEPHANE (sarı): üstünde mermiler olan yeşil kutu; sahip olduğun her silaha bir şarjör yedek mermi.',
+        '🛡️ KALKAN +25 (mavi): artılı mavi plaka; +25 kalkan (kalkanın doluysa alınmaz).',
+        '🪙 ALTIN (sarı): üst üste altın paralar; bir düşman öldürme ödülü kadar altın.',
+        '💣 BOMBA +1 (yeşil): pimli el bombası; +1 bomba (çantan doluysa alınmaz).',
         'Eşyayı almak için üstünden geçmen yeterli.',
         `Eşyalar ${CFG.dropLife} saniye sonra kaybolur; son saniyelerde yanıp söner.`
     ] },
@@ -137,7 +139,7 @@ const HELP_SECTIONS = [
         'Mağazaya ana menüden, duraklatma menüsünden ya da oyun sonu ekranından girilir.',
         'Altının yetmediği kalemlerin butonu soluk görünür.',
         `Silah Hasarı (${CFG.damageCost} altın): tüm silahların hasarı artar.`,
-        `Gelişmiş Tüfek Şarjörü (${CFG.magCost} altın): tüfek şarjörü +${CFG.magStep}.`,
+        `Gelişmiş Taramalı Şarjörü (${CFG.magCost} altın): Taramalı Tabanca şarjörü +${CFG.magStep}.`,
         `Ağır Kalkan (${CFG.shieldCost} altın): +${CFG.armorAmount} kalkan.`,
         ...UPGRADE_IDS.map(id => `${UPGRADES[id].name}: kalıcı yükseltme, ${UPGRADES[id].max} seviye; her seviyede fiyat artar (ilk seviye ${upgradeCost(id, 0)} altın).`),
         'Silahlar (Av Tüfeği, Keskin Nişancı, Taramalı Tabanca, Roketatar) bir kez alınır ve kalıcı olarak açılır.',

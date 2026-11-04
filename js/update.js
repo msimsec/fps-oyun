@@ -90,6 +90,8 @@ function updatePlayer(dt) {
     player.sawSpin = Math.max(0, player.sawSpin - dt);
     const sawM = weaponModels.saw;
     if (sawM && sawM.visible) sawM.userData.blade.rotation.x -= dt * (player.sawSpin > 0 ? 45 : 5);
+    const cb = weaponModels.crossbow;
+    if (cb && cb.visible) cb.userData.bolt.visible = !player.reloading && curAmmo() && curAmmo().ammo > 0;
     const rl = weaponModels.rocket;
     if (rl && rl.visible) rl.userData.warhead.visible = !player.reloading && curAmmo() && curAmmo().ammo > 0;
     weaponSwitchAnim = Math.max(0, weaponSwitchAnim - dt * 4);
@@ -219,7 +221,7 @@ function animate() {
         if (state === 'playing') updateEnemies(dt);
         updateParticles(dt);
         updateCorpses(dt);
-        if (state === 'playing') { updateGrenades(dt); updateRockets(dt); updateDrops(dt); }
+        if (state === 'playing') { updateGrenades(dt); updateRockets(dt); updateBolts(dt); updateDrops(dt); }
         updateHitDirections(dt);
         updateHUD();
     }

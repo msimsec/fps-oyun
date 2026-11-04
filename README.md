@@ -30,7 +30,7 @@ Dalgalar ilerledikçe düşmanlar yetenek kazanır: **2. dalga** zıplama (alça
 
 **Bomba (G):** Her ele 2 bombayla başlanır (en fazla 4). Atılan bomba sekerek yuvarlanır, 1.8 sn sonra patlar; 6 birim içindeki düşmanlara uzaklıkla azalan hasar verir, duvarın arkasındakiler korunur. Çok yakındaysan sana da yarı hasar verir. Her dalga sonunda +1 bomba.
 
-**Yerden toplananlar:** Ölen düşman %35 ihtimalle bir eşya düşürür: **Cephane** (sarı, her silaha bir şarjör), **Kalkan** (mavi, +25), **Altın** (sarı para) ya da **Bomba** (yeşil). Üstünden geçince alınır; 20 sn sonra (son saniyelerde yanıp sönerek) kaybolur.
+**Yerden toplananlar:** Ölen düşman %35 ihtimalle bir eşya düşürür. Her eşyanın üstünde ne olduğunu yazan renkli bir etiket ve altında parlayan bir halka vardır: **🔫 CEPHANE** (mermili yeşil kutu, her silaha bir şarjör), **🛡️ KALKAN +25** (artılı mavi plaka), **🪙 ALTIN** (altın paralar) ya da **💣 BOMBA +1** (pimli el bombası). Üstünden geçince alınır; 20 sn sonra (son saniyelerde yanıp sönerek) kaybolur.
 
 **Geri bildirim:** Vurulunca nişangâhın çevresinde atışın geldiği yönü gösteren kırmızı bir yay çıkar. Ölen düşman geriye doğru yığılıp yere gömülür; kafadan vurulursa kafası parçalanır.
 
@@ -46,7 +46,7 @@ Her iki modun zorluğu **Ayarlar** ekranından ayrı ayrı seçilir (Kolay / Ort
 | Shift | Koş (ileri giderken) |
 | Space | Zıpla (1 birimlik kasalara çıkılabilir) |
 | Fare | Nişan |
-| Sol tık | Ateş (tüfek basılı tutunca otomatik) |
+| Sol tık | Ateş (Taramalı Tabanca ve testere basılı tutunca sürekli) |
 | Sağ tık | Dürbün (keskin nişancı) |
 | R | Şarjör değiştir |
 | G | Bomba at |
@@ -59,10 +59,10 @@ Her iki modun zorluğu **Ayarlar** ekranından ayrı ayrı seçilir (Kolay / Ort
 |---|---|---|---|
 | 1 | Testereli Eldiven | Yakın dövüş; basılı tutunca dönen testere önündeki düşmanı keser, **mermi harcamaz** | Başlangıçta açık |
 | 2 | Tabanca | Yarı otomatik, 1.4x hasar, **sınırsız yedek mermi**, iki elle tutulur | Başlangıçta açık |
-| 3 | Tüfek | Otomatik, 30'luk şarjör (mağazadan büyütülür) | Başlangıçta açık |
+| 3 | Yaylı Tüfek | Ok atar; tek atış, 3.2x hasar, tam isabetli, ok uzakta hafifçe düşer, 5'lik şarjör | Başlangıçta açık |
 | 4 | Av Tüfeği | Pompalı, 8 saçma, yakında çok güçlü, menzili kısa | Mağaza, 250 altın |
 | 5 | Keskin Nişancı | 5x hasar, dürbün | Mağaza, 400 altın |
-| 6 | Taramalı Tabanca | Tamamı siyah AR tipi; çok hızlı otomatik ateş, 0.5x hasar, 40'lık şarjör | Mağaza, 300 altın |
+| 6 | Taramalı Tabanca | Tamamı siyah AR tipi; çok hızlı otomatik ateş, 0.5x hasar, 40'lık şarjör (mağazadan 70'e büyür) | Mağaza, 300 altın |
 | 7 | Roketatar | Roket çarptığı yerde patlar, 4.5 birimlik alan hasarı (6x); çok yakındaysan sana da vurur | Mağaza, 600 altın |
 
 Silahları birinci şahıs görünümde eldivenli eller tutar.
