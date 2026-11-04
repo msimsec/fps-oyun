@@ -267,36 +267,64 @@ function createWeaponModels() {
     addPart(rocketL, box(0.17, 0.02, 0.02), hazardMat, 0.27, -0.13, -0.3);                               // uyarı bandı
     rocketL.userData.warhead = warhead;
 
-    // Eller ve kollar: her silahı eldivenli eller tutar, kollar ekranın altından gelir
-    const gloveMat = new THREE.MeshStandardMaterial({ color: 0x26262b, roughness: 0.8 });
-    const sleeveMat = new THREE.MeshStandardMaterial({ color: 0x4a5536, roughness: 0.9 });
-    const cuffMat = new THREE.MeshStandardMaterial({ color: 0x1f2937, roughness: 0.7 });
+    // Eller ve kollar: parmaksız taktik eldivenli eller silahı tutar, kollar ekranın altından gelir.
+    // Kamera silahı sol üstten gördüğü için parmaklar ve başparmak silahın sol (görünen) yüzüne sarılır;
+    // ten rengi parmaklar koyu silahın üstünde net seçilir.
+    const gloveMat = new THREE.MeshStandardMaterial({ color: 0x5b4632, roughness: 0.85 });
+    const skinMat = new THREE.MeshStandardMaterial({ color: 0xd9a47c, roughness: 0.7 });
+    const sleeveMat = new THREE.MeshStandardMaterial({ color: 0x55633d, roughness: 0.9 });
+    const cuffMat = new THREE.MeshStandardMaterial({ color: 0x2d3324, roughness: 0.8 });
     const limb = (g, a, b, r, mat) => {
         const va = new THREE.Vector3(...a), vb = new THREE.Vector3(...b);
         const len = va.distanceTo(vb);
-        const m = new THREE.Mesh(new THREE.CylinderGeometry(r, r * 1.08, len, 10), mat);
+        const m = new THREE.Mesh(new THREE.CylinderGeometry(r, r * 1.1, len, 12), mat);
         m.position.copy(va).add(vb).multiplyScalar(0.5);
         m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), vb.clone().sub(va).normalize());
         g.add(m);
     };
-    // side: 1 sağ, -1 sol; (x, y, z): avucun ortası; tilt: elin öne eğimi
-    const arm = (g, side, x, y, z, tilt = 0.3) => {
-        const h = addPart(g, box(0.085, 0.1, 0.12), gloveMat, x, y, z, tilt);   // avuç ve parmaklar
-        h.rotation.z = side * 0.12;
-        addPart(g, box(0.03, 0.04, 0.07), gloveMat, x - side * 0.05, y + 0.03, z - 0.03);   // başparmak
-        const wx = x + side * 0.04, wy = y - 0.07, wz = z + 0.08;               // bilek
-        addPart(g, cyl(0.05, 0.05), cuffMat, wx, wy, wz, 0.9);
-        const ex = x + side * 0.2, ey = y - 0.5, ez = z + 0.42;                 // dirseğe doğru
-        limb(g, [wx, wy, wz], [ex, ey, ez], 0.048, sleeveMat);
-        limb(g, [ex, ey, ez], [ex + side * 0.12, ey - 0.4, ez + 0.35], 0.06, sleeveMat);
+    const forearm = (g, side, wx, wy, wz) => {
+        addPart(g, cyl(0.062, 0.08), cuffMat, wx, wy, wz, 0.9);                      // bilek / eldiven ağzı
+        const ex = wx + side * 0.17, ey = wy - 0.45, ez = wz + 0.4;
+        limb(g, [wx, wy, wz], [ex, ey, ez], 0.06, sleeveMat);                        // önkol
+        limb(g, [ex, ey, ez], [ex + side * 0.12, ey - 0.4, ez + 0.35], 0.075, sleeveMat);
     };
-    arm(rifle, 1, 0.25, -0.33, -0.3);  arm(rifle, -1, 0.2, -0.25, -0.84, 0.1);
-    arm(pistol, 1, 0.14, -0.33, -0.46); arm(pistol, -1, 0.12, -0.35, -0.5, 0.5);
-    arm(shotgun, 1, 0.25, -0.29, -0.26); arm(shotgun, -1, 0.2, -0.26, -0.74, 0.1);
-    arm(sniper, 1, 0.25, -0.32, -0.29); arm(sniper, -1, 0.2, -0.25, -0.8, 0.1);
-    arm(smg, 1, 0.24, -0.32, -0.34);   arm(smg, -1, 0.19, -0.22, -0.78, 0.1);
-    arm(saw, 1, 0.24, -0.28, -0.56, 0.1); arm(saw, -1, 0.02, -0.36, -0.5, 0.2);
-    arm(rocketL, 1, 0.27, -0.32, -0.46); arm(rocketL, -1, 0.27, -0.3, -0.83, 0.1);
+    // Sağ el kabzada: avuç kabzanın sağında, parmaklar kabzanın önünden sola sarılır, başparmak üstte
+    const gripHand = (g, x, y, z, w = 0.065) => {
+        addPart(g, box(0.06, 0.14, 0.13), gloveMat, x + w / 2 + 0.025, y, z);          // avuç (dış)
+        addPart(g, box(0.04, 0.14, 0.12), gloveMat, x - w / 2 - 0.015, y, z + 0.015);   // elin sol yüzü
+        for (let i = 0; i < 4; i++) {                                                  // parmaklar
+            addPart(g, box(w + 0.06, 0.03, 0.034), skinMat, x, y + 0.05 - i * 0.034, z - 0.07);
+        }
+        addPart(g, box(0.032, 0.032, 0.11), skinMat, x - w / 2 - 0.025, y + 0.08, z - 0.035);   // başparmak
+        forearm(g, 1, x + 0.03, y - 0.09, z + 0.07);
+    };
+    // Sol el önde: avuç el kundağının altında, parmaklar sol yüzden yukarı sarılır
+    const foreHand = (g, x, y, z, w = 0.09) => {
+        addPart(g, box(w + 0.04, 0.05, 0.15), gloveMat, x, y - 0.005, z);                      // avuç (alt)
+        addPart(g, box(0.038, 0.075, 0.15), gloveMat, x - w / 2 - 0.02, y + 0.035, z);   // elin sol yüzü
+        for (let i = 0; i < 4; i++) {                                                  // parmaklar
+            addPart(g, box(0.03, 0.09, 0.03), skinMat, x - w / 2 - 0.026, y + 0.075, z - 0.055 + i * 0.036);
+        }
+        addPart(g, box(0.03, 0.085, 0.032), skinMat, x + w / 2 + 0.025, y + 0.055, z + 0.035);    // başparmak
+        forearm(g, -1, x - 0.02, y - 0.05, z + 0.08);
+    };
+    gripHand(rifle, 0.25, -0.34, -0.29, 0.06);    foreHand(rifle, 0.25, -0.3, -0.84, 0.09);
+    gripHand(shotgun, 0.25, -0.29, -0.24, 0.09);  foreHand(shotgun, 0.25, -0.31, -0.74, 0.1);
+    gripHand(sniper, 0.25, -0.33, -0.28, 0.06);   foreHand(sniper, 0.25, -0.3, -0.78, 0.1);
+    gripHand(smg, 0.24, -0.33, -0.34, 0.06);      foreHand(smg, 0.24, -0.245, -0.8, 0.085);
+    gripHand(rocketL, 0.27, -0.27, -0.45, 0.06);  foreHand(rocketL, 0.27, -0.25, -0.82, 0.05);
+    // Tabanca: sağ el kabzada, sol el altından destekler (iki elle tutuş)
+    gripHand(pistol, 0.14, -0.34, -0.45, 0.07);
+    addPart(pistol, box(0.06, 0.13, 0.12), gloveMat, 0.075, -0.36, -0.44);
+    for (let i = 0; i < 4; i++) addPart(pistol, box(0.1, 0.024, 0.026), skinMat, 0.12, -0.31 - i * 0.028, -0.375);
+    forearm(pistol, -1, 0.06, -0.43, -0.37);
+    // Testere: sağ el yumruk halinde bileklikte; sol el boşta, yumruk
+    addPart(saw, box(0.1, 0.1, 0.1), gloveMat, 0.25, -0.3, -0.58);
+    for (let i = 0; i < 4; i++) addPart(saw, box(0.028, 0.026, 0.03), skinMat, 0.2, -0.26 - i * 0.026, -0.62);
+    forearm(saw, 1, 0.27, -0.36, -0.36);
+    addPart(saw, box(0.09, 0.1, 0.11), gloveMat, 0.0, -0.36, -0.52);
+    for (let i = 0; i < 4; i++) addPart(saw, box(0.03, 0.026, 0.03), skinMat, 0.05, -0.32 - i * 0.026, -0.57);
+    forearm(saw, -1, 0.0, -0.42, -0.45);
 
     Object.assign(weaponModels, { rifle, pistol, shotgun, sniper, smg, saw, rocket: rocketL });
     WEAPON_ORDER.forEach(id => {
