@@ -34,7 +34,7 @@ const HELP_SECTIONS = [
         `Shift: koş (yalnızca ileri giderken). Koşarken görüş açısı genişler ama isabet biraz bozulur.`,
         'Space: zıpla. 1 birim yüksekliğindeki kasalara zıplayarak çıkabilirsin; çok alçak basamaklara yürüyerek çıkılır.',
         'Fare: nişan al. Hassasiyeti Ayarlar\'dan değiştirebilirsin.',
-        'Sol tık: ateş et. Otomatik silahlarda (Tüfek, Taramalı Tabanca) basılı tutunca seri atar; diğerleri her tıkta bir atar.',
+        'Sol tık: ateş et. Otomatik silahlarda (Tüfek, Taramalı Tabanca) ve Testereli Eldiven\'de basılı tutunca sürekli çalışır; diğerleri her tıkta bir atar.',
         'Sağ tık: dürbün (yalnızca Keskin Nişancı). Dürbünle bakarken yavaş yürürsün ama isabet tamdır.',
         'R: şarjör değiştir. Şarjör boşalınca kendiliğinden de değişir.',
         'G: bomba at.',
@@ -67,11 +67,15 @@ const HELP_SECTIONS = [
         'Sağ alttaki panelde silahın adı, şarjördeki mermi / yedek mermi ve sahip olduğun silahlar yazar.',
         ...WEAPON_ORDER.map((id, i) => {
             const w = WEAPONS[id];
-            const kind = w.pellets > 1 ? `${w.pellets} saçma` : (w.auto ? 'otomatik' : 'yarı otomatik');
-            const mag = id === 'rifle' ? `${numSuffix(CFG.baseMag)} şarjör (mağazadan ${CFG.maxMag}'a kadar büyür)` : `${numSuffix(w.mag)} şarjör`;
             const how = w.cost ? `mağazada ${w.cost} altın` : 'başlangıçta açık';
+            if (w.melee) return `${w.name} (${i + 1} tuşu): yakın dövüş, basılı tutunca dönen testere önündeki düşmanı keser (${w.range} birim menzil), ${w.dmgMul}x hasar, mermi harcamaz; ${how}.`;
+            const kind = w.rocket ? `roket, ${w.blastRadius} birimlik patlama` : w.pellets > 1 ? `${w.pellets} saçma` : (w.auto ? 'otomatik' : 'yarı otomatik');
+            const mag = id === 'rifle' ? `${numSuffix(CFG.baseMag)} şarjör (mağazadan ${CFG.maxMag}'a kadar büyür)` : `${numSuffix(w.mag)} şarjör`;
             return `${w.name} (${i + 1} tuşu): ${kind}, ${w.dmgMul}x hasar, ${mag}; ${how}.`;
         }),
+        'Silahlarını eldivenli ellerin tutar: tabancayı iki elle, tüfekleri bir el kabzada bir el önde tutarsın.',
+        'Testereli Eldiven her zaman sendedir; mermi bitince ya da düşman dibine geldiğinde 1 tuşuyla geç. Kafaya denk gelen kesik 2 kat hasar verir.',
+        'Roketatar: roket bir duvara, zemine ya da düşmana değince patlar; patlama çevredeki herkese hasar verir, duvar arkası korunur. Çok yakına atarsan sana da yarı hasar verir.',
         'Taramalı Tabanca tamamen siyah, tırtıklı kabzalı AR tipi bir silahtır; skin seçimi gövdesinin rengini değiştirmez, yalnızca mermi rengi skine göre değişir.',
         'Tabancanın yedek mermisi sınırsızdır; diğer silahların mermisi bitse bile tabancayla savaşmaya devam edebilirsin.',
         'Her öldürdüğün düşman, sahip olduğun silahlara biraz yedek mermi verir.',
@@ -136,7 +140,7 @@ const HELP_SECTIONS = [
         `Gelişmiş Tüfek Şarjörü (${CFG.magCost} altın): tüfek şarjörü +${CFG.magStep}.`,
         `Ağır Kalkan (${CFG.shieldCost} altın): +${CFG.armorAmount} kalkan.`,
         ...UPGRADE_IDS.map(id => `${UPGRADES[id].name}: kalıcı yükseltme, ${UPGRADES[id].max} seviye; her seviyede fiyat artar (ilk seviye ${upgradeCost(id, 0)} altın).`),
-        'Silahlar (Pompalı, Keskin Nişancı, Taramalı Tabanca) bir kez alınır ve kalıcı olarak açılır.',
+        'Silahlar (Av Tüfeği, Keskin Nişancı, Taramalı Tabanca, Roketatar) bir kez alınır ve kalıcı olarak açılır.',
         'Skinler silahın ve mermilerin rengini değiştirir (Taramalı Tabanca her zaman siyah kalır, yalnızca mermisi renk alır).',
         'Sahip olduğun skine tıklayınca kuşanılır, kilitli olana tıklayınca satın alınır.'
     ] },
@@ -160,9 +164,10 @@ const HELP_SECTIONS = [
     { id: 'tips', title: '💡 İpuçları', lines: () => [
         'Siperin arkasında kalarak çatış; hasar almadığın sürece canın dolar.',
         'Düşmanları kafadan vur: hem 2 kat hasar hem fazladan skor.',
-        'Tabancayı yedek silah olarak kullan: mermisi hiç bitmez.',
+        'Tabancayı yedek silah olarak kullan: mermisi hiç bitmez. Dibine gelen düşmana Testereli Eldiven ile karşılık ver.',
         'Nişancılar uzaktan vurur; önce onları temizle ya da Keskin Nişancı ile uzaktan karşılık ver.',
-        'Zırhlılar çok dayanıklıdır; bomba ya da Pompalı ile yakından vur.',
+        'Zırhlılar çok dayanıklıdır; bomba, Roketatar ya da Av Tüfeği ile vur.',
+        'Kalabalık düşman grubuna roket at; tek roketle birkaç düşmanı birden indirebilirsin.',
         'Yere düşen eşyaları kaçırma; özellikle cephane ve kalkan zor anlarda hayat kurtarır.',
         'Altını önce Silah Hasarı ve Can Sınırı\'na yatırmak oyunu en çok kolaylaştırır.',
         'Zor gelirse Ayarlar\'dan zorluğu düşür; Kolay\'da can daha hızlı yenilenir.'

@@ -84,8 +84,14 @@ function pickEnemyType(waveNum) {
 // =====================================================================
 //  SİLAHLAR — hasar = oyuncunun hasar seviyesi × dmgMul (mağazadaki yükseltme hepsine işler)
 // =====================================================================
-const WEAPON_ORDER = ['pistol', 'rifle', 'shotgun', 'sniper', 'smg'];   // 1-5 tuşları bu sırayla
+const WEAPON_ORDER = ['saw', 'pistol', 'rifle', 'shotgun', 'sniper', 'smg', 'rocket'];   // 1-7 tuşları bu sırayla
 const WEAPONS = {
+    saw: {
+        // Testereli Eldiven: yakın dövüş. Basılı tutunca dönen testere önündeki düşmanı keser;
+        // mermi harcamaz. menzil: oyuncunun önünde kesebildiği uzaklık
+        name: 'Testereli Eldiven', auto: true, melee: true, interval: 0.12, dmgMul: 1.0, range: 2.4,
+        pellets: 1, spread: 0, mag: Infinity, startPool: Infinity, killAmmo: 0, reload: 0, cost: 0
+    },
     rifle: {
         name: 'Tüfek', auto: true, interval: 0.1, dmgMul: 1, pellets: 1, spread: 0,
         mag: null /* mağazadan yükseltilir */, startPool: 90, killAmmo: 20,
@@ -97,7 +103,7 @@ const WEAPONS = {
         mag: 12, startPool: Infinity, killAmmo: 0, reload: 1.2, speed: 84, life: 1.0, cost: 0
     },
     shotgun: {
-        name: 'Pompalı', auto: false, interval: 0.85, dmgMul: 0.6, pellets: 8, spread: 0.07,
+        name: 'Av Tüfeği', auto: false, interval: 0.85, dmgMul: 0.6, pellets: 8, spread: 0.07,
         mag: 6, startPool: 24, killAmmo: 3, reload: 2.4, speed: 70, life: 0.35, cost: 250
     },
     sniper: {
@@ -109,6 +115,12 @@ const WEAPONS = {
         // biraz dağınık; yakın-orta mesafe
         name: 'Taramalı Tabanca', auto: true, interval: 0.055, dmgMul: 0.5, pellets: 1, spread: 0.018,
         mag: 40, startPool: 160, killAmmo: 30, reload: 1.6, speed: 80, life: 0.8, cost: 300
+    },
+    rocket: {
+        // Roketatar: yavaş giden roket bir şeye çarpınca patlar; patlama alan hasarı verir
+        // (hasar = temel hasar × dmgMul, merkezden uzaklaştıkça azalır). Çok yakına atılırsa sana da vurur.
+        name: 'Roketatar', auto: false, rocket: true, interval: 0.9, dmgMul: 6, pellets: 1, spread: 0,
+        blastRadius: 4.5, mag: 4, startPool: 12, killAmmo: 1, reload: 2.2, speed: 30, life: 3, cost: 600
     }
 };
 

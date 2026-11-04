@@ -86,6 +86,12 @@ function updatePlayer(dt) {
 
     // Silah geri tepmesi, değiştirme ve şarjör animasyonu, yürürken hafif sallanma
     weaponKick = Math.max(0, weaponKick - dt * 0.8);
+    // Testere: keserken hızlı, boşta yavaş döner. Roketatar: şarjörde roket varsa başlığı görünür
+    player.sawSpin = Math.max(0, player.sawSpin - dt);
+    const sawM = weaponModels.saw;
+    if (sawM && sawM.visible) sawM.userData.blade.rotation.x -= dt * (player.sawSpin > 0 ? 45 : 5);
+    const rl = weaponModels.rocket;
+    if (rl && rl.visible) rl.userData.warhead.visible = !player.reloading && curAmmo() && curAmmo().ammo > 0;
     weaponSwitchAnim = Math.max(0, weaponSwitchAnim - dt * 4);
     const bob = player.onGround && isMoving() ? Math.sin(clock.elapsedTime * (isSprinting() ? 14 : 9)) * 0.012 : 0;
     weapon3DGroup.position.z = weaponKick;
@@ -174,11 +180,11 @@ function updateHUD() {
     setHud('hpMaxDisplay', player.maxHealth);
     $('healthHud').classList.toggle('regen', isRegenerating());
     setHud('shieldDisplay', player.armor > 0 ? String(Math.ceil(player.armor)) : (player.hasShield ? 'HAZIR' : 'YOK'));
-    setHud('weaponName', w.name.toUpperCase());
-    setHud('ammoDisplay', a ? a.ammo : 0);
+    setHud('weaponName', w.name.toLocaleUpperCase('tr'));
+    setHud('ammoDisplay', a ? (a.ammo === Infinity ? '∞' : a.ammo) : 0);
     setHud('ammoPoolDisplay', a ? (a.pool === Infinity ? '∞' : a.pool) : 0);
     setHud('reloadDisplay', player.reloading ? 'ŞARJÖR DEĞİŞİYOR...' :
-        (a && a.ammo === 0 && a.pool === 0 ? 'MERMİ BİTTİ · 1: TABANCA' : ''));
+        (a && a.ammo === 0 && a.pool === 0 ? 'MERMİ BİTTİ · 2: TABANCA · 1: TESTERE' : ''));
     setHud('weaponSlots', WEAPON_ORDER.map((id, i) =>
         player.ownedWeapons[id] ? (id === player.weapon ? `[${i + 1}]` : ` ${i + 1} `) : ' · ').join(''));
     setHud('grenadeDisplay', String(player.grenades));
@@ -213,7 +219,7 @@ function animate() {
         if (state === 'playing') updateEnemies(dt);
         updateParticles(dt);
         updateCorpses(dt);
-        if (state === 'playing') { updateGrenades(dt); updateDrops(dt); }
+        if (state === 'playing') { updateGrenades(dt); updateRockets(dt); updateDrops(dt); }
         updateHitDirections(dt);
         updateHUD();
     }

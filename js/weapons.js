@@ -53,6 +53,7 @@ function cycleWeapon(step) {
 function tryShoot() {
     const w = curWeapon(), a = curAmmo();
     if (player.reloading || player.fireCooldown > 0) return;
+    if (w.melee) { sawAttack(w); return; }
     if (!w.auto && player.semiFired) return;      // yarı otomatik: her tıkta bir atış
     if (a.ammo <= 0) {
         if (!player.semiFired) sfx('empty');
@@ -71,6 +72,13 @@ function tryShoot() {
     // Koşarken ve havadayken isabet biraz bozulur (dürbünle bakarken bozulmaz)
     const extra = player.zoomed ? 0 : (isSprinting() ? 0.02 : 0) + (player.onGround ? 0 : 0.03);
     const spread = w.spread + extra;
+    if (w.rocket) {
+        spawnRocket(origin, dir, w.speed, damage, w.blastRadius, w.life);
+        weaponKick = 0.22;
+        sfx('shoot_rocket');
+        if (a.ammo === 0) startReload();
+        return;
+    }
     for (let i = 0; i < w.pellets; i++) {
         const d = dir.clone();
         if (spread > 0) {
@@ -112,4 +120,38 @@ function setZoom(on) {
     player.zoomed = can;
     if (weapon3DGroup) weapon3DGroup.visible = !can;
     $('scopeOverlay').classList.toggle('show', can);
+}
+
+// Testereli Eldiven: önündeki (menzil ve görüş konisi içindeki) en yakın hedefe kesme hasarı.
+// Bakılan noktaya göre kafa vuruşu da sayılır. Mermi harcamaz, şarjör değiştirmez.
+function sawAttack(w) {
+    player.fireCooldown = w.interval;
+    player.sawSpin = 0.25;                       // testere bu kadar süre hızlı döner (görsel)
+    const dir = new THREE.Vector3();
+    camera.getWorldDirection(dir);
+    const targets = isDuelMode ? (duelBot ? [duelBot] : []) : enemies;
+    let best = null, bestD = Infinity;
+    const c = new THREE.Vector3();
+    for (const e of targets) {
+        const p = e.group.position;
+        c.set(p.x, p.y + 0.9 * e.scale, p.z);
+        const to = c.clone().sub(camera.position);
+        const d = to.length();
+        if (d > w.range + e.radius || d >= bestD) continue;
+        if (to.normalize().dot(dir) < 0.6) continue;           // önünde değil
+        best = e; bestD = d;
+    }
+    sfx(best ? 'sawHit' : 'sawSpin');
+    weaponKick = 0.03;
+    if (!best) return;
+    // Bakılan noktanın düşmanın neresine geldiği: kafa mı gövde mi
+    const pt = camera.position.clone().addScaledVector(dir, Math.max(0.3, bestD - best.radius * 0.5));
+    const hit = best.hitTest(pt) === 'head' ? 'head' : 'body';
+    const dmg = player.damage * w.dmgMul * (hit === 'head' ? 2 : 1);
+    best.takeDamage(dmg);
+    createParticles(pt, 0xb91c1c, 5);
+    createParticles(pt, 0xfbbf24, 3);                        // kıvılcım
+    flashClass('crosshair', hit === 'head' ? 'head' : 'hit', 120);
+    showDamageNumber(best, dmg, hit === 'head');
+    if (best.health <= 0) onEnemyKilled(best, hit);
 }

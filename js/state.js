@@ -8,12 +8,13 @@ const player = {
     health: 100, maxHealth: 100 + UPGRADES.health.per * save.upgrades.health, armor: 0,
     maxAmmo: save.maxAmmo,          // tüfek şarjörü (mağazadan yükseltilir)
     weapon: 'rifle',
-    ownedWeapons: { rifle: true, pistol: true, shotgun: save.weapons.shotgun, sniper: save.weapons.sniper, smg: save.weapons.smg },
+    ownedWeapons: { saw: true, rifle: true, pistol: true, shotgun: save.weapons.shotgun, sniper: save.weapons.sniper,
+                    smg: save.weapons.smg, rocket: save.weapons.rocket },
     arsenal: {},                    // silah başına { ammo, pool } — her elin başında doldurulur
     score: 0, kills: 0, headshots: 0, goldEarned: 0,
     gold: save.gold, damage: save.damage,
     hasShield: save.hasShield, activeSkin: save.activeSkin, unlockedSkins: save.unlockedSkins,
-    grenades: 0, grenadeCd: 0,
+    grenades: 0, grenadeCd: 0, sawSpin: 0,
     sinceHurt: 0, regenOn: false,   // son hasardan beri geçen süre, can şu an doluyor mu
     reloading: false, reloadTimer: 0, reloadTotal: 1, fireCooldown: 0, semiFired: false,
     velY: 0, airVX: 0, airVZ: 0, onGround: true, zoomed: false,
@@ -25,7 +26,8 @@ function saveGameData() {
         gold: player.gold, damage: player.damage, maxAmmo: player.maxAmmo,
         hasShield: player.hasShield,
         activeSkin: player.activeSkin, unlockedSkins: player.unlockedSkins, upgrades: player.upgrades,
-        weapons: { shotgun: player.ownedWeapons.shotgun, sniper: player.ownedWeapons.sniper, smg: player.ownedWeapons.smg }
+        weapons: { shotgun: player.ownedWeapons.shotgun, sniper: player.ownedWeapons.sniper,
+                   smg: player.ownedWeapons.smg, rocket: player.ownedWeapons.rocket }
     });
 }
 

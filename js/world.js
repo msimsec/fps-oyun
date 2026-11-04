@@ -137,14 +137,17 @@ function createWeaponModels() {
     addPart(rifle, box(0.08, 0.12, 0.26), B, 0.25, -0.24, -0.07);
     addPart(rifle, box(0.04, 0.04, 0.3), A, 0.25, -0.13, -0.5);
 
-    // Tabanca: kısa sürgü, gövde, eğik kabza, namlu ucu ve nişangahlar
+    // Tabanca: iki elle tutulur, ekranın ortasına yakın ve göze daha yakın durur.
+    // Kayar sürgü (üstte yivli), gövde, tetik korkuluğu, eğik kabza, namlu ucu, gez ve arpacık
     const pistol = new THREE.Group();
-    addPart(pistol, box(0.07, 0.07, 0.3), B, 0.22, -0.17, -0.46);
-    addPart(pistol, box(0.065, 0.05, 0.26), gripMat, 0.22, -0.225, -0.44);
-    addPart(pistol, box(0.065, 0.17, 0.09), gripMat, 0.22, -0.31, -0.33, 0.3);
-    addPart(pistol, cyl(0.016, 0.03), A, 0.22, -0.17, -0.625, R);
-    addPart(pistol, box(0.015, 0.02, 0.02), A, 0.22, -0.125, -0.59);
-    addPart(pistol, box(0.04, 0.02, 0.02), A, 0.22, -0.125, -0.33);
+    addPart(pistol, box(0.075, 0.075, 0.34), B, 0.14, -0.2, -0.56);              // sürgü
+    for (let i = 0; i < 4; i++) addPart(pistol, box(0.078, 0.06, 0.008), gripMat, 0.14, -0.2, -0.43 - i * 0.018);
+    addPart(pistol, box(0.07, 0.05, 0.3), gripMat, 0.14, -0.255, -0.56);         // gövde
+    addPart(pistol, box(0.012, 0.012, 0.08), gripMat, 0.14, -0.3, -0.58);        // tetik korkuluğu
+    addPart(pistol, box(0.07, 0.19, 0.095), gripMat, 0.14, -0.34, -0.45, 0.25);  // kabza
+    addPart(pistol, cyl(0.016, 0.03), A, 0.14, -0.2, -0.745, R);                // namlu ucu
+    addPart(pistol, box(0.012, 0.02, 0.02), A, 0.14, -0.155, -0.71);             // arpacık
+    addPart(pistol, box(0.045, 0.02, 0.02), A, 0.14, -0.155, -0.41);             // gez
 
     // Pompalı: kalın tek namlu, altında şarjör tüpü, tahta pompa kolu ve dipçik
     const shotgun = new THREE.Group();
@@ -213,7 +216,89 @@ function createWeaponModels() {
     // Tırtıklı şarjör (hafif öne eğik)
     addPart(smg, box(0.055, 0.22, 0.085), knurlMat, 0.24, -0.38, -0.5, -0.12);
 
-    Object.assign(weaponModels, { rifle, pistol, shotgun, sniper, smg });
+    // Testereli Eldiven: sağ kolda zırhlı bilek koruması, yumruğun önünde dönen dişli
+    // daire testere ve üstünde koruyucu kapak; arkada küçük motor bloğu. Sol el boşta, yumruk.
+    const steelMat = new THREE.MeshStandardMaterial({ color: 0xd1d5db, emissive: 0x2a2a2a, roughness: 0.25, metalness: 0.8 });
+    const hazardMat = new THREE.MeshStandardMaterial({ color: 0xeab308, roughness: 0.5 });
+    const saw = new THREE.Group();
+    addPart(saw, box(0.11, 0.1, 0.22), B, 0.25, -0.31, -0.42);                   // bilek koruması
+    addPart(saw, box(0.115, 0.02, 0.23), hazardMat, 0.25, -0.255, -0.42);        // sarı şerit
+    addPart(saw, box(0.08, 0.07, 0.08), gripMat, 0.25, -0.33, -0.27);           // motor bloğu
+    addPart(saw, cyl(0.022, 0.12), A, 0.22, -0.24, -0.62, R);                    // mil
+    // Testere biraz içe dönük: hem kesen kenarı hem yüzü görünsün
+    const blade = new THREE.Group();
+    blade.position.set(0.19, -0.2, -0.74);
+    blade.rotation.y = -0.75;
+    const bladeSpin = new THREE.Group();
+    blade.add(bladeSpin);
+    const guard = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.03, 20, 1, false, 0, Math.PI), B);
+    guard.rotation.z = R; guard.position.x = 0.03;                               // üst yarıyı örten kapak
+    blade.add(guard);
+    const disc = new THREE.Mesh(new THREE.CylinderGeometry(0.17, 0.17, 0.012, 28), steelMat);
+    disc.rotation.z = R;                                                          // disk dik dursun (x ekseni)
+    bladeSpin.add(disc);
+    for (let i = 0; i < 18; i++) {                                                // dişler
+        const a = (i / 18) * Math.PI * 2;
+        const t = new THREE.Mesh(box(0.014, 0.04, 0.035), steelMat);
+        t.position.set(0, Math.sin(a) * 0.18, Math.cos(a) * 0.18);
+        t.rotation.x = -a;
+        bladeSpin.add(t);
+    }
+    for (let i = 0; i < 3; i++) {                                                 // dönüşü belli eden kollar
+        const s = new THREE.Mesh(box(0.016, 0.2, 0.02), A);
+        s.rotation.x = (i / 3) * Math.PI; bladeSpin.add(s);
+    }
+    const hub = new THREE.Mesh(cyl(0.04, 0.03, 12), A); hub.rotation.z = R; bladeSpin.add(hub);
+    saw.add(blade);
+    saw.userData.blade = bladeSpin;
+
+    // Roketatar: omuzda taşınan kalın tüp, arkada genişleyen ağız, önde görünen roket başlığı,
+    // yan tarafta nişangâh, altta kabza ve ön tutamak
+    const rocketBody = new THREE.MeshStandardMaterial({ color: 0x4d5a2e, roughness: 0.6, metalness: 0.3 });
+    const rocketL = new THREE.Group();
+    addPart(rocketL, cyl(0.08, 1.15, 16), rocketBody, 0.27, -0.13, -0.55, R);
+    addPart(rocketL, new THREE.CylinderGeometry(0.11, 0.08, 0.14, 16), gripMat, 0.27, -0.13, 0.06, R);   // arka ağız
+    addPart(rocketL, cyl(0.09, 0.05, 16), gripMat, 0.27, -0.13, -1.11, R);                               // ön bilezik
+    const warhead = addPart(rocketL, new THREE.ConeGeometry(0.06, 0.16, 12), hazardMat, 0.27, -0.13, -1.2, -R);
+    addPart(rocketL, box(0.035, 0.07, 0.1), B, 0.19, -0.06, -0.62);                                      // nişangâh
+    addPart(rocketL, box(0.02, 0.03, 0.02), A, 0.19, -0.015, -0.62);
+    addPart(rocketL, box(0.06, 0.16, 0.08), gripMat, 0.27, -0.27, -0.45, 0.25);                          // kabza
+    addPart(rocketL, box(0.05, 0.13, 0.06), gripMat, 0.27, -0.25, -0.82);                                // ön tutamak
+    addPart(rocketL, box(0.17, 0.02, 0.02), hazardMat, 0.27, -0.13, -0.3);                               // uyarı bandı
+    rocketL.userData.warhead = warhead;
+
+    // Eller ve kollar: her silahı eldivenli eller tutar, kollar ekranın altından gelir
+    const gloveMat = new THREE.MeshStandardMaterial({ color: 0x26262b, roughness: 0.8 });
+    const sleeveMat = new THREE.MeshStandardMaterial({ color: 0x4a5536, roughness: 0.9 });
+    const cuffMat = new THREE.MeshStandardMaterial({ color: 0x1f2937, roughness: 0.7 });
+    const limb = (g, a, b, r, mat) => {
+        const va = new THREE.Vector3(...a), vb = new THREE.Vector3(...b);
+        const len = va.distanceTo(vb);
+        const m = new THREE.Mesh(new THREE.CylinderGeometry(r, r * 1.08, len, 10), mat);
+        m.position.copy(va).add(vb).multiplyScalar(0.5);
+        m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), vb.clone().sub(va).normalize());
+        g.add(m);
+    };
+    // side: 1 sağ, -1 sol; (x, y, z): avucun ortası; tilt: elin öne eğimi
+    const arm = (g, side, x, y, z, tilt = 0.3) => {
+        const h = addPart(g, box(0.085, 0.1, 0.12), gloveMat, x, y, z, tilt);   // avuç ve parmaklar
+        h.rotation.z = side * 0.12;
+        addPart(g, box(0.03, 0.04, 0.07), gloveMat, x - side * 0.05, y + 0.03, z - 0.03);   // başparmak
+        const wx = x + side * 0.04, wy = y - 0.07, wz = z + 0.08;               // bilek
+        addPart(g, cyl(0.05, 0.05), cuffMat, wx, wy, wz, 0.9);
+        const ex = x + side * 0.2, ey = y - 0.5, ez = z + 0.42;                 // dirseğe doğru
+        limb(g, [wx, wy, wz], [ex, ey, ez], 0.048, sleeveMat);
+        limb(g, [ex, ey, ez], [ex + side * 0.12, ey - 0.4, ez + 0.35], 0.06, sleeveMat);
+    };
+    arm(rifle, 1, 0.25, -0.33, -0.3);  arm(rifle, -1, 0.2, -0.25, -0.84, 0.1);
+    arm(pistol, 1, 0.14, -0.33, -0.46); arm(pistol, -1, 0.12, -0.35, -0.5, 0.5);
+    arm(shotgun, 1, 0.25, -0.29, -0.26); arm(shotgun, -1, 0.2, -0.26, -0.74, 0.1);
+    arm(sniper, 1, 0.25, -0.32, -0.29); arm(sniper, -1, 0.2, -0.25, -0.8, 0.1);
+    arm(smg, 1, 0.24, -0.32, -0.34);   arm(smg, -1, 0.19, -0.22, -0.78, 0.1);
+    arm(saw, 1, 0.24, -0.28, -0.56, 0.1); arm(saw, -1, 0.02, -0.36, -0.5, 0.2);
+    arm(rocketL, 1, 0.27, -0.32, -0.46); arm(rocketL, -1, 0.27, -0.3, -0.83, 0.1);
+
+    Object.assign(weaponModels, { rifle, pistol, shotgun, sniper, smg, saw, rocket: rocketL });
     WEAPON_ORDER.forEach(id => {
         const m = weaponModels[id];
         // Kameraya çok yakın parçalar ekranı kaplamasın: biraz küçült ve ileri it
