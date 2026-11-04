@@ -13,6 +13,7 @@ const CFG = {
     botBulletSpeed: 45, botBulletLife: 2.0, enemyRange: 25,
     armorAmount: 50,
     baseDamage: 15, damageStep: 5, maxDamage: 35, damageCost: 100,
+    // Şarjör yükseltmesi Taramalı Tabanca'ya işler: seviye maxAmmo'da tutulur (30 → 60), şarjör = 40 + (maxAmmo - 30)
     baseMag: 30, magStep: 5, maxMag: 60, magCost: 75,
     shieldCost: 150,
     // Bomba (G): fitil süresi, atış hızı, patlama yarıçapı ve merkezdeki hasar; el başına ve en fazla adet
@@ -84,7 +85,7 @@ function pickEnemyType(waveNum) {
 // =====================================================================
 //  SİLAHLAR — hasar = oyuncunun hasar seviyesi × dmgMul (mağazadaki yükseltme hepsine işler)
 // =====================================================================
-const WEAPON_ORDER = ['saw', 'pistol', 'rifle', 'shotgun', 'sniper', 'smg', 'rocket'];   // 1-7 tuşları bu sırayla
+const WEAPON_ORDER = ['saw', 'pistol', 'crossbow', 'shotgun', 'sniper', 'smg', 'rocket'];   // 1-7 tuşları bu sırayla
 const WEAPONS = {
     saw: {
         // Testereli Eldiven: yakın dövüş. Basılı tutunca dönen testere önündeki düşmanı keser;
@@ -92,10 +93,11 @@ const WEAPONS = {
         name: 'Testereli Eldiven', auto: true, melee: true, interval: 0.12, dmgMul: 1.0, range: 2.4,
         pellets: 1, spread: 0, mag: Infinity, startPool: Infinity, killAmmo: 0, reload: 0, cost: 0
     },
-    rifle: {
-        name: 'Tüfek', auto: true, interval: 0.1, dmgMul: 1, pellets: 1, spread: 0,
-        mag: null /* mağazadan yükseltilir */, startPool: 90, killAmmo: 20,
-        reload: 2.0, speed: 84, life: 1.2, cost: 0
+    crossbow: {
+        // Yaylı Tüfek: yay gücüyle ok atar. Seri değil ama her ok çok vurur ve tam isabetlidir;
+        // ok hafifçe düşerek uçar (gravity), duvara saplanıp bir süre orada kalır.
+        name: 'Yaylı Tüfek', auto: false, bolt: true, interval: 0.7, dmgMul: 3.2, pellets: 1, spread: 0,
+        gravity: 5, mag: 5, startPool: 30, killAmmo: 4, reload: 2.0, speed: 75, life: 2.5, cost: 0
     },
     pistol: {
         // Yedek mermisi sınırsız: diğer silahların mermisi bitse de oyuncu çaresiz kalmaz

@@ -6,9 +6,9 @@
 const player = {
     upgrades: save.upgrades,
     health: 100, maxHealth: 100 + UPGRADES.health.per * save.upgrades.health, armor: 0,
-    maxAmmo: save.maxAmmo,          // tüfek şarjörü (mağazadan yükseltilir)
-    weapon: 'rifle',
-    ownedWeapons: { saw: true, rifle: true, pistol: true, shotgun: save.weapons.shotgun, sniper: save.weapons.sniper,
+    maxAmmo: save.maxAmmo,          // şarjör yükseltmesi seviyesi (Taramalı Tabanca'ya işler)
+    weapon: 'crossbow',
+    ownedWeapons: { saw: true, crossbow: true, pistol: true, shotgun: save.weapons.shotgun, sniper: save.weapons.sniper,
                     smg: save.weapons.smg, rocket: save.weapons.rocket },
     arsenal: {},                    // silah başına { ammo, pool } — her elin başında doldurulur
     score: 0, kills: 0, headshots: 0, goldEarned: 0,
@@ -100,6 +100,7 @@ function applyMaxHealth() { player.maxHealth = 100 + UPGRADES.health.per * playe
 // Aktif silah ve cephanesi
 const curWeapon = () => WEAPONS[player.weapon];
 const curAmmo = () => player.arsenal[player.weapon];
-function magSize(id) { return id === 'rifle' ? player.maxAmmo : WEAPONS[id].mag; }
+function magSize(id) { return id === 'smg' ? WEAPONS.smg.mag + player.maxAmmo - CFG.baseMag : WEAPONS[id].mag; }
+const maxSmgMag = () => WEAPONS.smg.mag + CFG.maxMag - CFG.baseMag;
 // Ayakların yüksekliği (kasaların üstünde > 0)
 const footY = () => camera.position.y - CFG.eyeHeight;

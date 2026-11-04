@@ -37,7 +37,7 @@ function defaultSave() {
         hasShield: false, activeSkin: 'classic',
         unlockedSkins: Object.fromEntries(SKINS.map(id => [id, id === 'classic'])),
         upgrades: Object.fromEntries(UPGRADE_IDS.map(id => [id, 0])),
-        weapons: { shotgun: false, sniper: false, smg: false, rocket: false }   // testere, tüfek ve tabanca her zaman açık
+        weapons: { shotgun: false, sniper: false, smg: false, rocket: false }   // testere, yaylı tüfek ve tabanca her zaman açık
     };
 }
 

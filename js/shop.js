@@ -30,7 +30,7 @@ function shieldStatusText() {
 function updateShopModal() {
     $('modalGold').textContent = player.gold;
     $('modalDmg').textContent = `${player.damage} / ${CFG.maxDamage}`;
-    $('modalMag').textContent = `${player.maxAmmo} / ${CFG.maxMag}`;
+    $('modalMag').textContent = `${magSize('smg')} / ${maxSmgMag()}`;
     $('modalShield').textContent = shieldStatusText();
     renderSkinPicker();
     ['shotgun', 'sniper', 'smg', 'rocket'].forEach(id => {

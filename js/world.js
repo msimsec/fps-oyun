@@ -127,15 +127,44 @@ function createWeaponModels() {
     const box = (w, h, d) => new THREE.BoxGeometry(w, h, d);
     const cyl = (r, len, seg = 10) => new THREE.CylinderGeometry(r, r, len, seg);
 
-    // Tüfek: gövde, el kundağı, namlu, eğik şarjör, kabza, dipçik, üst ray
-    const rifle = new THREE.Group();
-    addPart(rifle, box(0.1, 0.14, 0.55), B, 0.25, -0.22, -0.45);
-    addPart(rifle, box(0.09, 0.1, 0.3), B, 0.25, -0.22, -0.86);
-    addPart(rifle, cyl(0.022, 0.25), A, 0.25, -0.2, -1.12, R);
-    addPart(rifle, box(0.07, 0.2, 0.1), gripMat, 0.25, -0.37, -0.5, 0.25);
-    addPart(rifle, box(0.06, 0.14, 0.07), gripMat, 0.25, -0.34, -0.28, 0.35);
-    addPart(rifle, box(0.08, 0.12, 0.26), B, 0.25, -0.24, -0.07);
-    addPart(rifle, box(0.04, 0.04, 0.3), A, 0.25, -0.13, -0.5);
+    // Yaylı Tüfek: tahta dipçik, uzun ok rayı, önde iki yana açılan yay kolları ve gergin kiriş,
+    // rayda yatan ok (şarjörde ok varken görünür), üstte küçük dürbün, altta kabza ve tetik
+    const crossbow = new THREE.Group();
+    const seg = (g, a, b, r, mat) => {                     // iki nokta arasında ince çubuk (kiriş)
+        const va = new THREE.Vector3(...a), vb = new THREE.Vector3(...b);
+        const m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, va.distanceTo(vb), 6), mat);
+        m.position.copy(va).add(vb).multiplyScalar(0.5);
+        m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), vb.clone().sub(va).normalize());
+        g.add(m);
+    };
+    addPart(crossbow, box(0.08, 0.13, 0.32), woodMat, 0.25, -0.26, -0.12, -0.08);   // dipçik
+    addPart(crossbow, box(0.075, 0.07, 0.78), woodMat, 0.25, -0.215, -0.6);         // gövde
+    addPart(crossbow, box(0.03, 0.012, 0.7), B, 0.25, -0.175, -0.62);               // ok rayı
+    addPart(crossbow, box(0.06, 0.16, 0.08), gripMat, 0.25, -0.33, -0.33, 0.3);    // kabza
+    addPart(crossbow, box(0.012, 0.045, 0.015), A, 0.25, -0.27, -0.4);              // tetik
+    addPart(crossbow, box(0.09, 0.08, 0.06), B, 0.25, -0.2, -0.97);                 // yay yuvası
+    // Yay kolları: yuvadan iki yana ve hafif geriye doğru
+    const limbL = addPart(crossbow, box(0.32, 0.03, 0.045), B, 0.25 - 0.17, -0.195, -0.93);
+    limbL.rotation.y = -0.32;
+    const limbR = addPart(crossbow, box(0.32, 0.03, 0.045), B, 0.25 + 0.17, -0.195, -0.93);
+    limbR.rotation.y = 0.32;
+    addPart(crossbow, box(0.02, 0.05, 0.03), A, 0.25 - 0.32, -0.195, -0.88);       // kol uçları
+    addPart(crossbow, box(0.02, 0.05, 0.03), A, 0.25 + 0.32, -0.195, -0.88);
+    const stringMat = new THREE.MeshBasicMaterial({ color: 0xe5e7eb });
+    seg(crossbow, [0.25 - 0.32, -0.19, -0.88], [0.25, -0.17, -0.6], 0.004, stringMat);   // kiriş
+    seg(crossbow, [0.25 + 0.32, -0.19, -0.88], [0.25, -0.17, -0.6], 0.004, stringMat);
+    addPart(crossbow, cyl(0.025, 0.2), B, 0.25, -0.11, -0.5, R);                    // dürbün
+    addPart(crossbow, box(0.015, 0.04, 0.015), B, 0.25, -0.14, -0.45);
+    addPart(crossbow, box(0.015, 0.04, 0.015), B, 0.25, -0.14, -0.56);
+    // Rayda yatan ok: gövde, uç ve tüyler
+    const loaded = new THREE.Group();
+    const boltShaftMat = new THREE.MeshStandardMaterial({ color: 0x3f3f46, roughness: 0.5, metalness: 0.5 });
+    addPart(loaded, cyl(0.008, 0.46), boltShaftMat, 0.25, -0.16, -0.83, R);
+    addPart(loaded, new THREE.ConeGeometry(0.018, 0.06, 6), A, 0.25, -0.16, -1.09, -R);
+    addPart(loaded, box(0.002, 0.03, 0.06), A, 0.25, -0.145, -0.63);
+    addPart(loaded, box(0.03, 0.002, 0.06), A, 0.25, -0.16, -0.63);
+    crossbow.add(loaded);
+    crossbow.userData.bolt = loaded;
 
     // Tabanca: iki elle tutulur, ekranın ortasına yakın ve göze daha yakın durur.
     // Kayar sürgü (üstte yivli), gövde, tetik korkuluğu, eğik kabza, namlu ucu, gez ve arpacık
@@ -308,7 +337,7 @@ function createWeaponModels() {
         addPart(g, box(0.03, 0.085, 0.032), skinMat, x + w / 2 + 0.025, y + 0.055, z + 0.035);    // başparmak
         forearm(g, -1, x - 0.02, y - 0.05, z + 0.08);
     };
-    gripHand(rifle, 0.25, -0.34, -0.29, 0.06);    foreHand(rifle, 0.25, -0.3, -0.84, 0.09);
+    gripHand(crossbow, 0.25, -0.34, -0.32, 0.06); foreHand(crossbow, 0.25, -0.27, -0.72, 0.075);
     gripHand(shotgun, 0.25, -0.29, -0.24, 0.09);  foreHand(shotgun, 0.25, -0.31, -0.74, 0.1);
     gripHand(sniper, 0.25, -0.33, -0.28, 0.06);   foreHand(sniper, 0.25, -0.3, -0.78, 0.1);
     gripHand(smg, 0.24, -0.33, -0.34, 0.06);      foreHand(smg, 0.24, -0.245, -0.8, 0.085);
@@ -326,7 +355,7 @@ function createWeaponModels() {
     for (let i = 0; i < 4; i++) addPart(saw, box(0.03, 0.026, 0.03), skinMat, 0.05, -0.32 - i * 0.026, -0.57);
     forearm(saw, -1, 0.0, -0.42, -0.45);
 
-    Object.assign(weaponModels, { rifle, pistol, shotgun, sniper, smg, saw, rocket: rocketL });
+    Object.assign(weaponModels, { crossbow, pistol, shotgun, sniper, smg, saw, rocket: rocketL });
     WEAPON_ORDER.forEach(id => {
         const m = weaponModels[id];
         // Kameraya çok yakın parçalar ekranı kaplamasın: biraz küçült ve ileri it
@@ -335,7 +364,7 @@ function createWeaponModels() {
         m.visible = false;
         weapon3DGroup.add(m);
     });
-    weaponModels.rifle.visible = true;
+    weaponModels.crossbow.visible = true;
 
     updateWeaponSkinColors();
     camera.add(weapon3DGroup);
