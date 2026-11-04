@@ -166,17 +166,29 @@ function createWeaponModels() {
     crossbow.add(loaded);
     crossbow.userData.bolt = loaded;
 
-    // Tabanca: iki elle tutulur, ekranın ortasına yakın ve göze daha yakın durur.
-    // Kayar sürgü (üstte yivli), gövde, tetik korkuluğu, eğik kabza, namlu ucu, gez ve arpacık
+    // Tabanca: gerçek bir yarı otomatik tabanca gibi — iki tonlu (sürgü skin renginde, gövde siyah),
+    // sürgünün yanında tutma yivleri, üstte kovan penceresi, önde namlu ağzı, gövde altında ray,
+    // tetik korkuluğu ve tetik, tırtıklı kabza, şarjör tabanı, horoz, gez ve arpacık.
+    // Ekranın sağında ve hafif çaprazdan görünür (dümdüz arkadan bakınca "sap" gibi duruyordu).
     const pistol = new THREE.Group();
-    addPart(pistol, box(0.075, 0.075, 0.34), B, 0.14, -0.2, -0.56);              // sürgü
-    for (let i = 0; i < 4; i++) addPart(pistol, box(0.078, 0.06, 0.008), gripMat, 0.14, -0.2, -0.43 - i * 0.018);
-    addPart(pistol, box(0.07, 0.05, 0.3), gripMat, 0.14, -0.255, -0.56);         // gövde
-    addPart(pistol, box(0.012, 0.012, 0.08), gripMat, 0.14, -0.3, -0.58);        // tetik korkuluğu
-    addPart(pistol, box(0.07, 0.19, 0.095), gripMat, 0.14, -0.34, -0.45, 0.25);  // kabza
-    addPart(pistol, cyl(0.016, 0.03), A, 0.14, -0.2, -0.745, R);                // namlu ucu
-    addPart(pistol, box(0.012, 0.02, 0.02), A, 0.14, -0.155, -0.71);             // arpacık
-    addPart(pistol, box(0.045, 0.02, 0.02), A, 0.14, -0.155, -0.41);             // gez
+    const pKnurl = new THREE.MeshStandardMaterial({ map: createKnurlTexture(), color: 0x3a3a3a, roughness: 0.9 });
+    const cx = 0.14;
+    addPart(pistol, box(0.07, 0.075, 0.36), B, cx, -0.2, -0.57);                       // sürgü
+    for (let i = 0; i < 6; i++) addPart(pistol, box(0.074, 0.05, 0.008), gripMat, cx, -0.2, -0.42 - i * 0.014);   // tutma yivleri
+    addPart(pistol, box(0.045, 0.006, 0.075), gripMat, cx + 0.008, -0.161, -0.56);    // kovan penceresi
+    addPart(pistol, cyl(0.019, 0.04), A, cx, -0.2, -0.765, R);                        // namlu ağzı
+    addPart(pistol, cyl(0.011, 0.045), gripMat, cx, -0.2, -0.77, R);
+    addPart(pistol, box(0.064, 0.045, 0.32), gripMat, cx, -0.258, -0.58);             // gövde
+    for (let i = 0; i < 3; i++) addPart(pistol, box(0.066, 0.008, 0.014), B, cx, -0.283, -0.66 - i * 0.03);    // ray dişleri
+    addPart(pistol, box(0.012, 0.05, 0.012), gripMat, cx, -0.3, -0.64);               // tetik korkuluğu (ön)
+    addPart(pistol, box(0.012, 0.012, 0.12), gripMat, cx, -0.323, -0.585);            // tetik korkuluğu (alt)
+    addPart(pistol, box(0.01, 0.042, 0.012), A, cx, -0.292, -0.56, 0.25);             // tetik
+    addPart(pistol, box(0.068, 0.21, 0.1), pKnurl, cx, -0.36, -0.46, 0.22);           // tırtıklı kabza
+    addPart(pistol, box(0.072, 0.022, 0.105), gripMat, cx, -0.468, -0.435, 0.22);    // şarjör tabanı
+    addPart(pistol, box(0.03, 0.035, 0.03), gripMat, cx, -0.19, -0.375);              // horoz
+    addPart(pistol, box(0.012, 0.024, 0.02), A, cx, -0.151, -0.73);                   // arpacık
+    addPart(pistol, box(0.018, 0.024, 0.02), A, cx - 0.017, -0.151, -0.405);          // gez (iki yanı, ortası boş)
+    addPart(pistol, box(0.018, 0.024, 0.02), A, cx + 0.017, -0.151, -0.405);
 
     // Pompalı: kalın tek namlu, altında şarjör tüpü, tahta pompa kolu ve dipçik
     const shotgun = new THREE.Group();
@@ -343,10 +355,10 @@ function createWeaponModels() {
     gripHand(smg, 0.24, -0.33, -0.34, 0.06);      foreHand(smg, 0.24, -0.245, -0.8, 0.085);
     gripHand(rocketL, 0.27, -0.27, -0.45, 0.06);  foreHand(rocketL, 0.27, -0.25, -0.82, 0.05);
     // Tabanca: sağ el kabzada, sol el altından destekler (iki elle tutuş)
-    gripHand(pistol, 0.14, -0.34, -0.45, 0.07);
-    addPart(pistol, box(0.06, 0.13, 0.12), gloveMat, 0.075, -0.36, -0.44);
-    for (let i = 0; i < 4; i++) addPart(pistol, box(0.1, 0.024, 0.026), skinMat, 0.12, -0.31 - i * 0.028, -0.375);
-    forearm(pistol, -1, 0.06, -0.43, -0.37);
+    gripHand(pistol, 0.14, -0.36, -0.46, 0.07);
+    addPart(pistol, box(0.06, 0.14, 0.12), gloveMat, 0.07, -0.38, -0.45);            // destek eli
+    for (let i = 0; i < 4; i++) addPart(pistol, box(0.1, 0.026, 0.028), skinMat, 0.115, -0.335 - i * 0.03, -0.39);
+    forearm(pistol, -1, 0.05, -0.46, -0.38);
     // Testere: sağ el yumruk halinde bileklikte; sol el boşta, yumruk
     addPart(saw, box(0.1, 0.1, 0.1), gloveMat, 0.25, -0.3, -0.58);
     for (let i = 0; i < 4; i++) addPart(saw, box(0.028, 0.026, 0.03), skinMat, 0.2, -0.26 - i * 0.026, -0.62);
@@ -360,7 +372,9 @@ function createWeaponModels() {
         const m = weaponModels[id];
         // Kameraya çok yakın parçalar ekranı kaplamasın: biraz küçült ve ileri it
         m.scale.setScalar(0.85);
-        m.position.set(id === 'pistol' ? 0.0 : 0.03, -0.02, -0.25);
+        m.position.set(0.03, -0.02, -0.25);
+        // Tabanca sağa ve biraz aşağı alınır, namlu nişangâha doğru hafif içe döner: yanı görünür
+        if (id === 'pistol') { m.position.set(0.24, -0.01, -0.2); m.rotation.y = 0.42; m.rotation.z = 0.05; }
         m.visible = false;
         weapon3DGroup.add(m);
     });
