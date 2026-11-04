@@ -67,7 +67,7 @@ function updateGrenades(dt) {
         e.t += dt;
         const k = e.t / 0.4;
         if (k >= 1) { scene.remove(e.mesh); e.mesh.material.dispose(); explosions.splice(i, 1); continue; }
-        e.mesh.scale.setScalar(0.5 + CFG.grenadeRadius * 0.8 * Math.sqrt(k));
+        e.mesh.scale.setScalar(0.5 + e.r * 0.8 * Math.sqrt(k));
         e.mesh.material.opacity = 0.75 * (1 - k);
     }
 }
@@ -83,18 +83,18 @@ function blastClear(from, to) {
     return true;
 }
 
-function explode(pos) {
-    const R = CFG.grenadeRadius;
+// R: patlama yarıçapı, power: merkezdeki hasar (bomba için ayarlardan; roket için silah hasarından)
+function explode(pos, R = CFG.grenadeRadius, power = CFG.grenadeDamage) {
     const mesh = new THREE.Mesh(BLAST_GEO, new THREE.MeshBasicMaterial({ color: 0xff8a1f, transparent: true, opacity: 0.75 }));
     mesh.position.copy(pos);
     scene.add(mesh);
-    explosions.push({ mesh, t: 0 });
+    explosions.push({ mesh, t: 0, r: R });
     createParticles(pos, 0xffb020, 18);
     createParticles(pos, 0x52525b, 10);
     const d = Math.hypot(pos.x - camera.position.x, pos.z - camera.position.z);
     sfx('explode', Math.max(0.3, 1 - d / 60));
 
-    const dmgAt = (dist) => CFG.grenadeDamage * (1 - dist / R) + 20;
+    const dmgAt = (dist) => power * (1 - dist / R) + 20;
     const center = new THREE.Vector3();
     const targets = isDuelMode ? (duelBot ? [duelBot] : []) : enemies.slice();
     let kills = 0;
@@ -109,13 +109,69 @@ function explode(pos) {
         if (e.health <= 0) { onEnemyKilled(e, 'body'); kills++; }
     }
     if (kills) runStats.bestBlast = Math.max(runStats.bestBlast, kills);
-    // Oyuncu kendi bombasından da etkilenir (yarı hasar)
+    // Oyuncu kendi bombasından / roketinden de etkilenir (yarı hasar)
     const pd = camera.position.distanceTo(pos);
     if (pd < R && blastClear(pos, camera.position)) damagePlayer(dmgAt(pd) * 0.5, false, 300, pos);
     if (kills) checkAchievements();
 }
 
+// =====================================================================
+//  ROKETATAR — roket düz gider; duvara, zemine ya da bir hedefe değince (ya da menzili
+//  bitince) patlar. Patlama bomba ile aynı kuralları izler: yarıçap içinde azalan hasar,
+//  duvar arkası korunur, çok yakındaki oyuncuya yarı hasar.
+// =====================================================================
+let rockets = [];
+const ROCKET_GEO = new THREE.CylinderGeometry(0.06, 0.08, 0.5, 8);
+ROCKET_GEO.rotateX(Math.PI / 2);                 // uzun ekseni ileri baksın
+const ROCKET_MAT = new THREE.MeshStandardMaterial({ color: 0x4b5320, roughness: 0.5, metalness: 0.4 });
+const ROCKET_FLAME_GEO = new THREE.ConeGeometry(0.07, 0.35, 8);
+ROCKET_FLAME_GEO.rotateX(-Math.PI / 2);
+const ROCKET_FLAME_MAT = new THREE.MeshBasicMaterial({ color: 0xffa21f });
+
+function spawnRocket(origin, dir, speed, damage, radius, life) {
+    const mesh = new THREE.Group();
+    mesh.add(new THREE.Mesh(ROCKET_GEO, ROCKET_MAT));
+    const flame = new THREE.Mesh(ROCKET_FLAME_GEO, ROCKET_FLAME_MAT);
+    flame.position.z = 0.42;
+    mesh.add(flame);
+    mesh.position.copy(origin).addScaledVector(dir, 0.4);
+    mesh.lookAt(mesh.position.clone().sub(dir));      // burun ileri (-z ekseni gidiş yönünde değil, +z arkada)
+    scene.add(mesh);
+    rockets.push({ mesh, vel: dir.clone().multiplyScalar(speed), life, damage, radius, flame });
+}
+
+function updateRockets(dt) {
+    const step = new THREE.Vector3();
+    for (let i = rockets.length - 1; i >= 0; i--) {
+        const r = rockets[i], p = r.mesh.position;
+        r.life -= dt;
+        r.flame.scale.setScalar(0.8 + Math.random() * 0.5);
+        // Hızlı roket ince duvarın içinden geçmesin diye küçük adımlarla ilerle
+        const n = Math.max(1, Math.ceil(r.vel.length() * dt / 0.25));
+        step.copy(r.vel).multiplyScalar(dt / n);
+        let boom = null;
+        for (let k = 0; k < n && !boom; k++) {
+            const prev = p.clone();
+            p.add(step);
+            if (p.y < curMap().bulletMinY || p.y > curMap().bulletMaxY || pointInWall(p)) { boom = prev; break; }
+            const targets = isDuelMode ? (duelBot ? [duelBot] : []) : enemies;
+            if (targets.some(e => e.hitTest(p))) boom = p.clone();
+        }
+        if (Math.random() < 0.6) createParticles(p.clone().addScaledVector(r.vel, -0.02), 0x9ca3af, 1);   // duman izi
+        if (!boom && r.life <= 0) boom = p.clone();
+        if (boom) {
+            scene.remove(r.mesh);
+            rockets.splice(i, 1);
+            // Space'te boşlukta biten roket patlamadan kaybolur (altında hiçbir şey yok)
+            if (r.life <= 0 && boom.y < curMap().killY) continue;
+            explode(boom, r.radius, r.damage);
+        }
+    }
+}
+
 function clearGrenades() {
+    rockets.forEach(r => scene.remove(r.mesh));
+    rockets = [];
     grenades.forEach(g => scene.remove(g.mesh));
     explosions.forEach(e => { scene.remove(e.mesh); e.mesh.material.dispose(); });
     grenades = []; explosions = [];

@@ -3,8 +3,9 @@
 // =====================================================================
 //  GİRİŞ (klavye düzeninden bağımsız: e.code)
 // =====================================================================
-const WEAPON_KEYS = { Digit1: 'pistol', Digit2: 'rifle', Digit3: 'shotgun', Digit4: 'sniper', Digit5: 'smg',
-                      Numpad1: 'pistol', Numpad2: 'rifle', Numpad3: 'shotgun', Numpad4: 'sniper', Numpad5: 'smg' };
+// 1-7 (üst sıra ya da sayı tuş takımı) → WEAPON_ORDER sırasıyla
+const WEAPON_KEYS = {};
+WEAPON_ORDER.forEach((id, i) => { WEAPON_KEYS['Digit' + (i + 1)] = id; WEAPON_KEYS['Numpad' + (i + 1)] = id; });
 
 function onKeyDown(e) {
     // Oyun sırasında Space/Enter odaktaki bir menü butonunu tetiklemesin

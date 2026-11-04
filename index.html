@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>3D Tactical FPS - 1v1 Düello ve Tüfek Skinleri</title>
     <!-- ?v=… : her yayında değiştirilir (tarih); tarayıcı önbellekteki eski CSS/JS dosyalarını kullanmasın -->
-    <link rel="stylesheet" href="css/style.css?v=20261101f">
+    <link rel="stylesheet" href="css/style.css?v=20261104a">
 
     <!-- Three.js r128 — üçüncü taraf CDN yerine oyunla aynı klasörden yüklenir.
          Dosya index.html ile aynı yerden geldiği için CDN ele geçirilme riski yoktur.
@@ -97,7 +97,7 @@
             <div><kbd>Sağ tık</kbd> Dürbün</div>
             <div><kbd>R</kbd> Şarjör</div>
             <div><kbd>G</kbd> Bomba at</div>
-            <div><kbd>1-5</kbd> Silah seç</div>
+            <div><kbd>1-7</kbd> Silah seç</div>
             <div><kbd>ESC</kbd> Duraklat</div>
         </div>
         <div class="note" id="mobileNote"></div>
@@ -275,19 +275,24 @@
                 <button class="buy-btn" id="btnUpReload" onclick="buyUpgrade('reload')"></button>
             </div>
             <div class="shop-card weapon-card">
-                <h3>Pompalı (3)</h3>
-                <p>8 saçma, yakında çok güçlü, uzakta etkisiz · 6'lık şarjör<br>Durum: <span id="shotgunStatus">KİLİTLİ</span></p>
+                <h3>Av Tüfeği (4)</h3>
+                <p>Pompalı av tüfeği: 8 saçma, yakında çok güçlü, uzakta etkisiz · 6'lık şarjör<br>Durum: <span id="shotgunStatus">KİLİTLİ</span></p>
                 <button class="buy-btn" id="btnShotgun" onclick="buyWeapon('shotgun')"></button>
             </div>
             <div class="shop-card weapon-card">
-                <h3>Keskin Nişancı (4)</h3>
+                <h3>Keskin Nişancı (5)</h3>
                 <p>5 kat hasar, sağ tıkla dürbün · 5'lik şarjör<br>Durum: <span id="sniperStatus">KİLİTLİ</span></p>
                 <button class="buy-btn" id="btnSniper" onclick="buyWeapon('sniper')"></button>
             </div>
             <div class="shop-card weapon-card">
-                <h3>Taramalı Tabanca (5)</h3>
+                <h3>Taramalı Tabanca (6)</h3>
                 <p>Tamamı siyah, tırtıklı kabzalı; çok hızlı seri ateş, mermi başına az hasar · 40'lık şarjör<br>Durum: <span id="smgStatus">KİLİTLİ</span></p>
                 <button class="buy-btn" id="btnSmg" onclick="buyWeapon('smg')"></button>
+            </div>
+            <div class="shop-card weapon-card">
+                <h3>Roketatar (7)</h3>
+                <p>Roket çarptığı yerde patlar, çevresine alan hasarı verir; çok yakına atma · 4'lük şarjör<br>Durum: <span id="rocketStatus">KİLİTLİ</span></p>
+                <button class="buy-btn" id="btnRocket" onclick="buyWeapon('rocket')"></button>
             </div>
         </div>
 
@@ -316,27 +321,27 @@
         </div>
     </div>
 
-    <script src="js/profiles.js?v=20261101f"></script>
-    <script src="js/config.js?v=20261101f"></script>
-    <script src="js/save.js?v=20261101f"></script>
-    <script src="js/state.js?v=20261101f"></script>
-    <script src="js/utils.js?v=20261101f"></script>
-    <script src="js/audio.js?v=20261101f"></script>
-    <script src="js/feedback.js?v=20261101f"></script>
-    <script src="js/world.js?v=20261101f"></script>
-    <script src="js/maps.js?v=20261101f"></script>
-    <script src="js/input.js?v=20261101f"></script>
-    <script src="js/game.js?v=20261101f"></script>
-    <script src="js/weapons.js?v=20261101f"></script>
-    <script src="js/enemies.js?v=20261101f"></script>
-    <script src="js/items.js?v=20261101f"></script>
-    <script src="js/waves.js?v=20261101f"></script>
-    <script src="js/records.js?v=20261101f"></script>
-    <script src="js/achievements.js?v=20261101f"></script>
-    <script src="js/update.js?v=20261101f"></script>
-    <script src="js/shop.js?v=20261101f"></script>
-    <script src="js/settings.js?v=20261101f"></script>
-    <script src="js/help.js?v=20261101f"></script>
-    <script src="js/main.js?v=20261101f"></script>
+    <script src="js/profiles.js?v=20261104a"></script>
+    <script src="js/config.js?v=20261104a"></script>
+    <script src="js/save.js?v=20261104a"></script>
+    <script src="js/state.js?v=20261104a"></script>
+    <script src="js/utils.js?v=20261104a"></script>
+    <script src="js/audio.js?v=20261104a"></script>
+    <script src="js/feedback.js?v=20261104a"></script>
+    <script src="js/world.js?v=20261104a"></script>
+    <script src="js/maps.js?v=20261104a"></script>
+    <script src="js/input.js?v=20261104a"></script>
+    <script src="js/game.js?v=20261104a"></script>
+    <script src="js/weapons.js?v=20261104a"></script>
+    <script src="js/enemies.js?v=20261104a"></script>
+    <script src="js/items.js?v=20261104a"></script>
+    <script src="js/waves.js?v=20261104a"></script>
+    <script src="js/records.js?v=20261104a"></script>
+    <script src="js/achievements.js?v=20261104a"></script>
+    <script src="js/update.js?v=20261104a"></script>
+    <script src="js/shop.js?v=20261104a"></script>
+    <script src="js/settings.js?v=20261104a"></script>
+    <script src="js/help.js?v=20261104a"></script>
+    <script src="js/main.js?v=20261104a"></script>
 </body>
 </html>

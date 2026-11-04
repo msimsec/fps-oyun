@@ -33,7 +33,7 @@ function updateShopModal() {
     $('modalMag').textContent = `${player.maxAmmo} / ${CFG.maxMag}`;
     $('modalShield').textContent = shieldStatusText();
     renderSkinPicker();
-    ['shotgun', 'sniper', 'smg'].forEach(id => {
+    ['shotgun', 'sniper', 'smg', 'rocket'].forEach(id => {
         $(id + 'Status').textContent = player.ownedWeapons[id] ? 'SAHİPSİNİZ' : 'KİLİTLİ';
     });
     // Yükseltme her silaha kendi çarpanıyla işler; kartta gerçek hasarları göster
@@ -51,6 +51,7 @@ function updateShopModal() {
     setBuyBtn('btnShotgun', WEAPONS.shotgun.cost, player.ownedWeapons.shotgun ? 'Sahipsin ✓' : null);
     setBuyBtn('btnSniper', WEAPONS.sniper.cost, player.ownedWeapons.sniper ? 'Sahipsin ✓' : null);
     setBuyBtn('btnSmg', WEAPONS.smg.cost, player.ownedWeapons.smg ? 'Sahipsin ✓' : null);
+    setBuyBtn('btnRocket', WEAPONS.rocket.cost, player.ownedWeapons.rocket ? 'Sahipsin ✓' : null);
 
     // Kalıcı yükseltmeler: seviye, şimdiki → sonraki etki, artan fiyat
     const pct = (v) => Math.round(v * 100) + '%';
