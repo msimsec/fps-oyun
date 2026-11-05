@@ -333,6 +333,7 @@ function fellOut() {
     const s = curMap().spawn;
     damagePlayer(35, true, 300);
     if (state !== 'playing') return;              // düşüş öldürdüyse el bitti
+    player.eye = CFG.eyeHeight;
     camera.position.set(s.x, s.y + CFG.eyeHeight, s.z);
     player.velY = 0; player.airVX = 0; player.airVZ = 0; player.onGround = true;
     showBanner('BOŞLUĞA DÜŞTÜN!', '-35 can', 1600);

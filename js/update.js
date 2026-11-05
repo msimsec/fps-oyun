@@ -5,10 +5,12 @@
 // =====================================================================
 const isMoving = () => keys.forward || keys.back || keys.left || keys.right;
 // İleri giderken, yerdeyken ve dürbünsüzken koşulur
-const isSprinting = () => keys.sprint && keys.forward && player.onGround && !player.zoomed;
+const isSprinting = () => keys.sprint && keys.forward && player.onGround && !player.zoomed && !isCrouching();
+// Çömelik sayılır: tuş basılı ya da hâlâ kalkıyor (göz hizası tam yükselmedi)
+const isCrouching = () => player.eye < CFG.eyeHeight - 0.1;
 
 function jump() {
-    if (!player.onGround) return;
+    if (!player.onGround || keys.crouch) return;   // çömelikken zıplanmaz
     player.velY = CFG.jumpSpeed;
     player.onGround = false;
     sfx('jump');
@@ -26,6 +28,11 @@ function updatePlayer(dt) {
         player.health = Math.min(player.maxHealth, player.health + CFG.regenRate * dt);
     }
     player.regenOn = regen;
+    // Çömelme: göz hizası yumuşakça iner/kalkar; ayaklar yerinde kalır
+    const eyeTarget = keys.crouch ? CFG.crouchEye : CFG.eyeHeight;
+    const newEye = player.eye + (eyeTarget - player.eye) * Math.min(1, dt * 12);
+    camera.position.y += newEye - player.eye;
+    player.eye = newEye;
     const f = new THREE.Vector3();
     camera.getWorldDirection(f);
     f.y = 0; f.normalize();
@@ -39,7 +46,8 @@ function updatePlayer(dt) {
     const len = Math.hypot(mx, mz);
     const feet = footY();
     if (len > 0) {
-        const speed = CFG.playerSpeed * speedMul() * (isSprinting() ? CFG.sprintMul : 1) * (player.zoomed ? 0.5 : 1);
+        const speed = CFG.playerSpeed * speedMul() * (isSprinting() ? CFG.sprintMul : 1) * (player.zoomed ? 0.5 : 1) *
+            (isCrouching() ? CFG.crouchSpeed : 1);
         const s = speed * dt / len;   // çapraz giderken hız artmaz
         moveWithCollision(camera.position, mx * s, mz * s, CFG.playerRadius, feet);
     }
@@ -61,10 +69,10 @@ function updatePlayer(dt) {
             player.airVX = 0; player.airVZ = 0;
             player.onGround = true;
         }
-        camera.position.y = newFeet + CFG.eyeHeight;
+        camera.position.y = newFeet + player.eye;
         if (newFeet < curMap().killY) { fellOut(); return; }
     } else {
-        camera.position.y = ground + CFG.eyeHeight;   // alçak basamaklara yürüyerek çık
+        camera.position.y = ground + player.eye;      // alçak basamaklara yürüyerek çık
         const plat = platformIndexAt(camera.position.x, camera.position.z, ground);
         if (plat >= 0) player.platform = plat;
         checkJumpPads();

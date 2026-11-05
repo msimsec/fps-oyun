@@ -38,7 +38,7 @@ function saveRunSnapshot() {
         },
         arsenal: Object.fromEntries(WEAPON_ORDER.filter(id => player.arsenal[id]).map(id =>
             [id, [ammoOut(player.arsenal[id].ammo), ammoOut(player.arsenal[id].pool)]])),
-        cam: [c.x, c.y, c.z, cameraAngleY, cameraAngleX],
+        cam: [c.x, footY() + CFG.eyeHeight, c.z, cameraAngleY, cameraAngleX],   // ayakta göz hizası
         stats: { pickups: runStats.pickups, bestBlast: runStats.bestBlast, cleanWave: runStats.cleanWave },
         enemies: enemies.filter(e => !e.isDuel).map(e => {
             const p = e.group.position;

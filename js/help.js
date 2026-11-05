@@ -37,6 +37,7 @@ const HELP_SECTIONS = [
         'W A S D (ya da ok tuşları): ileri, geri, sola, sağa yürü.',
         `Shift: koş (yalnızca ileri giderken). Koşarken görüş açısı genişler ama isabet biraz bozulur.`,
         'Space: zıpla. 1 birim yüksekliğindeki kasalara zıplayarak çıkabilirsin; çok alçak basamaklara yürüyerek çıkılır.',
+        'C ya da Ctrl: basılı tuttukça çömel. Çömelince alçalırsın (alçak siperin arkasında düşman seni göremez, mermisi de sana gelmez), yarı hızda yürürsün, atışların daha isabetli olur; zıplayamazsın. Not: tarayıcıda Ctrl+W sekmeyi kapatır, çömelip ileri yürürken C tuşunu kullan (kapansa bile DEVAM ET ile kaldığın yerden sürersin).',
         'Fare: nişan al. Hassasiyeti Ayarlar\'dan değiştirebilirsin.',
         'Sol tık: ateş et. Otomatik silahta (Taramalı Tabanca) ve Testereli Eldiven\'de basılı tutunca sürekli çalışır; diğerleri her tıkta bir atar.',
         'Sağ tık: dürbün (yalnızca Keskin Nişancı). Dürbünle bakarken yavaş yürürsün ama isabet tamdır.',
@@ -116,6 +117,7 @@ const HELP_SECTIONS = [
         'Dalgalar ilerledikçe düşmanlar yeni yetenekler kazanır (dalga başında duyurulur):',
         ...ENEMY_SKILLS.map(k => `${k.wave}. dalga: ${k.text}${k.needsPads ? ' (yalnızca rampalı bölümde, Space)' : ''}`),
         'Düşman yakına gelince temas hasarı verir; mesafeni koru.',
+        '3. dalgadan itibaren düşmanlar arada bir durup çömelerek ateş eder: alçalırlar (kafaları da aşağı iner), daha isabetli atarlar. Dibine gelince ya da vurulup kaçarken kalkarlar. Koşucular çömelmez; düello botu da arada bir çömelir.',
         'Ölen düşman geriye doğru devrilir, birkaç saniye yerde kalır, sonra toprağa gömülür. Kafadan öldürülürse kafası parçalanır.',
         'Cesetler engel değildir: mermiler içinden geçer, üstünden yürüyebilirsin.'
     ] },
@@ -160,6 +162,7 @@ const HELP_SECTIONS = [
     ] },
     { id: 'progress', title: '🏆 Rekorlar ve Başarımlar', lines: () => [
         'REKORLAR ekranında her bölüm için ayrı sekme vardır; her zorluk seviyesinin en iyi skoru, en uzak dalgası ve düello sonuçları yazar.',
+        'En iyi skorun ve en hızlı düello galibiyetinin altında rekorun kırıldığı gün ve saat yazar (bu özellikten önceki eski rekorlarda "tarih yok").',
         'Rekor kırınca oyun sonu ekranında "YENİ REKOR" yazar.',
         'Rekor ekranındaki Sıfırla yalnızca seçili bölümün rekorlarını siler; önce onay sorulur.',
         `BAŞARIMLAR ekranında ${ACHIEVEMENTS.length} başarım vardır; her biri bir kez açılır ve altın ödülü verir.`,
@@ -176,7 +179,7 @@ const HELP_SECTIONS = [
         'Ayarlar her oyuncu için ayrı kaydedilir.'
     ] },
     { id: 'tips', title: '💡 İpuçları', lines: () => [
-        'Siperin arkasında kalarak çatış; hasar almadığın sürece canın dolar.',
+        'Siperin arkasında kalarak çatış; hasar almadığın sürece canın dolar. Alçak siperin arkasında çömelirsen (C) düşman seni hiç göremez.',
         'Düşmanları kafadan vur: hem 2 kat hasar hem fazladan skor.',
         'Tabancayı yedek silah olarak kullan: mermisi hiç bitmez. Dibine gelen düşmana Testereli Eldiven ile karşılık ver.',
         'Nişancılar uzaktan vurur; önce onları temizle ya da Keskin Nişancı ile uzaktan karşılık ver.',

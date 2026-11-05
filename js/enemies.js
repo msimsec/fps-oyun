@@ -72,6 +72,7 @@ class HumanoidEnemy {
         const ra = new THREE.Mesh(GEO.arm, bm); ra.position.set(0.6, 0.6, 0);
         this.group.add(body, head, la, ra);
         this.head = head;
+        this.body = body; this.arms = [la, ra];
         // Tipe özgü ayırt edici parçalar
         if (typeId === 'tank' && !isDuel) {
             const pad = typeMat(0x1e293b);
@@ -124,6 +125,43 @@ class HumanoidEnemy {
         this.navCheck = 0; this.directPath = true;
         this.followTime = 0; this.followCheck = 0;
         this.dodgeTimer = 0; this.dodgeCooldown = 0; this.dodgeDir = 1;
+        // Çömelme: crouch 0 (ayakta) → 1 (tam çömelik); duruşa göre parçaların ayakta konumları
+        this.crouch = 0; this.crouchTimer = 0; this.crouchCd = 2 + Math.random() * 3;
+        this.pose = this.group.children.map(o => ({ o, y: o.position.y, sy: o.scale.y }));
+    }
+
+    // Çömelme duruşu: gövde ve kollar basılır, kafa ve üstündekiler aşağı iner (k: 0-1)
+    applyCrouch(k) {
+        for (const p of this.pose) {
+            if (p.o === this.hpBar) { p.o.position.y = p.y - 0.5 * k; continue; }
+            if (p.y >= 1.1) p.o.position.y = p.y - 0.5 * k;                       // kafa, omuzluk, gözlük, bant
+            else { p.o.position.y = p.y * (1 - 0.45 * k); p.o.scale.y = p.sy * (1 - 0.45 * k); }   // gövde, kollar, plaka, tüfek
+        }
+    }
+
+    // Göz/namlu yüksekliği (çömelince alçalır)
+    eyeY() { return this.group.position.y + (1.4 - 0.5 * this.crouch) * this.scale; }
+
+    // Çömelme kararı: belli aralıklarla, oyuncuyu görüyorsa ve ne çok yakın ne çok uzaksa bir süre
+    // durup çömelerek ateş eder. Koşucu çömelmez; dalga düşmanları 3. dalgadan itibaren (yetenek).
+    updateCrouch(dt, dist) {
+        const can = this.isDuel || (this.skills.crouch && this.typeId !== 'runner');
+        if (this.crouchTimer > 0) {
+            this.crouchTimer -= dt;
+            if (dist < 3 || this.dodgeTimer > 0) this.crouchTimer = 0;            // dibine gelince ya da kaçarken kalkar
+        } else if (can && !this.air) {
+            this.crouchCd -= dt;
+            if (this.crouchCd <= 0) {
+                this.crouchCd = (this.isDuel ? 3 : 4) + Math.random() * 4;
+                if (dist > 5 && Math.random() < 0.6 && this.canSeePlayer()) this.crouchTimer = 1.5 + Math.random() * 1.5;
+            }
+        }
+        const target = this.crouchTimer > 0 ? 1 : 0;
+        if (this.crouch !== target) {
+            this.crouch += Math.sign(target - this.crouch) * Math.min(Math.abs(target - this.crouch), dt * 6);
+            this.applyCrouch(this.crouch);
+        }
+        return this.crouchTimer > 0;
     }
 
     update(dt) {
@@ -146,6 +184,17 @@ class HumanoidEnemy {
         }
         this.jumpCd -= dt;
         this.dodgeCooldown -= dt;
+        // Çömelikken yerinde durup ateş eder (daha isabetli)
+        if (this.updateCrouch(dt, dist)) {
+            if (this.isDuel) {
+                this.shootTimer -= dt;
+                if (this.shootTimer <= 0) { this.shootTimer = CFG.botFireInterval; this.shootAtPlayer(CFG.botBulletDamage, CFG.botSpread * 0.7); }
+            } else {
+                this.tryShoot(dt, dist, 0.7);
+            }
+            if (this.hpBar.visible) this.hpBar.lookAt(camera.position);
+            return;
+        }
         if (this.dodgeTimer > 0) {
             // Kaçınma: vurulunca kısa süre hızla yana kay
             this.dodgeTimer -= dt;
@@ -349,7 +398,7 @@ class HumanoidEnemy {
         this.move(mx * this.speed * dt, mz * this.speed * dt);
     }
 
-    tryShoot(dt, dist) {
+    tryShoot(dt, dist, spreadMul = 1) {
         this.shootTimer -= dt;
         if (this.shootTimer > 0) return;
         this.shootTimer = this.nextFireDelay();
@@ -357,7 +406,7 @@ class HumanoidEnemy {
         const range = Math.max(this.type.range || 0, curMap().enemyRange);
         if (dist > 1.5 && dist < range && this.canSeePlayer()) {
             const aim = this.skills.aim ? 0.6 : 1;      // keskin nişan yeteneği
-            this.shootAtPlayer(CFG.enemyBulletDamage * this.type.dmg, CFG.enemySpread * this.type.spread * aim);
+            this.shootAtPlayer(CFG.enemyBulletDamage * this.type.dmg, CFG.enemySpread * this.type.spread * aim * spreadMul);
         }
     }
 
@@ -368,7 +417,7 @@ class HumanoidEnemy {
 
     // Arada duvar varsa ateş etmez (mermi boşa duvara gitmesin)
     canSeePlayer() {
-        const from = new THREE.Vector3(this.group.position.x, this.group.position.y + 1.4 * this.scale, this.group.position.z);
+        const from = new THREE.Vector3(this.group.position.x, this.eyeY(), this.group.position.z);
         const to = camera.position;
         const steps = Math.ceil(from.distanceTo(to) / 0.5);
         const pt = new THREE.Vector3();
@@ -380,7 +429,7 @@ class HumanoidEnemy {
     }
 
     shootAtPlayer(damage, spread) {
-        const origin = new THREE.Vector3(this.group.position.x, this.group.position.y + 1.4 * this.scale, this.group.position.z);
+        const origin = new THREE.Vector3(this.group.position.x, this.eyeY(), this.group.position.z);
         const target = new THREE.Vector3(camera.position.x, camera.position.y - 0.3, camera.position.z);
         const dist = origin.distanceTo(target);
         const dir = target.sub(origin).normalize();
@@ -400,8 +449,9 @@ class HumanoidEnemy {
         const k = this.scale;
         const h = Math.hypot(pt.x - p.x, pt.z - p.z) / k;
         const y = (pt.y - p.y) / k;
-        if (y > 1.2 && y < 1.75 && h < 0.35) return 'head';
-        if (y >= 0 && y <= 1.2 && h < 0.7) return 'body';
+        const c = this.crouch * 0.5;                 // çömelince kafa ve gövdenin üstü bu kadar iner
+        if (y > 1.2 - c && y < 1.75 - c && h < 0.35) return 'head';
+        if (y >= 0 && y <= 1.2 - c && h < 0.7) return 'body';
         return null;
     }
 

@@ -25,7 +25,7 @@ Ana menüdeki **BÖLÜM SEÇ** kısmından oynanacak harita seçilir (seçim oyu
 
 Düşmanların kafasında kendi renginde kızgın bir yüz (çatık kaşlar, dişli ağız) vardır. Dalga modunda 4 düşman tipi vardır: **Er** (kırmızı), **Koşucu** (turuncu, hızlı ama zayıf, 2. dalgadan itibaren), **Nişancı** (mavi, uzakta durup isabetli ateş eder, 3. dalgadan itibaren) ve **Zırhlı** (gri, iri, çok dayanıklı, 2.5 kat ödül, 4. dalgadan itibaren).
 
-Dalgalar ilerledikçe düşmanlar yetenek kazanır: **2. dalga** zıplama (alçak kasa ve siperlerin üstüne çıkar, kasaya çıkan oyuncunun yanına zıplar), **3. dalga** rampa kullanma (Space'te oyuncunun platformuna en kısa rampa yoluyla gelir), **4. dalga** vurulunca yana kaçma, **5. dalga** keskin nişan (daha isabetli ve sık ateş). Yeni yetenek dalga başında duyurulur.
+Dalgalar ilerledikçe düşmanlar yetenek kazanır: **2. dalga** zıplama (alçak kasa ve siperlerin üstüne çıkar, kasaya çıkan oyuncunun yanına zıplar), **3. dalga** rampa kullanma (Space'te oyuncunun platformuna en kısa rampa yoluyla gelir), **4. dalga** vurulunca yana kaçma, **5. dalga** keskin nişan (daha isabetli ve sık ateş). Ayrıca **3. dalgadan** itibaren düşmanlar arada bir çömelerek ateş eder (Koşucu hariç; düello botu da çömelir). Yeni yetenek dalga başında duyurulur.
 
 **Can yenilenmesi (dalga modu):** Bir süre hasar almazsan can kendiliğinden dolar; can göstergesi yeşil parlar ve kısa bir ses çalar. Kolay: 3 sn sonra saniyede 14, Orta: 4 sn sonra saniyede 10, Zor: 5 sn sonra saniyede 7 can. Düelloda can yenilenmez. Can kiti yoktur; eski kayıtlardaki kitler 50'şer altın olarak iade edilir.
 
@@ -46,6 +46,7 @@ Her iki modun zorluğu **Ayarlar** ekranından ayrı ayrı seçilir (Kolay / Ort
 | W A S D / ok tuşları | Hareket |
 | Shift | Koş (ileri giderken) |
 | Space | Zıpla (1 birimlik kasalara çıkılabilir) |
+| C / Ctrl | Çömel (basılı tut): alçalırsın, yarı hız, daha isabetli. Ctrl+W tarayıcıda sekmeyi kapattığı için çömelip yürürken C önerilir |
 | Fare | Nişan |
 | Sol tık | Ateş (Taramalı Tabanca ve testere basılı tutunca sürekli) |
 | Sağ tık | Dürbün (keskin nişancı) |
@@ -72,7 +73,7 @@ Kafa vuruşu her silahta 2 kat hasar verir. Mağazadaki "Silah Hasarı" yükselt
 
 ## Rekorlar ve başarımlar
 
-**Rekorlar** her bölüm için ayrı tutulur; rekor ekranının üstündeki sekmelerden bölüm seçilir. (Bölüm ayrımından önceki rekorlar Depo'ya aktarılır.)
+**Rekorlar** her bölüm için ayrı tutulur; en iyi skorun ve en hızlı düellonun kırıldığı tarih ve saat de yazar; rekor ekranının üstündeki sekmelerden bölüm seçilir. (Bölüm ayrımından önceki rekorlar Depo'ya aktarılır.)
 
 **Başarımlar** ana menüdeki **BAŞARIMLAR 🎖️** ekranındadır. Her biri bir kez açılır ve altın verir:
 

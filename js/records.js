@@ -10,8 +10,9 @@ const OLD_RECORDS_KEY = profileKey('fps_records_v1');   // bölüm ayrımı yokk
 function emptyDiffRecords() {
     const r = { game: {}, duel: {} };
     DIFFICULTIES.forEach(d => {
-        r.game[d] = { score: 0, wave: 0, kills: 0 };
-        r.duel[d] = { wins: 0, losses: 0, bestTime: 0 };
+        // scoreAt / timeAt: rekorun kırıldığı an (ms, Date.now()); 0 = bilinmiyor (eski kayıt)
+        r.game[d] = { score: 0, wave: 0, kills: 0, scoreAt: 0 };
+        r.duel[d] = { wins: 0, losses: 0, bestTime: 0, timeAt: 0 };
     });
     return r;
 }
@@ -28,11 +29,13 @@ function readDiffRecords(src, into) {
             into.game[d].score = clampInt(g.score, 0, 0, 1e9);
             into.game[d].wave = clampInt(g.wave, 0, 0, 1e6);
             into.game[d].kills = clampInt(g.kills, 0, 0, 1e9);
+            into.game[d].scoreAt = Number.isFinite(g.scoreAt) && g.scoreAt > 0 ? g.scoreAt : 0;
         }
         if (u) {
             into.duel[d].wins = clampInt(u.wins, 0, 0, 1e9);
             into.duel[d].losses = clampInt(u.losses, 0, 0, 1e9);
             into.duel[d].bestTime = Number.isFinite(u.bestTime) && u.bestTime > 0 ? u.bestTime : 0;
+            into.duel[d].timeAt = Number.isFinite(u.timeAt) && u.timeAt > 0 ? u.timeAt : 0;
         }
     });
 }
@@ -67,18 +70,32 @@ function updateRecords(won) {
             if (duelTime > 0 && (!r.bestTime || duelTime < r.bestTime)) {
                 if (r.bestTime) broken.push('En hızlı düello');
                 r.bestTime = duelTime;
+                r.timeAt = Date.now();
             }
         } else {
             r.losses++;
         }
     } else {
         const r = m.game[run.game];
-        if (player.score > r.score) { if (r.score) broken.push('En yüksek skor'); r.score = player.score; }
+        if (player.score > r.score) {
+            if (r.score) broken.push('En yüksek skor');
+            r.score = player.score;
+            r.scoreAt = Date.now();            // rekorun kırıldığı an (aynı elin sonraki kayıtları değiştirmez)
+        }
         if (wave.num > r.wave) { if (r.wave) broken.push('En uzak dalga'); r.wave = wave.num; }
         if (player.kills > r.kills) r.kills = player.kills;
     }
     saveRecords();
     return broken;
+}
+
+// Rekor tarihi: "05.11.2026 14:32". has: rekor var mı (yoksa boş); tarih tutulmadan önceki
+// eski rekorlarda "tarih yok" yazar.
+function recDate(has, ts) {
+    if (!has) return '';
+    if (!ts) return '<div class="rec-date">tarih yok</div>';
+    const d = new Date(ts), p = (n) => String(n).padStart(2, '0');
+    return `<div class="rec-date">${p(d.getDate())}.${p(d.getMonth() + 1)}.${d.getFullYear()} ${p(d.getHours())}:${p(d.getMinutes())}</div>`;
 }
 
 let recordsReturn = 'menu';
@@ -97,8 +114,8 @@ function openRecords(from, mapId) {
     const rows = DIFFICULTIES.map(d => {
         const g = records[recordsMap].game[d], u = records[recordsMap].duel[d];
         return `<tr><td class="lvl ${d}">${DIFF_LABELS[d]}</td>` +
-            `<td>${g.score}</td><td>${g.wave}</td><td>${g.kills}</td>` +
-            `<td>${u.wins} / ${u.losses}</td><td>${u.bestTime ? formatTime(u.bestTime) : '-'}</td></tr>`;
+            `<td>${g.score}${recDate(g.score > 0, g.scoreAt)}</td><td>${g.wave}</td><td>${g.kills}</td>` +
+            `<td>${u.wins} / ${u.losses}</td><td>${u.bestTime ? formatTime(u.bestTime) + recDate(true, u.timeAt) : '-'}</td></tr>`;
     }).join('');
     $('recordsBody').innerHTML = rows;
 }

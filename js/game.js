@@ -146,6 +146,7 @@ function damagePlayer(amount, pierce = false, flashMs = 150, src = null) {
 
 // Oyuncuyu bölümün başlangıç noktasına koy
 function placeAt(s) {
+    player.eye = CFG.eyeHeight;
     camera.position.set(s.x, s.y + CFG.eyeHeight, s.z);
     cameraAngleY = s.angle || 0;
     cameraAngleX = 0;

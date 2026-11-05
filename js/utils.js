@@ -91,7 +91,7 @@ function showScreen(id) {
 }
 
 function resetKeys() {
-    keys.forward = keys.back = keys.left = keys.right = keys.sprint = false;
+    keys.forward = keys.back = keys.left = keys.right = keys.sprint = keys.crouch = false;
     firing = false;
     player.semiFired = false;
 }

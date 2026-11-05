@@ -15,6 +15,7 @@ const player = {
     gold: save.gold, damage: save.damage,
     hasShield: save.hasShield, activeSkin: save.activeSkin, unlockedSkins: save.unlockedSkins,
     grenades: 0, grenadeCd: 0, sawSpin: 0,
+    eye: 1.4,                       // o anki göz hizası (çömelince alçalır)
     sinceHurt: 0, regenOn: false,   // son hasardan beri geçen süre, can şu an doluyor mu
     reloading: false, reloadTimer: 0, reloadTotal: 1, fireCooldown: 0, semiFired: false,
     velY: 0, airVX: 0, airVZ: 0, onGround: true, zoomed: false,
@@ -42,7 +43,7 @@ let pendingDuelWin = false;
 const run = { active: false, game: 'normal', duel: 'normal', map: 'depot' };
 let firing = false;
 let lockTimer = null;
-const keys = { forward: false, back: false, left: false, right: false, sprint: false };
+const keys = { forward: false, back: false, left: false, right: false, sprint: false, crouch: false };
 
 // Dalga durumu (yalnızca normal mod); hurt: bu dalgada hasar alındı mı (başarım için)
 const wave = { num: 0, toSpawn: 0, breakTimer: 0, inBreak: false, hurt: false };
@@ -104,4 +105,4 @@ const curAmmo = () => player.arsenal[player.weapon];
 function magSize(id) { return id === 'smg' ? WEAPONS.smg.mag + player.maxAmmo - CFG.baseMag : WEAPONS[id].mag; }
 const maxSmgMag = () => WEAPONS.smg.mag + CFG.maxMag - CFG.baseMag;
 // Ayakların yüksekliği (kasaların üstünde > 0)
-const footY = () => camera.position.y - CFG.eyeHeight;
+const footY = () => camera.position.y - player.eye;
