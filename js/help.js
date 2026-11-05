@@ -78,10 +78,11 @@ const HELP_SECTIONS = [
             return `${w.name} (${i + 1} tuşu): ${kind}, ${w.dmgMul}x hasar, ${mag}; ${how}.`;
         }),
         'Silahlarını eldivenli ellerin tutar: tabancayı iki elle, tüfekleri bir el kabzada bir el önde tutarsın.',
-        'Testereli Eldiven her zaman sendedir; mermi bitince ya da düşman dibine geldiğinde 1 tuşuyla geç. Kafaya denk gelen kesik 2 kat hasar verir.',
+        'Testereli Eldiven her zaman sendedir; mermi bitince ya da düşman dibine geldiğinde 1 tuşuyla geç. Kafaya denk gelen kesik 2 kat hasar verir. Duvarın arkasındaki düşmanı kesemezsin.',
         'Yaylı Tüfek: yay gücüyle ok atar. Her atıştan sonra kirişi yeniden gerer (yavaş), ama bir ok çoğu düşmanı tek başına indirir; kafaya 2 kat. Ok uzakta hafifçe düşer, uzaktaki hedefe biraz yukarı nişan al. Duvara saplanan ok bir süre orada kalır.',
         'Roketatar: roket namludan alev ve duman izi bırakarak uçar; bir duvara, zemine ya da düşmana değince büyük bir patlamayla patlar ve ekran sarsılır. Duvar arkası korunur.',
         "Roket düşmana doğrudan çarparsa tam hasar verir (çoğu düşmanı öldürür). Yanına düşerse düşmanın canının bir kısmını götürür: patlamaya çok yakın olan (yarıçapın ~%10'u) canının yarısını, biraz daha uzaktaki (~%20) yarıdan biraz azını kaybeder; kenara doğru hasar sıfıra iner. Yani yanına düşen roket tek başına öldürmez, ikinci roket ya da birkaç mermi bitirir.",
+        'Düello botunun canı çok yüksek olduğu için ona yüzdeli değil, bombadaki gibi uzaklıkla azalan normal patlama hasarı işler.',
         'Kendi roketine çok yakın durursan sen de aynı kuralla, yarı oranda can kaybedersin (dibinde patlarsa canının ~çeyreği).',
         'Taramalı Tabanca tamamen siyah, tırtıklı kabzalı AR tipi bir silahtır; skin seçimi gövdesinin rengini değiştirmez, yalnızca mermi rengi skine göre değişir.',
         'Tabancanın yedek mermisi sınırsızdır; diğer silahların mermisi bitse bile tabancayla savaşmaya devam edebilirsin.',

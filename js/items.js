@@ -116,10 +116,13 @@ function explode(pos, R = CFG.grenadeRadius, power = CFG.grenadeDamage, opts = {
         center.set(gp.x, gp.y + 0.9 * e.scale, gp.z);
         const dist = center.distanceTo(pos);
         if (dist > R || !blastClear(pos, center)) continue;
-        const dmg = opts.pct
+        // Yüzdeli hasar yalnızca dalga düşmanlarına: düello botunun canı çok yüksek, yüzdeyle
+        // iki roket botu bitirirdi; bot için uzaklıkla azalan sabit hasar kullanılır.
+        const pct = opts.pct && !e.isDuel;
+        const dmg = pct
             // Doğrudan isabet, yanına düşmekten asla az vurmaz (çok canlı düşmanda yüzde daha büyük olabilir)
             ? Math.round(Math.max(e === opts.direct ? power : 0, e.maxHealth * ROCKET_SPLASH(dist, R)))
-            : Math.round(dmgAt(dist));
+            : Math.round(e === opts.direct ? Math.max(power, dmgAt(dist)) : dmgAt(dist));
         if (dmg <= 0) continue;
         e.takeDamage(dmg);
         showDamageNumber(e, dmg, false);

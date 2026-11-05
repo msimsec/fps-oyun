@@ -146,6 +146,7 @@ function sawAttack(w) {
         const d = to.length();
         if (d > w.range + e.radius || d >= bestD) continue;
         if (to.normalize().dot(dir) < 0.6) continue;           // önünde değil
+        if (!blastClear(camera.position, c)) continue;         // arada duvar var: duvarın arkası kesilmez
         best = e; bestD = d;
     }
     sfx(best ? 'sawHit' : 'sawSpin');
