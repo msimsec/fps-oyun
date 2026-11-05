@@ -68,6 +68,7 @@ const HELP_SECTIONS = [
         `Mağazadaki Can Sınırı yükseltmesi maksimum canı kalıcı olarak +${UPGRADES.health.per} artırır.`
     ] },
     { id: 'weapons', title: '🔫 Silahlar ve Cephane', lines: () => [
+        'Silahlar gerçeğe yakın dengelendi (mermi başına öldürücülük): Roketatar > Keskin Nişancı > Av Tüfeği (yakında) > Yaylı Tüfek > Tabanca > Taramalı Tabanca. Taramalı tek mermisi zayıf ama çok hızlı atar; Testereli Eldiven yalnızca dipte etkilidir ama orada çok öldürücüdür.',
         'Sağ alttaki panelde silahın adı, şarjördeki mermi / yedek mermi ve sahip olduğun silahlar yazar.',
         ...WEAPON_ORDER.map((id, i) => {
             const w = WEAPONS[id];
@@ -81,9 +82,9 @@ const HELP_SECTIONS = [
         'Testereli Eldiven her zaman sendedir; mermi bitince ya da düşman dibine geldiğinde 1 tuşuyla geç. Kafaya denk gelen kesik 2 kat hasar verir. Duvarın arkasındaki düşmanı kesemezsin.',
         'Yaylı Tüfek: yay gücüyle ok atar. Her atıştan sonra kirişi yeniden gerer (yavaş), ama bir ok çoğu düşmanı tek başına indirir; kafaya 2 kat. Ok uzakta hafifçe düşer, uzaktaki hedefe biraz yukarı nişan al. Duvara saplanan ok bir süre orada kalır.',
         'Roketatar: roket namludan alev ve duman izi bırakarak uçar; bir duvara, zemine ya da düşmana değince büyük bir patlamayla patlar ve ekran sarsılır. Duvar arkası korunur.',
-        "Roket düşmana doğrudan çarparsa tam hasar verir (çoğu düşmanı öldürür). Yanına düşerse düşmanın canının bir kısmını götürür: patlamaya çok yakın olan (yarıçapın ~%10'u) canının yarısını, biraz daha uzaktaki (~%20) yarıdan biraz azını kaybeder; kenara doğru hasar sıfıra iner. Yani yanına düşen roket tek başına öldürmez, ikinci roket ya da birkaç mermi bitirir.",
+        "Roket en öldürücü silahtır: düşmana doğrudan çarparsa ya da çok yakınına (ayağının dibine) düşerse öldürür. Patlamadan uzaklaştıkça hasar hızla azalır: yarıçapın yarısında canının ~%65'i, dörtte üçünde ~%28'i gider, kenarda hiç.",
         'Düello botunun canı çok yüksek olduğu için ona yüzdeli değil, bombadaki gibi uzaklıkla azalan normal patlama hasarı işler.',
-        'Kendi roketine çok yakın durursan sen de aynı kuralla, yarı oranda can kaybedersin (dibinde patlarsa canının ~çeyreği).',
+        'Kendi roketine çok yakın durursan sen de aynı kuralla, yarı şiddette can kaybedersin (dibinde patlarsa canının yarısı gider).',
         'Taramalı Tabanca tamamen siyah, tırtıklı kabzalı AR tipi bir silahtır; skin seçimi gövdesinin rengini değiştirmez, yalnızca mermi rengi skine göre değişir.',
         'Tabancanın yedek mermisi sınırsızdır; diğer silahların mermisi bitse bile tabancayla savaşmaya devam edebilirsin.',
         'Her öldürdüğün düşman, sahip olduğun silahlara biraz yedek mermi verir.',
@@ -122,7 +123,7 @@ const HELP_SECTIONS = [
         `Ölen düşman %${Math.round(CFG.dropChance * 100)} ihtimalle yere dönen, parlayan bir eşya bırakır.`,
         'Her eşyanın üstünde ne olduğunu yazan renkli bir etiket, altında da aynı renkte parlayan bir halka vardır.',
         'Cephane silaha özeldir: etikette hangi silahın cephanesi olduğu ve kaç tane verdiği yazar. Yalnızca sahip olduğun silahların cephanesi düşer; elindeki silahın yedeği azsa onunki daha sık düşer.',
-        '🏹 OK +5 (Yaylı Tüfek, turuncu bant, üstünde oklar) · 🔴 SAÇMA +6 (Av Tüfeği, kırmızı fişekler) · 🎯 MERMİ +5 (Keskin Nişancı, uzun mermiler) · 🔫 MERMİ +şarjör (Taramalı Tabanca, siyah şarjör) · 🚀 ROKET +2 (Roketatar, küçük roketler).',
+        'Cephane kutusunun üstünde o silahın küçük modeli yatar (hep yandan görünür): 🏹 OK +5 Yaylı Tüfek · 🔴 SAÇMA +6 Av Tüfeği · 🎯 MERMİ +5 Keskin Nişancı (dürbünlü) · 🔫 MERMİ +şarjör Taramalı Tabanca (siyah) · 🚀 ROKET +2 Roketatar (sarı başlıklı tüp). Kutunun bandı ve halkası da silahın renginde.',
         'Cephaneyi alınca sağ üstte "+6 saçma (Av Tüfeği) → 6/12" gibi ne aldığın yazar; elindeki silahın cephanesiyse mermi göstergesi yeşil yanar.',
         '🛡️ KALKAN +25 (mavi): artılı mavi plaka; +25 kalkan (kalkanın doluysa alınmaz).',
         '🪙 ALTIN (sarı): üst üste altın paralar; bir düşman öldürme ödülü kadar altın.',
