@@ -71,7 +71,7 @@ function tryShoot() {
     const damage = player.damage * w.dmgMul;
     // Koşarken ve havadayken isabet biraz bozulur (dürbünle bakarken bozulmaz)
     const extra = player.zoomed ? 0 : (isSprinting() ? 0.02 : 0) + (player.onGround ? 0 : 0.03);
-    const spread = w.spread + extra;
+    const spread = (w.spread + extra) * (isCrouching() ? CFG.crouchSpread : 1);   // çömelince daha isabetli
     if (w.bolt) {
         spawnBolt(origin, dir, w.speed, damage, w.gravity, w.life);
         weaponKick = 0.12;

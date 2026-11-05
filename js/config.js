@@ -9,6 +9,8 @@ const CFG = {
     sprintMul: 1.6,               // Shift ile koşma hız çarpanı
     jumpSpeed: 6.5, gravity: 18,  // ~1.2 birim zıplama yüksekliği (1 birimlik kasalara çıkılabilir)
     stepHeight: 0.35,             // bu kadar alçak engellerin üstüne yürüyerek çıkılır
+    // Çömelme (C / Ctrl): göz hizası, hız çarpanı ve isabet (dağılma) çarpanı
+    crouchEye: 0.85, crouchSpeed: 0.5, crouchSpread: 0.5,
     baseFov: 75, sprintFov: 82, zoomFov: 25,
     botBulletSpeed: 45, botBulletLife: 2.0, enemyRange: 25,
     armorAmount: 50,
@@ -64,6 +66,7 @@ const ENEMY_TYPES = {
 const ENEMY_SKILLS = [
     { wave: 2, id: 'jump',  text: 'Düşmanlar artık zıplayabiliyor!' },
     { wave: 3, id: 'pads',  text: 'Düşmanlar artık rampaları kullanıyor!', needsPads: true },
+    { wave: 3, id: 'crouch', text: 'Düşmanlar artık çömelerek ateş ediyor!' },
     { wave: 4, id: 'dodge', text: 'Düşmanlar artık vurulunca kaçıyor!' },
     { wave: 5, id: 'aim',   text: 'Düşmanların nişanı keskinleşti!' }
 ];

@@ -10,12 +10,16 @@ WEAPON_ORDER.forEach((id, i) => { WEAPON_KEYS['Digit' + (i + 1)] = id; WEAPON_KE
 function onKeyDown(e) {
     // Oyun sırasında Space/Enter odaktaki bir menü butonunu tetiklemesin
     if (state === 'playing' && (e.code === 'Space' || e.code === 'Enter')) e.preventDefault();
+    // Oyunda Ctrl ile çömelirken tarayıcı kısayolları (Ctrl+S, Ctrl+D...) çalışmasın.
+    // (Ctrl+W/Ctrl+T gibi bazılarını tarayıcı engelletmez; bu yüzden çömelme C'de de var.)
+    if (state === 'playing' && e.ctrlKey) e.preventDefault();
     switch (e.code) {
         case 'KeyW': case 'ArrowUp': keys.forward = true; break;
         case 'KeyS': case 'ArrowDown': keys.back = true; break;
         case 'KeyA': case 'ArrowLeft': keys.left = true; break;
         case 'KeyD': case 'ArrowRight': keys.right = true; break;
         case 'ShiftLeft': case 'ShiftRight': keys.sprint = true; break;
+        case 'KeyC': case 'ControlLeft': case 'ControlRight': if (state === 'playing') keys.crouch = true; break;
         case 'Space': if (state === 'playing') jump(); break;
         case 'KeyR': if (state === 'playing') startReload(); break;
         case 'KeyB': case 'KeyG': if (state === 'playing') throwGrenade(); break;   // bomba: B (G de çalışır)
@@ -31,6 +35,7 @@ function onKeyUp(e) {
         case 'KeyA': case 'ArrowLeft': keys.left = false; break;
         case 'KeyD': case 'ArrowRight': keys.right = false; break;
         case 'ShiftLeft': case 'ShiftRight': keys.sprint = false; break;
+        case 'KeyC': case 'ControlLeft': case 'ControlRight': keys.crouch = false; break;
     }
 }
 
