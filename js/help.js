@@ -127,7 +127,8 @@ const HELP_SECTIONS = [
         '🛡️ KALKAN +25 (mavi): artılı mavi plaka; +25 kalkan (kalkanın doluysa alınmaz).',
         '🪙 ALTIN (sarı): üst üste altın paralar; bir düşman öldürme ödülü kadar altın.',
         '💣 BOMBA +1 (yeşil): pimli el bombası; +1 bomba (çantan doluysa alınmaz).',
-        'Eşyayı almak için üstünden geçmen yeterli.',
+        'Eşyayı almak için üstünden geçmen yeterli. Eşya bir kasanın ya da duvarın dibine düşerse en yakın boş yere kayar; hep alınabilir.',
+        'Bomba çantan doluyken (4/4) bomba, kalkanın doluyken kalkan alınmaz: etiketi soluk görünür ve üstüne gelince nedeni yazar. Bir bomba atınca ya da hasar alınca alabilirsin; eşya kaybolana kadar yerinde bekler.',
         `Eşyalar ${CFG.dropLife} saniye sonra kaybolur; son saniyelerde yanıp söner.`
     ] },
     { id: 'maps', title: '🗺️ Bölümler', lines: () => [

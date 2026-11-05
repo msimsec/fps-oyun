@@ -525,8 +525,24 @@ function maybeDrop(x, y, z) {
     spawnDrop(type, x, y, z, weapon);
 }
 
+// Eşya bir kasanın/duvarın içine ya da oyuncunun yaklaşamayacağı kadar dibine düştüyse
+// en yakın boş yere kaydırılır (oyuncu yarıçapından geniş pay bırakılır, böylece hep alınabilir)
+function freeDropSpot(x, y, z) {
+    const R = CFG.playerRadius + 0.3;
+    if (overlapDepth(x, z, R, y) === 0) return { x, z };
+    for (let r = 0.4; r <= 10; r += 0.4) {
+        for (let k = 0; k < 16; k++) {
+            const a = (k / 16) * Math.PI * 2, nx = x + Math.cos(a) * r, nz = z + Math.sin(a) * r;
+            // Aynı zeminde kalsın (kasanın üstüne ya da boşluğa kaymasın)
+            if (overlapDepth(nx, nz, R, y) === 0 && Math.abs(groundHeight(nx, nz, y, 0.3) - y) < 0.05) return { x: nx, z: nz };
+        }
+    }
+    return { x, z };
+}
+
 function spawnDrop(type, x, y, z, weapon = null) {
     if (type === 'ammo' && !AMMO_INFO[weapon]) weapon = 'crossbow';
+    ({ x, z } = freeDropSpot(x, y, z));
     const info = type === 'ammo' ? AMMO_INFO[weapon] : null;
     const amount = info ? info.amount() : 0;
     // Cephane etiketinde silahın cephanesi ve adı yazar: "🏹 OK +5 / Yaylı Tüfek"
@@ -549,15 +565,17 @@ function spawnDrop(type, x, y, z, weapon = null) {
     const lk = 'label' + (info ? weapon + amount : '');
     C[lk] = C[lk] || dropLabel(t);
     const label = C[lk].clone();
+    label.material = label.material.clone();     // soluklaşma her eşyada ayrı olsun (doku paylaşılır)
     label.position.y = info ? 1.35 : 1.25;
     root.add(label);
     scene.add(root);
-    drops.push({ type, weapon, amount, mesh: root, item, ring, baseY: y, life: CFG.dropLife, t: Math.random() * 6 });
+    drops.push({ type, weapon, amount, mesh: root, item, ring, label, baseY: y, life: CFG.dropLife, t: Math.random() * 6 });
     if (drops.length > 15) removeDrop(0);
 }
 
 function removeDrop(i) {
-    scene.remove(drops[i].mesh);           // geometri ve materyaller türler arasında paylaşıldığı için silinmez
+    scene.remove(drops[i].mesh);
+    drops[i].label.material.dispose();           // geometri ve materyaller türler arasında paylaşıldığı için silinmez
     drops.splice(i, 1);
 }
 
@@ -590,8 +608,10 @@ function applyDrop(type, weapon, amount) {
     return false;
 }
 
+let dropFullHintAt = 0;
 function updateDrops(dt) {
     const feet = footY();
+    dropFullHintAt -= dt;
     for (let i = drops.length - 1; i >= 0; i--) {
         const d = drops[i], m = d.mesh;
         d.life -= dt; d.t += dt;
@@ -600,13 +620,25 @@ function updateDrops(dt) {
         d.item.position.y = 0.6 + Math.sin(d.t * 3) * 0.12;
         d.ring.scale.setScalar(1 + Math.sin(d.t * 4) * 0.08);
         m.visible = d.life > 4 || Math.floor(d.life * 6) % 2 === 0;   // kaybolmadan önce yanıp söner
-        if (Math.hypot(m.position.x - camera.position.x, m.position.z - camera.position.z) < 1.4 &&
-            Math.abs(feet - d.baseY) < 1.6 && applyDrop(d.type, d.weapon, d.amount)) {
-            sfx('pickup');
-            runStats.pickups++;
-            removeDrop(i);
-            checkAchievements();
+        if (Math.hypot(m.position.x - camera.position.x, m.position.z - camera.position.z) < 1.5 &&
+            Math.abs(feet - d.baseY) < 1.6) {
+            if (applyDrop(d.type, d.weapon, d.amount)) {
+                sfx('pickup');
+                runStats.pickups++;
+                removeDrop(i);
+                checkAchievements();
+            } else if (dropFullHintAt <= 0) {
+                // Alınamıyor: neden alınamadığını söyle (sık sık tekrarlamadan)
+                dropFullHintAt = 2;
+                showToast(d.type === 'grenade'
+                    ? `💣 Bomba çantan dolu (${player.grenades}/${CFG.grenadeMax}) — bomba atınca alabilirsin`
+                    : `🛡️ Kalkanın dolu (${Math.ceil(player.armor)}/${CFG.armorAmount}) — hasar alınca alabilirsin`);
+            }
         }
+        // Dolu olduğu için şu an alınamayan eşyanın etiketi soluk görünür
+        const full = (d.type === 'grenade' && player.grenades >= CFG.grenadeMax) ||
+                     (d.type === 'shield' && player.armor >= CFG.armorAmount);
+        if (d.label) d.label.material.opacity = full ? 0.4 : 1;
     }
 }
 
