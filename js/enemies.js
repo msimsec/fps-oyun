@@ -82,6 +82,7 @@ class HumanoidEnemy {
         } else if (typeId === 'sniper' && !isDuel) {
             const gun = new THREE.Mesh(GEO.longGun, typeMat(0x111827));
             gun.position.set(0.6, 0.85, 0.55);
+            this.gun = gun;
             // Alnında dürbün gözlüğü (gözleri kapatmasın diye kaşların üstünde)
             const visor = new THREE.Mesh(GEO.visor, typeMat(0x22d3ee));
             visor.position.set(0, 1.69, 0.2);
@@ -567,6 +568,12 @@ function makeCorpse(e, head) {
         createParticles(hp, e.isDuel ? 0xc084fc : (e.type ? e.type.head : 0xf87171), 14);
     }
     g.rotation.order = 'YXZ';            // devrilme düşmanın kendi ekseninde olsun
+    // Nişancının öne uzanan uzun tüfeği: ceset geriye devrilince dimdik yukarı bakıp yerde
+    // "çubuk" gibi duruyordu. Tüfek elinden düşer: gövdeye paralel, cesedin yanında yere yatar.
+    if (e.gun) {
+        e.gun.rotation.x = Math.PI / 2;
+        e.gun.position.set(0.8, 0.55, 0.12);
+    }
     corpses.push({ group: g, t: 0, landed: false, vy: 0 });
     // Aynı anda çok ceset birikmesin
     if (corpses.length > 12) { scene.remove(corpses[0].group); corpses.shift(); }
