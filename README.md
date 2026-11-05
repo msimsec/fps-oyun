@@ -29,9 +29,9 @@ Dalgalar ilerledikçe düşmanlar yetenek kazanır: **2. dalga** zıplama (alça
 
 **Can yenilenmesi (dalga modu):** Bir süre hasar almazsan can kendiliğinden dolar; can göstergesi yeşil parlar ve kısa bir ses çalar. Kolay: 3 sn sonra saniyede 14, Orta: 4 sn sonra saniyede 10, Zor: 5 sn sonra saniyede 7 can. Düelloda can yenilenmez. Can kiti yoktur; eski kayıtlardaki kitler 50'şer altın olarak iade edilir.
 
-**Bomba (G):** Her ele 2 bombayla başlanır (en fazla 4). Atılan bomba sekerek yuvarlanır, 1.8 sn sonra patlar; 6 birim içindeki düşmanlara uzaklıkla azalan hasar verir, duvarın arkasındakiler korunur. Çok yakındaysan sana da yarı hasar verir. Her dalga sonunda +1 bomba.
+**Bomba (B):** Her ele 2 bombayla başlanır (en fazla 4). Atılan bomba sekerek yuvarlanır, 1.8 sn sonra patlar; 6 birim içindeki düşmanlara uzaklıkla azalan hasar verir, duvarın arkasındakiler korunur. Çok yakındaysan sana da yarı hasar verir. Her dalga sonunda +1 bomba.
 
-**Yerden toplananlar:** Ölen düşman %35 ihtimalle bir eşya düşürür. Her eşyanın üstünde ne olduğunu yazan renkli bir etiket ve altında parlayan bir halka vardır. **Cephane silaha özeldir:** 🏹 OK +5 (Yaylı Tüfek), 🔴 SAÇMA +6 (Av Tüfeği), 🎯 MERMİ +5 (Keskin Nişancı), 🔫 MERMİ +şarjör (Taramalı Tabanca), 🚀 ROKET +2 (Roketatar); yalnızca sahip olduğun silahlarınki düşer, elindeki silahın yedeği azsa onunki daha sık düşer. Diğerleri: **🛡️ KALKAN +25**, **🪙 ALTIN**, **💣 BOMBA +1**. Üstünden geçince alınır; ne alındığı sağ üstte yazar. 20 sn sonra (son saniyelerde yanıp sönerek) kaybolur.
+**Yerden toplananlar:** Ölen düşman %35 ihtimalle bir eşya düşürür. Her eşyanın üstünde ne olduğunu yazan renkli bir etiket ve altında parlayan bir halka vardır. **Cephane silaha özeldir:** 🏹 OK +5 (Yaylı Tüfek), 🔴 SAÇMA +6 (Av Tüfeği), 🎯 MERMİ +5 (Keskin Nişancı), 🔫 MERMİ +şarjör (Taramalı Tabanca), 🚀 ROKET +2 (Roketatar); yalnızca sahip olduğun silahlarınki düşer, elindeki silahın yedeği azsa onunki daha sık düşer. Diğerleri: **🛡️ KALKAN +25**, **🪙 ALTIN**, **💣 BOMBA +1**. Üstünden geçince alınır; ne alındığı sağ üstte yazar. Kasanın ya da duvarın dibine düşen eşya en yakın boş yere kayar. Bomba çantası (4/4) ya da kalkan doluyken o eşya alınmaz; etiketi soluklaşır ve üstüne gelince nedeni yazar. 20 sn sonra (son saniyelerde yanıp sönerek) kaybolur.
 
 **Geri bildirim:** Vurulunca nişangâhın çevresinde atışın geldiği yönü gösteren kırmızı bir yay çıkar. Ölen düşman geriye doğru yığılıp yere gömülür; kafadan vurulursa kafası parçalanır.
 
@@ -50,7 +50,7 @@ Her iki modun zorluğu **Ayarlar** ekranından ayrı ayrı seçilir (Kolay / Ort
 | Sol tık | Ateş (Taramalı Tabanca ve testere basılı tutunca sürekli) |
 | Sağ tık | Dürbün (keskin nişancı) |
 | R | Şarjör değiştir |
-| G | Bomba at |
+| B | Bomba at (G de çalışır) |
 | 1-7 / fare tekerleği | Silah değiştir |
 | ESC | Duraklat |
 

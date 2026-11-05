@@ -41,7 +41,7 @@ const HELP_SECTIONS = [
         'Sol tık: ateş et. Otomatik silahta (Taramalı Tabanca) ve Testereli Eldiven\'de basılı tutunca sürekli çalışır; diğerleri her tıkta bir atar.',
         'Sağ tık: dürbün (yalnızca Keskin Nişancı). Dürbünle bakarken yavaş yürürsün ama isabet tamdır.',
         'R: şarjör değiştir. Şarjör boşalınca kendiliğinden de değişir.',
-        'G: bomba at.',
+        'B: bomba at (alışık olanlar için G de çalışır).',
         `1-${WEAPON_ORDER.length}: silah seç (${WEAPON_ORDER.map((id, i) => `${i + 1} ${WEAPONS[id].name}`).join(', ')}). Fare tekerleği de silahlar arasında gezer.`,
         'ESC: duraklat.'
     ] },
@@ -93,7 +93,7 @@ const HELP_SECTIONS = [
         'Her elin başında tüm silahların şarjörü ve yedek mermisi doldurulur.'
     ] },
     { id: 'grenade', title: '💣 Bomba', lines: () => [
-        'G tuşu baktığın yöne bomba atar. Sağ alttaki panelde kaç bomban kaldığı yazar.',
+        'B tuşu baktığın yöne bomba atar (G de çalışır). Sağ alttaki panelde kaç bomban kaldığı yazar.',
         `Bomba duvardan ve yerden seker, ${CFG.grenadeFuse} saniye sonra patlar.`,
         `Patlama ${CFG.grenadeRadius} birim içindeki düşmanlara hasar verir; merkeze yakın olan daha çok hasar alır.`,
         'Duvarın ya da siperin arkasındaki düşmanlar patlamadan korunur.',
@@ -127,7 +127,8 @@ const HELP_SECTIONS = [
         '🛡️ KALKAN +25 (mavi): artılı mavi plaka; +25 kalkan (kalkanın doluysa alınmaz).',
         '🪙 ALTIN (sarı): üst üste altın paralar; bir düşman öldürme ödülü kadar altın.',
         '💣 BOMBA +1 (yeşil): pimli el bombası; +1 bomba (çantan doluysa alınmaz).',
-        'Eşyayı almak için üstünden geçmen yeterli.',
+        'Eşyayı almak için üstünden geçmen yeterli. Eşya bir kasanın ya da duvarın dibine düşerse en yakın boş yere kayar; hep alınabilir.',
+        'Bomba çantan doluyken (4/4) bomba, kalkanın doluyken kalkan alınmaz: etiketi soluk görünür ve üstüne gelince nedeni yazar. Bir bomba atınca ya da hasar alınca alabilirsin; eşya kaybolana kadar yerinde bekler.',
         `Eşyalar ${CFG.dropLife} saniye sonra kaybolur; son saniyelerde yanıp söner.`
     ] },
     { id: 'maps', title: '🗺️ Bölümler', lines: () => [
