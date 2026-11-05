@@ -56,6 +56,7 @@ let brickMaterial, crateMaterial;
 let weapon3DGroup, weaponBodyMat, weaponAccentMat;
 const weaponModels = {};
 let weaponKick = 0;
+let camShake = 0;                 // patlama/roket sarsıntısı (saniyede söner)
 let weaponSwitchAnim = 0;
 const clock = new THREE.Clock();
 const tmpVec = new THREE.Vector3();
