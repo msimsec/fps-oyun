@@ -16,7 +16,7 @@ const CFG = {
     // Şarjör yükseltmesi Taramalı Tabanca'ya işler: seviye maxAmmo'da tutulur (30 → 60), şarjör = 40 + (maxAmmo - 30)
     baseMag: 30, magStep: 5, maxMag: 60, magCost: 75,
     shieldCost: 150,
-    // Bomba (G): fitil süresi, atış hızı, patlama yarıçapı ve merkezdeki hasar; el başına ve en fazla adet
+    // Bomba (B): fitil süresi, atış hızı, patlama yarıçapı ve merkezdeki hasar; el başına ve en fazla adet
     grenadeFuse: 1.8, grenadeSpeed: 15, grenadeRadius: 6, grenadeDamage: 110, grenadeStart: 2, grenadeMax: 4,
     // Ölen düşmanın eşya düşürme şansı ve eşyanın yerde kalma süresi (sn)
     dropChance: 0.35, dropLife: 20,

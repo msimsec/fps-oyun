@@ -41,7 +41,7 @@ const HELP_SECTIONS = [
         'Sol tık: ateş et. Otomatik silahta (Taramalı Tabanca) ve Testereli Eldiven\'de basılı tutunca sürekli çalışır; diğerleri her tıkta bir atar.',
         'Sağ tık: dürbün (yalnızca Keskin Nişancı). Dürbünle bakarken yavaş yürürsün ama isabet tamdır.',
         'R: şarjör değiştir. Şarjör boşalınca kendiliğinden de değişir.',
-        'G: bomba at.',
+        'B: bomba at (alışık olanlar için G de çalışır).',
         `1-${WEAPON_ORDER.length}: silah seç (${WEAPON_ORDER.map((id, i) => `${i + 1} ${WEAPONS[id].name}`).join(', ')}). Fare tekerleği de silahlar arasında gezer.`,
         'ESC: duraklat.'
     ] },
@@ -93,7 +93,7 @@ const HELP_SECTIONS = [
         'Her elin başında tüm silahların şarjörü ve yedek mermisi doldurulur.'
     ] },
     { id: 'grenade', title: '💣 Bomba', lines: () => [
-        'G tuşu baktığın yöne bomba atar. Sağ alttaki panelde kaç bomban kaldığı yazar.',
+        'B tuşu baktığın yöne bomba atar (G de çalışır). Sağ alttaki panelde kaç bomban kaldığı yazar.',
         `Bomba duvardan ve yerden seker, ${CFG.grenadeFuse} saniye sonra patlar.`,
         `Patlama ${CFG.grenadeRadius} birim içindeki düşmanlara hasar verir; merkeze yakın olan daha çok hasar alır.`,
         'Duvarın ya da siperin arkasındaki düşmanlar patlamadan korunur.',

@@ -18,7 +18,7 @@ function onKeyDown(e) {
         case 'ShiftLeft': case 'ShiftRight': keys.sprint = true; break;
         case 'Space': if (state === 'playing') jump(); break;
         case 'KeyR': if (state === 'playing') startReload(); break;
-        case 'KeyG': if (state === 'playing') throwGrenade(); break;
+        case 'KeyB': case 'KeyG': if (state === 'playing') throwGrenade(); break;   // bomba: B (G de çalışır)
         default:
             if (WEAPON_KEYS[e.code] && state === 'playing') selectWeapon(WEAPON_KEYS[e.code]);
     }
