@@ -473,28 +473,49 @@ function dropModel(type, weapon) {
         add(C.box, C.m1, 0, 0, 0); add(C.band, C['band' + weapon], 0, 0.05, 0);
         const brass = C.brass || (C.brass = glowMat(0xd4a017));
         const dark = C.dark || (C.dark = glowMat(0x27272a));
-        if (weapon === 'crossbow') {             // üç ok
-            C.bolt = C.bolt || new THREE.CylinderGeometry(0.012, 0.012, 0.42, 6);
-            C.btip = C.btip || new THREE.ConeGeometry(0.025, 0.06, 6);
-            for (let i = -1; i <= 1; i++) { add(C.bolt, dark, i * 0.08, 0.16, 0, 0, Math.PI / 2); add(C.btip, C['band' + weapon], i * 0.08 + 0.24, 0.16, 0, 0, -Math.PI / 2); }
-        } else if (weapon === 'shotgun') {       // kırmızı saçma fişekleri, pirinç dipli
-            C.shell = C.shell || new THREE.CylinderGeometry(0.045, 0.045, 0.14, 10);
-            C.base = C.base || new THREE.CylinderGeometry(0.047, 0.047, 0.04, 10);
-            for (let i = -1; i <= 1; i++) { add(C.shell, C['band' + weapon], i * 0.12, 0.22, 0); add(C.base, brass, i * 0.12, 0.15, 0); }
-        } else if (weapon === 'sniper') {        // uzun ince mermiler
-            C.long = C.long || new THREE.CylinderGeometry(0.025, 0.025, 0.24, 8);
-            C.ltip = C.ltip || new THREE.ConeGeometry(0.025, 0.08, 8);
-            for (let i = -1; i <= 1; i++) { add(C.long, brass, i * 0.09, 0.25, 0); add(C.ltip, dark, i * 0.09, 0.41, 0); }
-        } else if (weapon === 'smg') {           // siyah şarjör
-            C.mag = C.mag || new THREE.BoxGeometry(0.07, 0.3, 0.12);
-            add(C.mag, dark, 0, 0.27, 0, 0.15);
-            C.stip = C.stip || new THREE.ConeGeometry(0.02, 0.05, 8);
-            add(C.stip, brass, 0, 0.44, 0.02);
-        } else {                                 // iki küçük roket
-            C.rbody = C.rbody || new THREE.CylinderGeometry(0.05, 0.05, 0.3, 10);
-            C.rtip = C.rtip || new THREE.ConeGeometry(0.05, 0.1, 10);
-            const olive = C.olive || (C.olive = glowMat(0x4d5a2e));
-            for (const dx of [-0.08, 0.08]) { add(C.rbody, olive, dx, 0.28, 0); add(C.rtip, C['band' + weapon], dx, 0.48, 0); }
+        // Kutunun üstünde o silahın küçük modeli yatar (yandan tanınacak şekilde); dönerken her yönden görünür
+        const wood = C.wood || (C.wood = glowMat(0x8b5a2b));
+        const olive = C.olive || (C.olive = glowMat(0x4d5a2e));
+        const yellow = C.yellow || (C.yellow = glowMat(0xeab308));
+        const G = (k, f) => C[k] || (C[k] = f());
+        const box = (k, w, h, d) => G(k, () => new THREE.BoxGeometry(w, h, d));
+        const rod = (k, r, len) => G(k, () => new THREE.CylinderGeometry(r, r, len, 10));
+        const Y = 0.26, R = Math.PI / 2;                 // silahın yüksekliği; R: silindiri x eksenine yatırır
+        if (weapon === 'crossbow') {             // dipçik, ray, iki yana açılan yay kolları, kiriş, ok
+            add(box('cbStock', 0.3, 0.07, 0.06), wood, -0.12, Y, 0);
+            add(box('cbRail', 0.38, 0.035, 0.05), dark, 0.14, Y + 0.01, 0);
+            const l1 = add(box('cbLimb', 0.04, 0.035, 0.3), dark, 0.3, Y + 0.01, 0.13); l1.rotation.y = 0.35;
+            const l2 = add(box('cbLimb', 0.04, 0.035, 0.3), dark, 0.3, Y + 0.01, -0.13); l2.rotation.y = -0.35;
+            add(box('cbStr', 0.004, 0.006, 0.5), G('strMat', () => glowMat(0xe5e7eb)), 0.22, Y + 0.02, 0);
+            add(rod('cbBolt', 0.01, 0.42), C['band' + weapon], 0.12, Y + 0.04, 0, 0, R);
+        } else if (weapon === 'shotgun') {       // uzun namlu, altında tüp, tahta pompa ve dipçik, kırmızı fişek
+            add(rod('sgBarrel', 0.024, 0.5), dark, 0.16, Y + 0.02, 0, 0, R);
+            add(rod('sgTube', 0.018, 0.38), dark, 0.12, Y - 0.025, 0, 0, R);
+            add(box('sgPump', 0.13, 0.055, 0.06), wood, 0.2, Y - 0.025, 0);
+            add(box('sgBody', 0.14, 0.08, 0.06), dark, -0.12, Y, 0);
+            add(box('sgStock', 0.24, 0.09, 0.05), wood, -0.3, Y - 0.02, 0);
+            add(rod('sgShell', 0.03, 0.09), C['band' + weapon], -0.1, Y - 0.1, 0.12);
+        } else if (weapon === 'sniper') {        // uzun ince namlu, büyük dürbün, dipçik ve uzun mermi
+            add(rod('snBarrel', 0.014, 0.5), dark, 0.25, Y, 0, 0, R);
+            add(box('snBody', 0.26, 0.065, 0.055), dark, -0.04, Y, 0);
+            add(rod('snScope', 0.032, 0.22), dark, -0.02, Y + 0.07, 0, 0, R);
+            add(rod('snLens', 0.036, 0.02), C['band' + weapon], 0.1, Y + 0.07, 0, 0, R);
+            add(box('snStock', 0.22, 0.09, 0.045), wood, -0.29, Y - 0.015, 0);
+            add(rod('snRound', 0.02, 0.14), brass, 0.05, Y - 0.1, 0.12);
+        } else if (weapon === 'smg') {           // siyah AR tipi: gövde, ray, namlu, şarjör, kabza, dipçik
+            add(box('smBody', 0.3, 0.075, 0.05), dark, 0, Y, 0);
+            add(box('smRail', 0.34, 0.015, 0.03), dark, 0.03, Y + 0.045, 0);
+            add(rod('smBarrel', 0.013, 0.14), dark, 0.22, Y + 0.01, 0, 0, R);
+            add(box('smMag', 0.045, 0.13, 0.04), dark, 0.05, Y - 0.09, 0);
+            add(box('smGrip', 0.04, 0.1, 0.04), dark, -0.08, Y - 0.07, 0);
+            add(box('smStock', 0.14, 0.065, 0.04), dark, -0.24, Y - 0.01, 0);
+            add(box('smTip', 0.05, 0.02, 0.045), C['band' + weapon], 0.05, Y - 0.15, 0);   // açık renk şarjör tabanı
+        } else {                                 // roketatar: yeşil tüp, sarı roket başlığı, kabza
+            add(rod('rkTube', 0.055, 0.6), olive, -0.02, Y + 0.02, 0, 0, R);
+            const head = add(G('rkHead', () => new THREE.ConeGeometry(0.05, 0.14, 10)), yellow, 0.34, Y + 0.02, 0, 0, -R);
+            head.rotation.z = -R;
+            add(box('rkGrip', 0.04, 0.1, 0.04), dark, 0.0, Y - 0.06, 0);
+            add(box('rkBand', 0.03, 0.115, 0.115), C['band' + weapon], -0.22, Y + 0.02, 0);
         }
     } else if (type === 'shield') {
         // Mavi kalkan plakası, ortasında açık renkli artı
@@ -560,6 +581,7 @@ function spawnDrop(type, x, y, z, weapon = null) {
     root.position.set(x, y, z);
     const item = dropModel(type, weapon);
     item.position.y = 0.6;
+    if (type === 'ammo') item.scale.setScalar(1.3);   // silahlı cephane kutusu biraz daha büyük
     root.add(item);
     // Yerde parlayan halka
     C.ringGeo = C.ringGeo || new THREE.RingGeometry(0.45, 0.6, 28);
@@ -573,7 +595,7 @@ function spawnDrop(type, x, y, z, weapon = null) {
     C[lk] = C[lk] || dropLabel(t);
     const label = C[lk].clone();
     label.material = label.material.clone();     // soluklaşma her eşyada ayrı olsun (doku paylaşılır)
-    label.position.y = info ? 1.35 : 1.25;
+    label.position.y = info ? 1.6 : 1.25;
     root.add(label);
     scene.add(root);
     drops.push({ type, weapon, amount, mesh: root, item, ring, label, baseY: y, life: CFG.dropLife, t: Math.random() * 6 });
@@ -623,7 +645,9 @@ function updateDrops(dt) {
         const d = drops[i], m = d.mesh;
         d.life -= dt; d.t += dt;
         if (d.life <= 0) { removeDrop(i); continue; }
-        d.item.rotation.y += dt * 2.2;
+        // Silah modeli hep yandan görünsün: uzun ekseni oyuncuya dik dursun, hafifçe sallansın
+        // (dönerken önden bakınca çubuk gibi görünüyordu)
+        d.item.rotation.y = Math.atan2(camera.position.x - m.position.x, camera.position.z - m.position.z) + Math.sin(d.t * 1.6) * 0.35;
         d.item.position.y = 0.6 + Math.sin(d.t * 3) * 0.12;
         d.ring.scale.setScalar(1 + Math.sin(d.t * 4) * 0.08);
         m.visible = d.life > 4 || Math.floor(d.life * 6) % 2 === 0;   // kaybolmadan önce yanıp söner

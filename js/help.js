@@ -123,7 +123,7 @@ const HELP_SECTIONS = [
         `Ölen düşman %${Math.round(CFG.dropChance * 100)} ihtimalle yere dönen, parlayan bir eşya bırakır.`,
         'Her eşyanın üstünde ne olduğunu yazan renkli bir etiket, altında da aynı renkte parlayan bir halka vardır.',
         'Cephane silaha özeldir: etikette hangi silahın cephanesi olduğu ve kaç tane verdiği yazar. Yalnızca sahip olduğun silahların cephanesi düşer; elindeki silahın yedeği azsa onunki daha sık düşer.',
-        '🏹 OK +5 (Yaylı Tüfek, turuncu bant, üstünde oklar) · 🔴 SAÇMA +6 (Av Tüfeği, kırmızı fişekler) · 🎯 MERMİ +5 (Keskin Nişancı, uzun mermiler) · 🔫 MERMİ +şarjör (Taramalı Tabanca, siyah şarjör) · 🚀 ROKET +2 (Roketatar, küçük roketler).',
+        'Cephane kutusunun üstünde o silahın küçük modeli yatar (hep yandan görünür): 🏹 OK +5 Yaylı Tüfek · 🔴 SAÇMA +6 Av Tüfeği · 🎯 MERMİ +5 Keskin Nişancı (dürbünlü) · 🔫 MERMİ +şarjör Taramalı Tabanca (siyah) · 🚀 ROKET +2 Roketatar (sarı başlıklı tüp). Kutunun bandı ve halkası da silahın renginde.',
         'Cephaneyi alınca sağ üstte "+6 saçma (Av Tüfeği) → 6/12" gibi ne aldığın yazar; elindeki silahın cephanesiyse mermi göstergesi yeşil yanar.',
         '🛡️ KALKAN +25 (mavi): artılı mavi plaka; +25 kalkan (kalkanın doluysa alınmaz).',
         '🪙 ALTIN (sarı): üst üste altın paralar; bir düşman öldürme ödülü kadar altın.',
