@@ -58,15 +58,15 @@ Her iki modun zorluğu **Ayarlar** ekranından ayrı ayrı seçilir (Kolay / Ort
 
 | # | Silah | Özellik | Nasıl açılır |
 |---|---|---|---|
-| 1 | Testereli Eldiven | Yakın dövüş; basılı tutunca dönen testere önündeki düşmanı keser, **mermi harcamaz** | Başlangıçta açık |
-| 2 | Tabanca | Yarı otomatik, 1.4x hasar, **sınırsız yedek mermi**, iki elle tutulur | Başlangıçta açık |
+| 1 | Testereli Eldiven | Yakın dövüş (1.2x, saniyede ~8 kesik); basılı tutunca dönen testere önündeki düşmanı keser, **mermi harcamaz** | Başlangıçta açık |
+| 2 | Tabanca | Yarı otomatik, 1x hasar, **sınırsız yedek mermi**, iki elle tutulur | Başlangıçta açık |
 | 3 | Yaylı Tüfek | Ok atar; tek atış, 3.2x hasar, tam isabetli, ok uzakta hafifçe düşer, 5'lik şarjör | Başlangıçta açık |
 | 4 | Av Tüfeği | Pompalı, 8 saçma, yakında çok güçlü, menzili kısa | Mağaza, 250 altın |
-| 5 | Keskin Nişancı | 5x hasar, dürbün | Mağaza, 400 altın |
-| 6 | Taramalı Tabanca | Tamamı siyah AR tipi; çok hızlı otomatik ateş, 0.5x hasar, 40'lık şarjör (mağazadan 70'e büyür) | Mağaza, 300 altın |
-| 7 | Roketatar | Roket namludan alev ve duman izi bırakarak uçar, çarptığı yerde patlar (ateş topu, duman, ekran sarsıntısı). Doğrudan isabet tam hasar; yanına düşerse canın bir kısmı gider (çok yakında ~yarısı, uzaklaştıkça azalır); çok yakındaysan sana da vurur | Mağaza, 600 altın |
+| 5 | Keskin Nişancı | 7x hasar, dürbün | Mağaza, 400 altın |
+| 6 | Taramalı Tabanca | Tamamı siyah AR tipi; çok hızlı otomatik ateş, 0.45x hasar, 40'lık şarjör (mağazadan 70'e büyür) | Mağaza, 300 altın |
+| 7 | Roketatar | Roket namludan alev ve duman izi bırakarak uçar, çarptığı yerde patlar (ateş topu, duman, ekran sarsıntısı). En öldürücü silah: doğrudan isabet (10x) ya da ayağının dibine düşerse öldürür, uzaklaştıkça hasar azalır (yarıçapın yarısında canın ~%65'i); çok yakındaysan sana da vurur | Mağaza, 600 altın |
 
-Silahları birinci şahıs görünümde eldivenli eller tutar.
+Silahları birinci şahıs görünümde eldivenli eller tutar. Denge gerçeğe yakındır (mermi başına öldürücülük): Roketatar > Keskin Nişancı > Av Tüfeği (yakında) > Yaylı Tüfek > Tabanca > Taramalı Tabanca; Taramalı hızıyla, testere yalnızca dipte etkilidir.
 
 Kafa vuruşu her silahta 2 kat hasar verir. Mağazadaki "Silah Hasarı" yükseltmesi tüm silahlara işler.
 

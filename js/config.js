@@ -84,13 +84,16 @@ function pickEnemyType(waveNum) {
 
 // =====================================================================
 //  SİLAHLAR — hasar = oyuncunun hasar seviyesi × dmgMul (mağazadaki yükseltme hepsine işler)
+//  Denge (gerçeğe yakın sıralama, mermi başına öldürücülük):
+//  Roketatar > Keskin Nişancı > Av Tüfeği (yakında) > Yaylı Tüfek > Tabanca > Taramalı (tek mermi);
+//  Taramalı hızıyla, testere yalnızca dipte etkilidir.
 // =====================================================================
 const WEAPON_ORDER = ['saw', 'pistol', 'crossbow', 'shotgun', 'sniper', 'smg', 'rocket'];   // 1-7 tuşları bu sırayla
 const WEAPONS = {
     saw: {
         // Testereli Eldiven: yakın dövüş. Basılı tutunca dönen testere önündeki düşmanı keser;
         // mermi harcamaz. menzil: oyuncunun önünde kesebildiği uzaklık
-        name: 'Testereli Eldiven', auto: true, melee: true, interval: 0.12, dmgMul: 1.0, range: 2.4,
+        name: 'Testereli Eldiven', auto: true, melee: true, interval: 0.12, dmgMul: 1.2, range: 2.4,
         pellets: 1, spread: 0, mag: Infinity, startPool: Infinity, killAmmo: 0, reload: 0, cost: 0
     },
     crossbow: {
@@ -101,7 +104,7 @@ const WEAPONS = {
     },
     pistol: {
         // Yedek mermisi sınırsız: diğer silahların mermisi bitse de oyuncu çaresiz kalmaz
-        name: 'Tabanca', auto: false, interval: 0.2, dmgMul: 1.4, pellets: 1, spread: 0.004,
+        name: 'Tabanca', auto: false, interval: 0.2, dmgMul: 1.0, pellets: 1, spread: 0.004,
         mag: 12, startPool: Infinity, killAmmo: 0, reload: 1.2, speed: 84, life: 1.0, cost: 0
     },
     shotgun: {
@@ -109,19 +112,19 @@ const WEAPONS = {
         mag: 6, startPool: 24, killAmmo: 3, reload: 2.4, speed: 70, life: 0.35, cost: 250
     },
     sniper: {
-        name: 'Keskin Nişancı', auto: false, interval: 1.1, dmgMul: 5, pellets: 1, spread: 0,
+        name: 'Keskin Nişancı', auto: false, interval: 1.1, dmgMul: 7, pellets: 1, spread: 0,
         mag: 5, startPool: 15, killAmmo: 2, reload: 2.6, speed: 160, life: 0.8, cost: 400, zoom: true
     },
     smg: {
         // Taramalı tabanca (AR tipi kısa karabina görünümü): çok hızlı ateş, mermi başına az hasar,
         // biraz dağınık; yakın-orta mesafe
-        name: 'Taramalı Tabanca', auto: true, interval: 0.055, dmgMul: 0.5, pellets: 1, spread: 0.018,
+        name: 'Taramalı Tabanca', auto: true, interval: 0.055, dmgMul: 0.45, pellets: 1, spread: 0.018,
         mag: 40, startPool: 160, killAmmo: 30, reload: 1.6, speed: 80, life: 0.8, cost: 300
     },
     rocket: {
         // Roketatar: yavaş giden roket bir şeye çarpınca patlar; patlama alan hasarı verir
         // (hasar = temel hasar × dmgMul, merkezden uzaklaştıkça azalır). Çok yakına atılırsa sana da vurur.
-        name: 'Roketatar', auto: false, rocket: true, interval: 0.9, dmgMul: 6, pellets: 1, spread: 0,
+        name: 'Roketatar', auto: false, rocket: true, interval: 0.9, dmgMul: 10, pellets: 1, spread: 0,
         blastRadius: 4.5, mag: 4, startPool: 12, killAmmo: 1, reload: 2.2, speed: 24, life: 3.5, cost: 600
     }
 };

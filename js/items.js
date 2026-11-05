@@ -87,7 +87,13 @@ function blastClear(from, to) {
 // opts.pct: hasar düşmanın canının yüzdesi olarak (roket): patlama merkezine yarıçapın %10'u
 //   kadar yakın olan canının yarısını, %20'si kadar yakın olan yarıdan biraz azını kaybeder,
 //   kenara doğru sıfıra iner. opts.direct: roketin doğrudan çarptığı düşman (tam hasar alır).
-const ROCKET_SPLASH = (d, R) => Math.max(0, 0.555 * (1 - d / R));
+// Roket patlaması gerçekte en öldürücü silah: yarıçapın ilk %25'inde (düşmanın ayağının dibi
+// dahil) öldürür; dışarı doğru hızla azalır (%50'de ~%65, %75'te ~%28, kenarda 0).
+const ROCKET_SPLASH = (d, R) => {
+    const k = d / R;
+    if (k <= 0.25) return 1.05;
+    return Math.max(0, 1.05 * Math.pow(1 - (k - 0.25) / 0.75, 1.2));
+};
 function explode(pos, R = CFG.grenadeRadius, power = CFG.grenadeDamage, opts = {}) {
     ensureFxLights();
     // Görsel: hızla büyüyen şok küresi, ateş topu, kara duman, kıvılcımlar, parlama ışığı, sarsıntı
@@ -132,6 +138,7 @@ function explode(pos, R = CFG.grenadeRadius, power = CFG.grenadeDamage, opts = {
     // Oyuncu kendi bombasından / roketinden de etkilenir (yarı hasar)
     const pd = camera.position.distanceTo(pos);
     if (pd < R && blastClear(pos, camera.position)) {
+        // Kendi roketin: aynı eğri, yarı şiddette (dibinde patlarsa canının yarısı gider)
         const self = opts.pct ? player.maxHealth * ROCKET_SPLASH(pd, R) * 0.5 : dmgAt(pd) * 0.5;
         if (self > 0) damagePlayer(self, false, 300, pos);
     }
