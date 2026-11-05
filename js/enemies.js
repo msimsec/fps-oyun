@@ -141,6 +141,9 @@ class HumanoidEnemy {
 
     // Göz/namlu yüksekliği (çömelince alçalır)
     eyeY() { return this.group.position.y + (1.4 - 0.5 * this.crouch) * this.scale; }
+    // Gövdenin ortası (patlama ve testere bu noktaya bakar) ve kafanın yüksekliği; çömelince alçalır
+    midY() { return this.group.position.y + (0.9 - 0.3 * this.crouch) * this.scale; }
+    headY() { return this.group.position.y + (1.45 - 0.5 * this.crouch) * this.scale; }
 
     // Çömelme kararı: belli aralıklarla, oyuncuyu görüyorsa ve ne çok yakın ne çok uzaksa bir süre
     // durup çömelerek ateş eder. Koşucu çömelmez; dalga düşmanları 3. dalgadan itibaren (yetenek).
@@ -614,7 +617,7 @@ function makeCorpse(e, head) {
     e.hpBar.visible = false;
     if (head) {
         e.head.visible = false;
-        const hp = new THREE.Vector3(g.position.x, g.position.y + 1.45 * e.scale, g.position.z);
+        const hp = new THREE.Vector3(g.position.x, e.headY(), g.position.z);
         createParticles(hp, e.isDuel ? 0xc084fc : (e.type ? e.type.head : 0xf87171), 14);
     }
     g.rotation.order = 'YXZ';            // devrilme düşmanın kendi ekseninde olsun
@@ -623,6 +626,8 @@ function makeCorpse(e, head) {
     if (e.gun) {
         e.gun.rotation.x = Math.PI / 2;
         e.gun.position.set(0.8, 0.55, 0.12);
+        const gp = e.pose.find(q => q.o === e.gun);
+        if (gp) e.gun.scale.y = gp.sy;               // çömelikken öldüyse tüfek basık kalmasın
     }
     corpses.push({ group: g, t: 0, landed: false, vy: 0 });
     // Aynı anda çok ceset birikmesin

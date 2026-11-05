@@ -119,7 +119,7 @@ function explode(pos, R = CFG.grenadeRadius, power = CFG.grenadeDamage, opts = {
     let kills = 0;
     for (const e of targets) {
         const gp = e.group.position;
-        center.set(gp.x, gp.y + 0.9 * e.scale, gp.z);
+        center.set(gp.x, e.midY(), gp.z);
         const dist = center.distanceTo(pos);
         if (dist > R || !blastClear(pos, center)) continue;
         // Yüzdeli hasar yalnızca dalga düşmanlarına: düello botunun canı çok yüksek, yüzdeyle

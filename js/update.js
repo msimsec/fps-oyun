@@ -5,7 +5,7 @@
 // =====================================================================
 const isMoving = () => keys.forward || keys.back || keys.left || keys.right;
 // İleri giderken, yerdeyken ve dürbünsüzken koşulur
-const isSprinting = () => keys.sprint && keys.forward && player.onGround && !player.zoomed && !isCrouching();
+const isSprinting = () => keys.sprint && keys.forward && player.onGround && !player.zoomed && !keys.crouch && !isCrouching();
 // Çömelik sayılır: tuş basılı ya da hâlâ kalkıyor (göz hizası tam yükselmedi)
 const isCrouching = () => player.eye < CFG.eyeHeight - 0.1;
 

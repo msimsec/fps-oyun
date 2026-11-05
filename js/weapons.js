@@ -141,7 +141,7 @@ function sawAttack(w) {
     const c = new THREE.Vector3();
     for (const e of targets) {
         const p = e.group.position;
-        c.set(p.x, p.y + 0.9 * e.scale, p.z);
+        c.set(p.x, e.midY(), p.z);
         const to = c.clone().sub(camera.position);
         const d = to.length();
         if (d > w.range + e.radius || d >= bestD) continue;
