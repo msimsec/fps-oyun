@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>3D Tactical FPS - 1v1 Düello ve Tüfek Skinleri</title>
     <!-- ?v=… : her yayında değiştirilir (tarih); tarayıcı önbellekteki eski CSS/JS dosyalarını kullanmasın -->
-    <link rel="stylesheet" href="css/style.css?v=20261105a">
+    <link rel="stylesheet" href="css/style.css?v=20261105c">
 
     <!-- Three.js r128 — üçüncü taraf CDN yerine oyunla aynı klasörden yüklenir.
          Dosya index.html ile aynı yerden geldiği için CDN ele geçirilme riski yoktur.
@@ -105,13 +105,15 @@
         <div class="map-picker-sub">Oynamak istediğin haritaya tıkla, sonra OYUNA BAŞLA'ya bas</div>
         <div class="map-picker" id="mapPicker"></div>
         <div class="menu-buttons">
-            <button class="btn restart-btn" onclick="startRun(false)">OYUNA BAŞLA</button>
+            <button class="btn resume-btn" id="resumeBtn" onclick="resumeRun()" style="display:none">DEVAM ET ▶</button>
+            <button class="btn restart-btn" onclick="startNewRun()">OYUNA BAŞLA</button>
             <button class="btn duel-btn" onclick="startRun(true)">1v1 DÜELLO ⚔️</button>
             <button class="btn shop-open-btn" onclick="openShop('menu')">MAĞAZA 🛒</button>
             <button class="btn records-btn" onclick="openRecords('menu')">REKORLAR 🏆</button>
             <button class="btn ach-btn" onclick="openAchievements('menu')">BAŞARIMLAR 🎖️</button>
             <button class="btn settings-btn" onclick="openSettings('menu')">AYARLAR ⚙️</button>
         </div>
+        <div class="resume-info" id="resumeInfo" style="display:none"></div>
         <div class="note" id="difficultyInfo" style="margin-top: 18px;"></div>
     </div>
 
@@ -321,27 +323,28 @@
         </div>
     </div>
 
-    <script src="js/profiles.js?v=20261105a"></script>
-    <script src="js/config.js?v=20261105a"></script>
-    <script src="js/save.js?v=20261105a"></script>
-    <script src="js/state.js?v=20261105a"></script>
-    <script src="js/utils.js?v=20261105a"></script>
-    <script src="js/audio.js?v=20261105a"></script>
-    <script src="js/feedback.js?v=20261105a"></script>
-    <script src="js/world.js?v=20261105a"></script>
-    <script src="js/maps.js?v=20261105a"></script>
-    <script src="js/input.js?v=20261105a"></script>
-    <script src="js/game.js?v=20261105a"></script>
-    <script src="js/weapons.js?v=20261105a"></script>
-    <script src="js/enemies.js?v=20261105a"></script>
-    <script src="js/items.js?v=20261105a"></script>
-    <script src="js/waves.js?v=20261105a"></script>
-    <script src="js/records.js?v=20261105a"></script>
-    <script src="js/achievements.js?v=20261105a"></script>
-    <script src="js/update.js?v=20261105a"></script>
-    <script src="js/shop.js?v=20261105a"></script>
-    <script src="js/settings.js?v=20261105a"></script>
-    <script src="js/help.js?v=20261105a"></script>
-    <script src="js/main.js?v=20261105a"></script>
+    <script src="js/profiles.js?v=20261105c"></script>
+    <script src="js/config.js?v=20261105c"></script>
+    <script src="js/save.js?v=20261105c"></script>
+    <script src="js/state.js?v=20261105c"></script>
+    <script src="js/utils.js?v=20261105c"></script>
+    <script src="js/audio.js?v=20261105c"></script>
+    <script src="js/feedback.js?v=20261105c"></script>
+    <script src="js/world.js?v=20261105c"></script>
+    <script src="js/maps.js?v=20261105c"></script>
+    <script src="js/input.js?v=20261105c"></script>
+    <script src="js/game.js?v=20261105c"></script>
+    <script src="js/weapons.js?v=20261105c"></script>
+    <script src="js/enemies.js?v=20261105c"></script>
+    <script src="js/items.js?v=20261105c"></script>
+    <script src="js/waves.js?v=20261105c"></script>
+    <script src="js/records.js?v=20261105c"></script>
+    <script src="js/achievements.js?v=20261105c"></script>
+    <script src="js/resume.js?v=20261105c"></script>
+    <script src="js/update.js?v=20261105c"></script>
+    <script src="js/shop.js?v=20261105c"></script>
+    <script src="js/settings.js?v=20261105c"></script>
+    <script src="js/help.js?v=20261105c"></script>
+    <script src="js/main.js?v=20261105c"></script>
 </body>
 </html>

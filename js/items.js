@@ -84,7 +84,11 @@ function blastClear(from, to) {
 }
 
 // R: patlama yarıçapı, power: merkezdeki hasar (bomba için ayarlardan; roket için silah hasarından)
-function explode(pos, R = CFG.grenadeRadius, power = CFG.grenadeDamage) {
+// opts.pct: hasar düşmanın canının yüzdesi olarak (roket): patlama merkezine yarıçapın %10'u
+//   kadar yakın olan canının yarısını, %20'si kadar yakın olan yarıdan biraz azını kaybeder,
+//   kenara doğru sıfıra iner. opts.direct: roketin doğrudan çarptığı düşman (tam hasar alır).
+const ROCKET_SPLASH = (d, R) => Math.max(0, 0.555 * (1 - d / R));
+function explode(pos, R = CFG.grenadeRadius, power = CFG.grenadeDamage, opts = {}) {
     ensureFxLights();
     // Görsel: hızla büyüyen şok küresi, ateş topu, kara duman, kıvılcımlar, parlama ışığı, sarsıntı
     const mesh = new THREE.Mesh(BLAST_GEO, new THREE.MeshBasicMaterial({ color: 0xff8a1f, transparent: true, opacity: 0.45 }));
@@ -112,7 +116,11 @@ function explode(pos, R = CFG.grenadeRadius, power = CFG.grenadeDamage) {
         center.set(gp.x, gp.y + 0.9 * e.scale, gp.z);
         const dist = center.distanceTo(pos);
         if (dist > R || !blastClear(pos, center)) continue;
-        const dmg = Math.round(dmgAt(dist));
+        const dmg = opts.pct
+            // Doğrudan isabet, yanına düşmekten asla az vurmaz (çok canlı düşmanda yüzde daha büyük olabilir)
+            ? Math.round(Math.max(e === opts.direct ? power : 0, e.maxHealth * ROCKET_SPLASH(dist, R)))
+            : Math.round(dmgAt(dist));
+        if (dmg <= 0) continue;
         e.takeDamage(dmg);
         showDamageNumber(e, dmg, false);
         if (e.health <= 0) { onEnemyKilled(e, 'body'); kills++; }
@@ -120,7 +128,10 @@ function explode(pos, R = CFG.grenadeRadius, power = CFG.grenadeDamage) {
     if (kills) runStats.bestBlast = Math.max(runStats.bestBlast, kills);
     // Oyuncu kendi bombasından / roketinden de etkilenir (yarı hasar)
     const pd = camera.position.distanceTo(pos);
-    if (pd < R && blastClear(pos, camera.position)) damagePlayer(dmgAt(pd) * 0.5, false, 300, pos);
+    if (pd < R && blastClear(pos, camera.position)) {
+        const self = opts.pct ? player.maxHealth * ROCKET_SPLASH(pd, R) * 0.5 : dmgAt(pd) * 0.5;
+        if (self > 0) damagePlayer(self, false, 300, pos);
+    }
     if (kills) checkAchievements();
 }
 
@@ -251,13 +262,14 @@ function updateRockets(dt) {
         // Hızlı roket ince duvarın içinden geçmesin diye küçük adımlarla ilerle
         const n = Math.max(1, Math.ceil(r.vel.length() * dt / 0.25));
         step.copy(r.vel).multiplyScalar(dt / n);
-        let boom = null;
+        let boom = null, direct = null;
         for (let k = 0; k < n && !boom; k++) {
             const prev = p.clone();
             p.add(step);
             if (p.y < curMap().bulletMinY || p.y > curMap().bulletMaxY || pointInWall(p)) { boom = prev; break; }
             const targets = isDuelMode ? (duelBot ? [duelBot] : []) : enemies;
-            if (targets.some(e => e.hitTest(p))) boom = p.clone();
+            direct = targets.find(e => e.hitTest(p)) || null;
+            if (direct) boom = p.clone();
         }
         // Duman izi: roketin arkasında kalan, büyüyüp sönen gri bulutlar ve kısa ateş kıvılcımları
         const tail = p.clone().addScaledVector(r.vel, -0.45 / r.vel.length());
@@ -274,7 +286,7 @@ function updateRockets(dt) {
             rockets.splice(i, 1);
             // Space'te boşlukta biten roket patlamadan kaybolur (altında hiçbir şey yok)
             if (r.life <= 0 && boom.y < curMap().killY) continue;
-            explode(boom, r.radius, r.damage);
+            explode(boom, r.radius, r.damage, { pct: true, direct });
         }
     }
 }

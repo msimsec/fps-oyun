@@ -85,7 +85,10 @@ function hideAllScreens() {
     SCREENS.forEach(id => $(id).classList.remove('show'));
     document.body.classList.remove('in-menu');
 }
-function showScreen(id) { hideAllScreens(); $(id).classList.add('show'); document.body.classList.add('in-menu'); }
+function showScreen(id) {
+    hideAllScreens(); $(id).classList.add('show'); document.body.classList.add('in-menu');
+    if (id === 'menuScreen' && typeof updateResumeButton === 'function') updateResumeButton();
+}
 
 function resetKeys() {
     keys.forward = keys.back = keys.left = keys.right = keys.sprint = false;

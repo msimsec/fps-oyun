@@ -205,6 +205,7 @@ function animate() {
 
     if (state === 'playing') {
         if (isDuelMode) duelTime += dt;
+        tickRunSave(dt);
         updatePlayer(dt);
         updateBullets(dt);
         if (pendingDuelWin) {

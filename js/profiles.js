@@ -13,7 +13,7 @@ const PROFILES_KEY = 'fps_profiles_v1';
 const PROFILE_CHOSEN_KEY = 'fps_profile_chosen';   // sessionStorage: bu sekmede giriş yapıldı mı
 const MAX_PROFILES = 20, NAME_MAX = 16;
 const PW_MIN = 4, PW_MAX = 8;
-const PROFILE_DATA_KEYS = ['fps_save_v2', 'fps_records_v1', 'fps_records_v2', 'fps_settings_v1', 'fps_achievements_v1'];
+const PROFILE_DATA_KEYS = ['fps_save_v2', 'fps_records_v1', 'fps_records_v2', 'fps_settings_v1', 'fps_achievements_v1', 'fps_run_v1'];
 
 function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
 function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
