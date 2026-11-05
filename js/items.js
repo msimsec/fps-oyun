@@ -85,13 +85,22 @@ function blastClear(from, to) {
 
 // R: patlama yarıçapı, power: merkezdeki hasar (bomba için ayarlardan; roket için silah hasarından)
 function explode(pos, R = CFG.grenadeRadius, power = CFG.grenadeDamage) {
-    const mesh = new THREE.Mesh(BLAST_GEO, new THREE.MeshBasicMaterial({ color: 0xff8a1f, transparent: true, opacity: 0.75 }));
+    ensureFxLights();
+    // Görsel: hızla büyüyen şok küresi, ateş topu, kara duman, kıvılcımlar, parlama ışığı, sarsıntı
+    const mesh = new THREE.Mesh(BLAST_GEO, new THREE.MeshBasicMaterial({ color: 0xff8a1f, transparent: true, opacity: 0.45 }));
     mesh.position.copy(pos);
     scene.add(mesh);
     explosions.push({ mesh, t: 0, r: R });
-    createParticles(pos, 0xffb020, 18);
+    const rnd = (k) => new THREE.Vector3((Math.random() - 0.5) * k, Math.random() * k * 0.6, (Math.random() - 0.5) * k);
+    makePuff(pos, 0xffffff, R * 0.5, 0.12, true, null, 1);                       // ilk beyaz parlama
+    for (let i = 0; i < 9; i++) makePuff(pos.clone().add(rnd(R * 0.4)), i % 2 ? 0xff7a1a : 0xffc04a, R * 0.35, 0.45 + Math.random() * 0.2, true, rnd(4), 1.8);
+    for (let i = 0; i < 8; i++) makePuff(pos.clone().add(rnd(R * 0.3)), 0x3f3f46, R * 0.3, 1.6 + Math.random() * 0.6, false, rnd(2).add(new THREE.Vector3(0, 1.2, 0)), 2.2);
+    createParticles(pos, 0xffb020, 22);
     createParticles(pos, 0x52525b, 10);
+    fxLights.blast.position.copy(pos); fxLights.blast.position.y += 1;
+    fxLights.blast.intensity = 5;
     const d = Math.hypot(pos.x - camera.position.x, pos.z - camera.position.z);
+    camShake = Math.max(camShake, Math.max(0, 1 - d / 30) * 0.9);
     sfx('explode', Math.max(0.3, 1 - d / 60));
 
     const dmgAt = (dist) => power * (1 - dist / R) + 20;
@@ -121,23 +130,115 @@ function explode(pos, R = CFG.grenadeRadius, power = CFG.grenadeDamage) {
 //  duvar arkası korunur, çok yakındaki oyuncuya yarı hasar.
 // =====================================================================
 let rockets = [];
-const ROCKET_GEO = new THREE.CylinderGeometry(0.06, 0.08, 0.5, 8);
-ROCKET_GEO.rotateX(Math.PI / 2);                 // uzun ekseni ileri baksın
-const ROCKET_MAT = new THREE.MeshStandardMaterial({ color: 0x4b5320, roughness: 0.5, metalness: 0.4 });
-const ROCKET_FLAME_GEO = new THREE.ConeGeometry(0.07, 0.35, 8);
-ROCKET_FLAME_GEO.rotateX(-Math.PI / 2);
-const ROCKET_FLAME_MAT = new THREE.MeshBasicMaterial({ color: 0xffa21f });
+const ROCKET_BODY_GEO = new THREE.CylinderGeometry(0.075, 0.075, 0.55, 10);
+ROCKET_BODY_GEO.rotateX(Math.PI / 2);            // uzun ekseni z boyunca (burun -z'de)
+const ROCKET_NOSE_GEO = new THREE.ConeGeometry(0.075, 0.2, 10);
+ROCKET_NOSE_GEO.rotateX(-Math.PI / 2); ROCKET_NOSE_GEO.translate(0, 0, -0.37);
+const ROCKET_FIN_GEO = new THREE.BoxGeometry(0.26, 0.012, 0.12);
+ROCKET_FIN_GEO.translate(0, 0, 0.22);
+const ROCKET_MAT = new THREE.MeshStandardMaterial({ color: 0x4d5a2e, roughness: 0.5, metalness: 0.4 });
+const ROCKET_NOSE_MAT = new THREE.MeshStandardMaterial({ color: 0xeab308, roughness: 0.4, metalness: 0.3 });
+
+// =====================================================================
+//  EFEKTLER — ateş ve duman bulutları (kameraya dönük parlak lekeler), patlama ışığı, ekran sarsıntısı
+// =====================================================================
+let puffs = [];
+let fxLights = null;
+const glowTex = (() => {
+    const c = document.createElement('canvas');
+    c.width = c.height = 64;
+    const ctx = c.getContext('2d');
+    const g = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+    g.addColorStop(0, 'rgba(255,255,255,1)');
+    g.addColorStop(0.4, 'rgba(255,255,255,0.6)');
+    g.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, 64, 64);
+    return new THREE.CanvasTexture(c);
+})();
+
+// Işıklar sahneye bir kez eklenir; kapalıyken şiddeti 0 (sonradan ışık ekleyip çıkarmak oyunu takıltır)
+function ensureFxLights() {
+    if (fxLights) return;
+    fxLights = { rocket: new THREE.PointLight(0xffa040, 0, 10), blast: new THREE.PointLight(0xffb050, 0, 26) };
+    scene.add(fxLights.rocket, fxLights.blast);
+}
+
+// glow: true → parlak ateş (toplamalı karışım), false → duman
+function makePuff(pos, color, size, life, glow, vel = null, grow = 1.5) {
+    const mat = new THREE.SpriteMaterial({ map: glowTex, color, transparent: true, depthWrite: false,
+        opacity: glow ? 1 : 0.7, blending: glow ? THREE.AdditiveBlending : THREE.NormalBlending });
+    const sp = new THREE.Sprite(mat);
+    sp.position.copy(pos);
+    sp.scale.setScalar(size);
+    scene.add(sp);
+    puffs.push({ sp, life, max: life, size, grow, vel: vel || new THREE.Vector3(0, glow ? 0 : 0.6, 0), op: mat.opacity });
+    if (puffs.length > 220) killPuff(0);
+}
+function killPuff(i) { scene.remove(puffs[i].sp); puffs[i].sp.material.dispose(); puffs.splice(i, 1); }
+
+function updateFx(dt) {
+    for (let i = puffs.length - 1; i >= 0; i--) {
+        const p = puffs[i];
+        p.life -= dt;
+        if (p.life <= 0) { killPuff(i); continue; }
+        const k = 1 - p.life / p.max;
+        p.sp.position.addScaledVector(p.vel, dt);
+        p.sp.scale.setScalar(p.size * (1 + p.grow * k));
+        p.sp.material.opacity = p.op * (1 - k);
+    }
+    if (fxLights) {
+        fxLights.blast.intensity = Math.max(0, fxLights.blast.intensity - dt * 12);
+        if (!rockets.length) fxLights.rocket.intensity = 0;
+    }
+    camShake = Math.max(0, camShake - dt * 2.2);
+}
+
+function clearFx() {
+    while (puffs.length) killPuff(puffs.length - 1);
+    if (fxLights) { fxLights.rocket.intensity = 0; fxLights.blast.intensity = 0; }
+    camShake = 0;
+}
+
+// Nişangâhın baktığı nokta (en fazla 80 birim ya da ilk duvar): roket namludan çıkıp oraya gider
+function aimPoint(dir) {
+    const p = camera.position.clone();
+    for (let d = 0.5; d < 80; d += 0.5) {
+        p.copy(camera.position).addScaledVector(dir, d);
+        if (pointInWall(p) || p.y < curMap().bulletMinY) return p;
+    }
+    return p;
+}
 
 function spawnRocket(origin, dir, speed, damage, radius, life) {
+    ensureFxLights();
+    // Roket, roketatarın ağzından (sağ alt) çıkar ve nişangâhın baktığı noktaya uçar
+    const muzzle = camera.localToWorld(new THREE.Vector3(0.27, -0.13, -1.0));
+    const target = aimPoint(dir);
+    const d = target.clone().sub(muzzle);
+    const v = d.lengthSq() > 4 ? d.normalize() : dir.clone();
     const mesh = new THREE.Group();
-    mesh.add(new THREE.Mesh(ROCKET_GEO, ROCKET_MAT));
-    const flame = new THREE.Mesh(ROCKET_FLAME_GEO, ROCKET_FLAME_MAT);
-    flame.position.z = 0.42;
-    mesh.add(flame);
-    mesh.position.copy(origin).addScaledVector(dir, 0.4);
-    mesh.lookAt(mesh.position.clone().sub(dir));      // burun ileri (-z ekseni gidiş yönünde değil, +z arkada)
+    mesh.add(new THREE.Mesh(ROCKET_BODY_GEO, ROCKET_MAT));
+    mesh.add(new THREE.Mesh(ROCKET_NOSE_GEO, ROCKET_NOSE_MAT));
+    const f1 = new THREE.Mesh(ROCKET_FIN_GEO, ROCKET_MAT), f2 = new THREE.Mesh(ROCKET_FIN_GEO, ROCKET_MAT);
+    f2.rotation.z = Math.PI / 2;
+    mesh.add(f1, f2);
+    // Arkada parlak alev ve çevresinde turuncu hale
+    const flame = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: 0xffe08a, blending: THREE.AdditiveBlending, depthWrite: false }));
+    flame.position.z = 0.4; flame.scale.setScalar(0.8);
+    const halo = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: 0xff7a1a, blending: THREE.AdditiveBlending, depthWrite: false, opacity: 0.8 }));
+    halo.position.z = 0.45; halo.scale.setScalar(1.9);
+    mesh.add(flame, halo);
+    mesh.position.copy(muzzle);
+    mesh.lookAt(muzzle.clone().sub(v));
     scene.add(mesh);
-    rockets.push({ mesh, vel: dir.clone().multiplyScalar(speed), life, damage, radius, flame });
+    rockets.push({ mesh, vel: v.multiplyScalar(speed), life, damage, radius, flame, halo });
+    // Atış anı: namlu alevi, ağızdan duman, kısa sarsıntı
+    makePuff(muzzle, 0xffd27a, 0.9, 0.1, true, null, 1);
+    for (let i = 0; i < 4; i++) {
+        makePuff(muzzle, 0xb8b8b8, 0.35, 0.9, false,
+            new THREE.Vector3((Math.random() - 0.5) * 1.5, 0.5 + Math.random(), (Math.random() - 0.5) * 1.5), 2.5);
+    }
+    camShake = Math.max(camShake, 0.18);
 }
 
 function updateRockets(dt) {
@@ -145,7 +246,8 @@ function updateRockets(dt) {
     for (let i = rockets.length - 1; i >= 0; i--) {
         const r = rockets[i], p = r.mesh.position;
         r.life -= dt;
-        r.flame.scale.setScalar(0.8 + Math.random() * 0.5);
+        r.flame.scale.setScalar(0.7 + Math.random() * 0.4);
+        r.halo.material.opacity = 0.6 + Math.random() * 0.3;
         // Hızlı roket ince duvarın içinden geçmesin diye küçük adımlarla ilerle
         const n = Math.max(1, Math.ceil(r.vel.length() * dt / 0.25));
         step.copy(r.vel).multiplyScalar(dt / n);
@@ -157,10 +259,18 @@ function updateRockets(dt) {
             const targets = isDuelMode ? (duelBot ? [duelBot] : []) : enemies;
             if (targets.some(e => e.hitTest(p))) boom = p.clone();
         }
-        if (Math.random() < 0.6) createParticles(p.clone().addScaledVector(r.vel, -0.02), 0x9ca3af, 1);   // duman izi
+        // Duman izi: roketin arkasında kalan, büyüyüp sönen gri bulutlar ve kısa ateş kıvılcımları
+        const tail = p.clone().addScaledVector(r.vel, -0.45 / r.vel.length());
+        makePuff(tail, 0xe4e4e7, 0.45, 1.6, false, new THREE.Vector3((Math.random() - 0.5) * 0.3, 0.4, (Math.random() - 0.5) * 0.3), 3.2);
+        makePuff(tail, 0xff9a3c, 0.5, 0.15, true, null, 0.5);
+        if (i === rockets.length - 1 && fxLights) {           // en son atılan roketi ışık izler
+            fxLights.rocket.position.copy(p);
+            fxLights.rocket.intensity = 2.2;
+        }
         if (!boom && r.life <= 0) boom = p.clone();
         if (boom) {
             scene.remove(r.mesh);
+            r.flame.material.dispose(); r.halo.material.dispose();
             rockets.splice(i, 1);
             // Space'te boşlukta biten roket patlamadan kaybolur (altında hiçbir şey yok)
             if (r.life <= 0 && boom.y < curMap().killY) continue;
@@ -243,9 +353,10 @@ function updateBolts(dt) {
 }
 
 function clearGrenades() {
+    clearFx();
     bolts.forEach(b => scene.remove(b.mesh));
     bolts = [];
-    rockets.forEach(r => scene.remove(r.mesh));
+    rockets.forEach(r => { scene.remove(r.mesh); r.flame.material.dispose(); r.halo.material.dispose(); });
     rockets = [];
     grenades.forEach(g => scene.remove(g.mesh));
     explosions.forEach(e => { scene.remove(e.mesh); e.mesh.material.dispose(); });
@@ -270,42 +381,99 @@ const dropCache = {};                // tür başına paylaşılan model parçal
 const glowMat = (c) => new THREE.MeshStandardMaterial({ color: c, emissive: c, emissiveIntensity: 0.35, roughness: 0.45, metalness: 0.3 });
 
 // Eşyanın üstünde duran etiket: renkli kutu içinde simge + ad (hep kameraya döner)
+// t.sub verilirse ikinci satırda küçük yazılır (cephanede: hangi silahın)
 function dropLabel(t) {
+    const two = !!t.sub;
     const c = document.createElement('canvas');
-    c.width = 256; c.height = 64;
+    c.width = 256; c.height = two ? 96 : 64;
     const ctx = c.getContext('2d');
     const hex = '#' + t.color.toString(16).padStart(6, '0');
     ctx.fillStyle = 'rgba(2, 6, 23, 0.85)';
     ctx.strokeStyle = hex; ctx.lineWidth = 5;
     ctx.beginPath();
-    if (ctx.roundRect) ctx.roundRect(4, 4, 248, 56, 14); else ctx.rect(4, 4, 248, 56);
+    if (ctx.roundRect) ctx.roundRect(4, 4, 248, c.height - 8, 14); else ctx.rect(4, 4, 248, c.height - 8);
     ctx.fill(); ctx.stroke();
     ctx.fillStyle = hex;
     ctx.font = 'bold 30px Arial, sans-serif';
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     ctx.fillText(`${t.icon} ${t.name}`, 128, 34);
+    if (two) {
+        ctx.fillStyle = '#e2e8f0';
+        ctx.font = 'bold 22px Arial, sans-serif';
+        ctx.fillText(t.sub, 128, 68);
+    }
     const tex = new THREE.CanvasTexture(c);
     const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, depthWrite: false }));
-    sprite.scale.set(1.3, 0.325, 1);
+    sprite.scale.set(1.3, two ? 0.4875 : 0.325, 1);
     return sprite;
 }
 
+// Silaha özel cephane: hangi silahın, kaç tane, nasıl görünür
+const AMMO_INFO = {
+    crossbow: { icon: '🏹', unit: 'OK',    word: 'ok',    color: 0xd97706, amount: () => 5 },
+    shotgun:  { icon: '🔴', unit: 'SAÇMA', word: 'saçma', color: 0xef4444, amount: () => 6 },
+    sniper:   { icon: '🎯', unit: 'MERMİ', word: 'mermi', color: 0x22d3ee, amount: () => 5 },
+    smg:      { icon: '🔫', unit: 'MERMİ', word: 'mermi', color: 0xe5e7eb, amount: () => magSize('smg') },
+    rocket:   { icon: '🚀', unit: 'ROKET', word: 'roket', color: 0xf97316, amount: () => 2 }
+};
+
+// Hangi silahın cephanesi düşsün: yalnızca sahip olunanlar; elindeki silahın yedeği azsa
+// ya da bir silahın mermisi hiç kalmadıysa onun düşme ihtimali artar
+function pickAmmoWeapon() {
+    const opts = Object.keys(AMMO_INFO).filter(id => player.ownedWeapons[id] && player.arsenal[id]);
+    if (!opts.length) return null;
+    const w = opts.map(id => {
+        const a = player.arsenal[id];
+        let k = 1;
+        if (a.ammo + a.pool === 0) k += 2;
+        if (id === player.weapon && a.pool < magSize(id)) k += 3;
+        return k;
+    });
+    let r = Math.random() * w.reduce((s, v) => s + v, 0);
+    for (let i = 0; i < opts.length; i++) { r -= w[i]; if (r <= 0) return opts[i]; }
+    return opts[opts.length - 1];
+}
+
 // Türün 3B modeli (her çağrıda yeni grup; geometri ve materyaller paylaşılır)
-function dropModel(type) {
+function dropModel(type, weapon) {
     const C = dropCache[type] || (dropCache[type] = {});
     const g = new THREE.Group();
     const add = (geo, mat, x, y, z, rx = 0, rz = 0) => {
         const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); m.rotation.x = rx; m.rotation.z = rz; g.add(m); return m;
     };
     if (type === 'ammo') {
-        // Yeşil cephane kutusu, sarı bant ve üstünde üç mermi
+        // Yeşil cephane kutusu; bandı silahın renginde, üstünde o silahın cephanesi
+        const info = AMMO_INFO[weapon];
         C.box = C.box || new THREE.BoxGeometry(0.44, 0.26, 0.28);
         C.band = C.band || new THREE.BoxGeometry(0.45, 0.06, 0.29);
-        C.shell = C.shell || new THREE.CylinderGeometry(0.035, 0.035, 0.16, 10);
-        C.tip = C.tip || new THREE.ConeGeometry(0.035, 0.07, 10);
-        C.m1 = C.m1 || glowMat(0x4d5a2e); C.m2 = C.m2 || glowMat(0xfacc15); C.m3 = C.m3 || glowMat(0xb45309);
-        add(C.box, C.m1, 0, 0, 0); add(C.band, C.m2, 0, 0.05, 0);
-        for (let i = -1; i <= 1; i++) { add(C.shell, C.m2, i * 0.1, 0.21, 0); add(C.tip, C.m3, i * 0.1, 0.325, 0); }
+        C.m1 = C.m1 || glowMat(0x4d5a2e);
+        C['band' + weapon] = C['band' + weapon] || glowMat(info.color);
+        add(C.box, C.m1, 0, 0, 0); add(C.band, C['band' + weapon], 0, 0.05, 0);
+        const brass = C.brass || (C.brass = glowMat(0xd4a017));
+        const dark = C.dark || (C.dark = glowMat(0x27272a));
+        if (weapon === 'crossbow') {             // üç ok
+            C.bolt = C.bolt || new THREE.CylinderGeometry(0.012, 0.012, 0.42, 6);
+            C.btip = C.btip || new THREE.ConeGeometry(0.025, 0.06, 6);
+            for (let i = -1; i <= 1; i++) { add(C.bolt, dark, i * 0.08, 0.16, 0, 0, Math.PI / 2); add(C.btip, C['band' + weapon], i * 0.08 + 0.24, 0.16, 0, 0, -Math.PI / 2); }
+        } else if (weapon === 'shotgun') {       // kırmızı saçma fişekleri, pirinç dipli
+            C.shell = C.shell || new THREE.CylinderGeometry(0.045, 0.045, 0.14, 10);
+            C.base = C.base || new THREE.CylinderGeometry(0.047, 0.047, 0.04, 10);
+            for (let i = -1; i <= 1; i++) { add(C.shell, C['band' + weapon], i * 0.12, 0.22, 0); add(C.base, brass, i * 0.12, 0.15, 0); }
+        } else if (weapon === 'sniper') {        // uzun ince mermiler
+            C.long = C.long || new THREE.CylinderGeometry(0.025, 0.025, 0.24, 8);
+            C.ltip = C.ltip || new THREE.ConeGeometry(0.025, 0.08, 8);
+            for (let i = -1; i <= 1; i++) { add(C.long, brass, i * 0.09, 0.25, 0); add(C.ltip, dark, i * 0.09, 0.41, 0); }
+        } else if (weapon === 'smg') {           // siyah şarjör
+            C.mag = C.mag || new THREE.BoxGeometry(0.07, 0.3, 0.12);
+            add(C.mag, dark, 0, 0.27, 0, 0.15);
+            C.stip = C.stip || new THREE.ConeGeometry(0.02, 0.05, 8);
+            add(C.stip, brass, 0, 0.44, 0.02);
+        } else {                                 // iki küçük roket
+            C.rbody = C.rbody || new THREE.CylinderGeometry(0.05, 0.05, 0.3, 10);
+            C.rtip = C.rtip || new THREE.ConeGeometry(0.05, 0.1, 10);
+            const olive = C.olive || (C.olive = glowMat(0x4d5a2e));
+            for (const dx of [-0.08, 0.08]) { add(C.rbody, olive, dx, 0.28, 0); add(C.rtip, C['band' + weapon], dx, 0.48, 0); }
+        }
     } else if (type === 'shield') {
         // Mavi kalkan plakası, ortasında açık renkli artı
         C.plate = C.plate || new THREE.BoxGeometry(0.42, 0.5, 0.08);
@@ -337,30 +505,39 @@ function maybeDrop(x, y, z) {
     let r = Math.random() * DROP_IDS.reduce((s, id) => s + DROP_TYPES[id].weight, 0);
     let type = DROP_IDS[0];
     for (const id of DROP_IDS) { r -= DROP_TYPES[id].weight; if (r <= 0) { type = id; break; } }
-    spawnDrop(type, x, y, z);
+    let weapon = null;
+    if (type === 'ammo') { weapon = pickAmmoWeapon(); if (!weapon) type = 'gold'; }
+    spawnDrop(type, x, y, z, weapon);
 }
 
-function spawnDrop(type, x, y, z) {
-    const t = DROP_TYPES[type];
+function spawnDrop(type, x, y, z, weapon = null) {
+    if (type === 'ammo' && !AMMO_INFO[weapon]) weapon = 'crossbow';
+    const info = type === 'ammo' ? AMMO_INFO[weapon] : null;
+    const amount = info ? info.amount() : 0;
+    // Cephane etiketinde silahın cephanesi ve adı yazar: "🏹 OK +5 / Yaylı Tüfek"
+    const t = info ? { icon: info.icon, name: `${info.unit} +${amount}`, sub: WEAPONS[weapon].name, color: info.color }
+                   : DROP_TYPES[type];
     const C = dropCache[type] || (dropCache[type] = {});
     const root = new THREE.Group();
     root.position.set(x, y, z);
-    const item = dropModel(type);
+    const item = dropModel(type, weapon);
     item.position.y = 0.6;
     root.add(item);
     // Yerde parlayan halka
     C.ringGeo = C.ringGeo || new THREE.RingGeometry(0.45, 0.6, 28);
-    C.ringMat = C.ringMat || new THREE.MeshBasicMaterial({ color: t.color, transparent: true, opacity: 0.55, side: THREE.DoubleSide, depthWrite: false });
-    const ring = new THREE.Mesh(C.ringGeo, C.ringMat);
+    const rk = 'ringMat' + t.color;
+    C[rk] = C[rk] || new THREE.MeshBasicMaterial({ color: t.color, transparent: true, opacity: 0.55, side: THREE.DoubleSide, depthWrite: false });
+    const ring = new THREE.Mesh(C.ringGeo, C[rk]);
     ring.rotation.x = -Math.PI / 2; ring.position.y = 0.03;
     root.add(ring);
     // Etiket
-    C.label = C.label || dropLabel(t);
-    const label = C.label.clone();
-    label.position.y = 1.25;
+    const lk = 'label' + (info ? weapon + amount : '');
+    C[lk] = C[lk] || dropLabel(t);
+    const label = C[lk].clone();
+    label.position.y = info ? 1.35 : 1.25;
     root.add(label);
     scene.add(root);
-    drops.push({ type, mesh: root, item, ring, baseY: y, life: CFG.dropLife, t: Math.random() * 6 });
+    drops.push({ type, weapon, amount, mesh: root, item, ring, baseY: y, life: CFG.dropLife, t: Math.random() * 6 });
     if (drops.length > 15) removeDrop(0);
 }
 
@@ -370,15 +547,16 @@ function removeDrop(i) {
 }
 
 // Alınabiliyorsa etkisini uygular ve true döner (dolu kalkan / bomba çantası alınmaz)
-function applyDrop(type) {
+function applyDrop(type, weapon, amount) {
     switch (type) {
-        case 'ammo':
-            WEAPON_ORDER.forEach(id => {
-                const a = player.arsenal[id];
-                if (player.ownedWeapons[id] && a && a.pool !== Infinity) a.pool += magSize(id);
-            });
-            addKillFeed('+ Cephane (her silaha bir şarjör)', false);
+        case 'ammo': {
+            const a = player.arsenal[weapon];
+            if (!a || !AMMO_INFO[weapon]) return false;
+            a.pool += amount;
+            addKillFeed(`${AMMO_INFO[weapon].icon} +${amount} ${AMMO_INFO[weapon].word} (${WEAPONS[weapon].name}) → ${a.ammo}/${a.pool}`, false);
+            if (weapon === player.weapon) flashClass('ammoHud', 'gain', 700);   // elindeki silahsa mermi göstergesi yeşil yanar
             return true;
+        }
         case 'shield':
             if (player.armor >= CFG.armorAmount) return false;
             player.armor = Math.min(CFG.armorAmount, player.armor + 25);
@@ -408,7 +586,7 @@ function updateDrops(dt) {
         d.ring.scale.setScalar(1 + Math.sin(d.t * 4) * 0.08);
         m.visible = d.life > 4 || Math.floor(d.life * 6) % 2 === 0;   // kaybolmadan önce yanıp söner
         if (Math.hypot(m.position.x - camera.position.x, m.position.z - camera.position.z) < 1.4 &&
-            Math.abs(feet - d.baseY) < 1.6 && applyDrop(d.type)) {
+            Math.abs(feet - d.baseY) < 1.6 && applyDrop(d.type, d.weapon, d.amount)) {
             sfx('pickup');
             runStats.pickups++;
             removeDrop(i);

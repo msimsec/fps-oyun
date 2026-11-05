@@ -81,7 +81,7 @@ function tryShoot() {
     }
     if (w.rocket) {
         spawnRocket(origin, dir, w.speed, damage, w.blastRadius, w.life);
-        weaponKick = 0.22;
+        weaponKick = 0.32;
         sfx('shoot_rocket');
         if (a.ammo === 0) startReload();
         return;

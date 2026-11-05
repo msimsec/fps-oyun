@@ -122,7 +122,7 @@ const WEAPONS = {
         // Roketatar: yavaş giden roket bir şeye çarpınca patlar; patlama alan hasarı verir
         // (hasar = temel hasar × dmgMul, merkezden uzaklaştıkça azalır). Çok yakına atılırsa sana da vurur.
         name: 'Roketatar', auto: false, rocket: true, interval: 0.9, dmgMul: 6, pellets: 1, spread: 0,
-        blastRadius: 4.5, mag: 4, startPool: 12, killAmmo: 1, reload: 2.2, speed: 30, life: 3, cost: 600
+        blastRadius: 4.5, mag: 4, startPool: 12, killAmmo: 1, reload: 2.2, speed: 24, life: 3.5, cost: 600
     }
 };
 

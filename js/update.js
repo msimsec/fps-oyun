@@ -221,12 +221,21 @@ function animate() {
         if (state === 'playing') updateEnemies(dt);
         updateParticles(dt);
         updateCorpses(dt);
-        if (state === 'playing') { updateGrenades(dt); updateRockets(dt); updateBolts(dt); updateDrops(dt); }
+        if (state === 'playing') { updateGrenades(dt); updateRockets(dt); updateBolts(dt); updateDrops(dt); updateFx(dt); }
         updateHitDirections(dt);
         updateHUD();
     }
     updateFloaters(dt);
     updateMapEffects(dt);
 
-    renderer.render(scene, camera);
+    // Ekran sarsıntısı (patlama, roket): yalnızca çizim için kamerayı titret, sonra eski açıya dön
+    if (camShake > 0 && state === 'playing') {
+        const k = camShake * camShake * 0.05;
+        camera.rotation.x = cameraAngleX + (Math.random() - 0.5) * k;
+        camera.rotation.y = cameraAngleY + (Math.random() - 0.5) * k;
+        renderer.render(scene, camera);
+        applyCameraRotation();
+    } else {
+        renderer.render(scene, camera);
+    }
 }

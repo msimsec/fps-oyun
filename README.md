@@ -30,7 +30,7 @@ Dalgalar ilerledikçe düşmanlar yetenek kazanır: **2. dalga** zıplama (alça
 
 **Bomba (G):** Her ele 2 bombayla başlanır (en fazla 4). Atılan bomba sekerek yuvarlanır, 1.8 sn sonra patlar; 6 birim içindeki düşmanlara uzaklıkla azalan hasar verir, duvarın arkasındakiler korunur. Çok yakındaysan sana da yarı hasar verir. Her dalga sonunda +1 bomba.
 
-**Yerden toplananlar:** Ölen düşman %35 ihtimalle bir eşya düşürür. Her eşyanın üstünde ne olduğunu yazan renkli bir etiket ve altında parlayan bir halka vardır: **🔫 CEPHANE** (mermili yeşil kutu, her silaha bir şarjör), **🛡️ KALKAN +25** (artılı mavi plaka), **🪙 ALTIN** (altın paralar) ya da **💣 BOMBA +1** (pimli el bombası). Üstünden geçince alınır; 20 sn sonra (son saniyelerde yanıp sönerek) kaybolur.
+**Yerden toplananlar:** Ölen düşman %35 ihtimalle bir eşya düşürür. Her eşyanın üstünde ne olduğunu yazan renkli bir etiket ve altında parlayan bir halka vardır. **Cephane silaha özeldir:** 🏹 OK +5 (Yaylı Tüfek), 🔴 SAÇMA +6 (Av Tüfeği), 🎯 MERMİ +5 (Keskin Nişancı), 🔫 MERMİ +şarjör (Taramalı Tabanca), 🚀 ROKET +2 (Roketatar); yalnızca sahip olduğun silahlarınki düşer, elindeki silahın yedeği azsa onunki daha sık düşer. Diğerleri: **🛡️ KALKAN +25**, **🪙 ALTIN**, **💣 BOMBA +1**. Üstünden geçince alınır; ne alındığı sağ üstte yazar. 20 sn sonra (son saniyelerde yanıp sönerek) kaybolur.
 
 **Geri bildirim:** Vurulunca nişangâhın çevresinde atışın geldiği yönü gösteren kırmızı bir yay çıkar. Ölen düşman geriye doğru yığılıp yere gömülür; kafadan vurulursa kafası parçalanır.
 
@@ -63,7 +63,7 @@ Her iki modun zorluğu **Ayarlar** ekranından ayrı ayrı seçilir (Kolay / Ort
 | 4 | Av Tüfeği | Pompalı, 8 saçma, yakında çok güçlü, menzili kısa | Mağaza, 250 altın |
 | 5 | Keskin Nişancı | 5x hasar, dürbün | Mağaza, 400 altın |
 | 6 | Taramalı Tabanca | Tamamı siyah AR tipi; çok hızlı otomatik ateş, 0.5x hasar, 40'lık şarjör (mağazadan 70'e büyür) | Mağaza, 300 altın |
-| 7 | Roketatar | Roket çarptığı yerde patlar, 4.5 birimlik alan hasarı (6x); çok yakındaysan sana da vurur | Mağaza, 600 altın |
+| 7 | Roketatar | Roket namludan alev ve duman izi bırakarak uçar, çarptığı yerde patlar (ateş topu, duman, ekran sarsıntısı); 4.5 birimlik alan hasarı (6x); çok yakındaysan sana da vurur | Mağaza, 600 altın |
 
 Silahları birinci şahıs görünümde eldivenli eller tutar.
 
@@ -145,4 +145,4 @@ python3 -m http.server 8000
 
 ## Kayıtlar
 
-Altın, yükseltmeler, silahlar, skinler, ayarlar, rekorlar ve başarımlar tarayıcının `localStorage` alanında, oyuncu başına ayrı anahtarlarla (`fps_save_v2::<profil>` gibi) saklanır. Başka bir tarayıcıya veya cihaza taşınmaz. v1.1'den kalan kayıt ilk açılışta "Oyuncu 1" profiline taşınır.
+Altın, yükseltmeler, silahlar, skinler, ayarlar, rekorlar ve başarımlar tarayıcının `localStorage` alanında, oyuncu başına ayrı anahtarlarla (`fps_save_v2::<profil>` gibi) saklanır. Başka bir tarayıcıya veya cihaza taşınmaz. Altın ve satın alınanlar anında kaydedilir; tarayıcı ya da sekme oyunun ortasında kapatılsa bile o elin skoru ve dalgası rekorlara yazılır. v1.1'den kalan kayıt ilk açılışta "Oyuncu 1" profiline taşınır.

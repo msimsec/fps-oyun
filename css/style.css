@@ -492,3 +492,4 @@ kbd {
 .btn.danger-btn { background: #dc2626; color: #ffffff; }
 .btn.danger-btn:hover { background: #ef4444; box-shadow: 0 0 15px rgba(239, 68, 68, 0.8); }
 #dialogBox { z-index: 400; }   /* menülerin (100) ve mağazanın (200) üstünde */
+.ammo-hud.gain { box-shadow: 0 0 16px rgba(74, 222, 128, 0.8); border-color: #4ade80; }
