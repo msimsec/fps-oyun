@@ -20,9 +20,10 @@ Ana menüdeki **BÖLÜM SEÇ** kısmından oynanacak harita seçilir (seçim oyu
 ## Oyun modları
 
 - **Dalga modu:** Düşmanlar dalgalar halinde gelir. Her dalga bir öncekinden kalabalık ve güçlüdür. Dalga temizlenince bonus altın ve skor verilir, kısa bir moladan sonra sıradaki dalga başlar.
+- **Yarım kalan el (DEVAM ET):** Dalga modundaki el birkaç saniyede bir, ana menüye dönünce ve tarayıcı kapanırken kaydedilir. Ana menüde yeşil **DEVAM ET ▶** butonu eli kaldığı yerden sürdürür (bölüm, zorluk, dalga, can, kalkan, skor, cephane, bomba, konum, sahadaki düşmanlar ve yerdeki eşyalar). Yarım kalan el varken OYUNA BAŞLA önce sorar; el bitince kayıt silinir. Düello kaydedilmez.
 - **1v1 Düello:** Sağa sola kayan ve sürekli ateş eden mor bota karşı teke tek. Botun canı ekranın üstündeki çubukta görünür.
 
-Dalga modunda 4 düşman tipi vardır: **Er** (kırmızı), **Koşucu** (turuncu, hızlı ama zayıf, 2. dalgadan itibaren), **Nişancı** (mavi, uzakta durup isabetli ateş eder, 3. dalgadan itibaren) ve **Zırhlı** (gri, iri, çok dayanıklı, 2.5 kat ödül, 4. dalgadan itibaren).
+Düşmanların kafasında kendi renginde kızgın bir yüz (çatık kaşlar, dişli ağız) vardır. Dalga modunda 4 düşman tipi vardır: **Er** (kırmızı), **Koşucu** (turuncu, hızlı ama zayıf, 2. dalgadan itibaren), **Nişancı** (mavi, uzakta durup isabetli ateş eder, 3. dalgadan itibaren) ve **Zırhlı** (gri, iri, çok dayanıklı, 2.5 kat ödül, 4. dalgadan itibaren).
 
 Dalgalar ilerledikçe düşmanlar yetenek kazanır: **2. dalga** zıplama (alçak kasa ve siperlerin üstüne çıkar, kasaya çıkan oyuncunun yanına zıplar), **3. dalga** rampa kullanma (Space'te oyuncunun platformuna en kısa rampa yoluyla gelir), **4. dalga** vurulunca yana kaçma, **5. dalga** keskin nişan (daha isabetli ve sık ateş). Yeni yetenek dalga başında duyurulur.
 
@@ -63,7 +64,7 @@ Her iki modun zorluğu **Ayarlar** ekranından ayrı ayrı seçilir (Kolay / Ort
 | 4 | Av Tüfeği | Pompalı, 8 saçma, yakında çok güçlü, menzili kısa | Mağaza, 250 altın |
 | 5 | Keskin Nişancı | 5x hasar, dürbün | Mağaza, 400 altın |
 | 6 | Taramalı Tabanca | Tamamı siyah AR tipi; çok hızlı otomatik ateş, 0.5x hasar, 40'lık şarjör (mağazadan 70'e büyür) | Mağaza, 300 altın |
-| 7 | Roketatar | Roket namludan alev ve duman izi bırakarak uçar, çarptığı yerde patlar (ateş topu, duman, ekran sarsıntısı); 4.5 birimlik alan hasarı (6x); çok yakındaysan sana da vurur | Mağaza, 600 altın |
+| 7 | Roketatar | Roket namludan alev ve duman izi bırakarak uçar, çarptığı yerde patlar (ateş topu, duman, ekran sarsıntısı). Doğrudan isabet tam hasar; yanına düşerse canın bir kısmı gider (çok yakında ~yarısı, uzaklaştıkça azalır); çok yakındaysan sana da vurur | Mağaza, 600 altın |
 
 Silahları birinci şahıs görünümde eldivenli eller tutar.
 
@@ -125,6 +126,7 @@ js/
   waves.js        Dalga sistemi
   records.js      Rekorlar (bölüm ve zorluk başına)
   achievements.js Başarımlar
+  resume.js       Yarım kalan eli kaydetme ve DEVAM ET
   update.js       Oyun döngüsü, hareket/zıplama, HUD
   shop.js         Mağaza
   settings.js     Ayarlar ekranı

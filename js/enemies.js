@@ -9,6 +9,49 @@ function typeMat(color) {
     return typeMatCache[color] || (typeMatCache[color] = new THREE.MeshStandardMaterial({ color, roughness: 0.45 }));
 }
 
+// Düşman yüzü: tipin renginde kare kafa, çatık kaşlar, beyaz gözler, dişli kızgın ağız.
+// Doku yalnızca kafanın ön yüzüne (oyuncuya bakan +z) basılır; diğer yüzler düz renk.
+const faceMatCache = {};
+function faceMaterials(color) {
+    if (faceMatCache[color]) return faceMatCache[color];
+    const c = document.createElement('canvas');
+    c.width = c.height = 128;
+    const ctx = c.getContext('2d');
+    const hex = '#' + color.toString(16).padStart(6, '0');
+    ctx.fillStyle = hex; ctx.fillRect(0, 0, 128, 128);
+    ctx.fillStyle = 'rgba(0,0,0,0.18)';                       // kenarlarda hafif gölge (yuvarlak görünüm)
+    ctx.fillRect(0, 0, 128, 6); ctx.fillRect(0, 122, 128, 6); ctx.fillRect(0, 0, 6, 128); ctx.fillRect(122, 0, 6, 128);
+    // Çatık kaşlar
+    ctx.strokeStyle = '#111'; ctx.lineWidth = 9; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(18, 30); ctx.lineTo(54, 38); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(110, 30); ctx.lineTo(74, 38); ctx.stroke();
+    // Gözler: beyaz, koyu göz bebeği
+    for (const x of [38, 90]) {
+        ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(x, 55, 13, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = '#111'; ctx.lineWidth = 3; ctx.stroke();
+        ctx.fillStyle = '#0b2e1a'; ctx.beginPath(); ctx.arc(x - 1, 56, 6, 0, Math.PI * 2); ctx.fill();
+    }
+    // Ağız: koyu yeşil, üstte ve altta beyaz üçgen dişler
+    ctx.fillStyle = '#062312';
+    ctx.beginPath();
+    if (ctx.roundRect) ctx.roundRect(22, 76, 84, 36, 9); else ctx.rect(22, 76, 84, 36);
+    ctx.fill();
+    ctx.fillStyle = '#f8fafc';
+    for (let i = 0; i < 5; i++) {
+        const x = 30 + i * 16;
+        ctx.beginPath(); ctx.moveTo(x - 6, 78); ctx.lineTo(x + 6, 78); ctx.lineTo(x, 94); ctx.fill();      // üst dişler
+    }
+    for (let i = 0; i < 4; i++) {
+        const x = 38 + i * 16;
+        ctx.beginPath(); ctx.moveTo(x - 6, 110); ctx.lineTo(x + 6, 110); ctx.lineTo(x, 96); ctx.fill();    // alt dişler
+    }
+    const tex = new THREE.CanvasTexture(c);
+    const plain = new THREE.MeshStandardMaterial({ color, roughness: 0.5 });
+    const face = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.6 });
+    // BoxGeometry yüz sırası: +x, -x, +y, -y, +z (ön), -z (arka)
+    return (faceMatCache[color] = [plain, plain, plain, plain, face, plain]);
+}
+
 class HumanoidEnemy {
     // hpMul / speedMul: dalga ilerledikçe düşmanlar güçlenir; typeId: ENEMY_TYPES anahtarı
     constructor(x, z, isDuel = false, hpMul = 1, speedMul = 1, typeId = 'grunt') {
@@ -19,11 +62,11 @@ class HumanoidEnemy {
         this.radius = 0.6 * this.scale / CFG.enemyScale;   // iri düşmanlar duvara daha erken değer
         this.group = new THREE.Group();
         const bm = isDuel ? MAT.duelBody : typeMat(this.type.body);
-        const hm = isDuel ? MAT.duelHead : typeMat(this.type.head);
 
         const body = new THREE.Mesh(GEO.body, bm);
         body.position.y = 0.6; body.castShadow = true;
-        const head = new THREE.Mesh(GEO.head, hm);
+        // Kafa: tipin renginde kızgın yüz (düello botu mor)
+        const head = new THREE.Mesh(GEO.head, faceMaterials(isDuel ? 0xa855f7 : this.type.face || this.type.body));
         head.position.y = 1.45; head.castShadow = true;
         const la = new THREE.Mesh(GEO.arm, bm); la.position.set(-0.6, 0.6, 0);
         const ra = new THREE.Mesh(GEO.arm, bm); ra.position.set(0.6, 0.6, 0);
@@ -39,12 +82,13 @@ class HumanoidEnemy {
         } else if (typeId === 'sniper' && !isDuel) {
             const gun = new THREE.Mesh(GEO.longGun, typeMat(0x111827));
             gun.position.set(0.6, 0.85, 0.55);
+            // Alnında dürbün gözlüğü (gözleri kapatmasın diye kaşların üstünde)
             const visor = new THREE.Mesh(GEO.visor, typeMat(0x22d3ee));
-            visor.position.set(0, 1.5, 0.26);
+            visor.position.set(0, 1.69, 0.2);
             this.group.add(gun, visor);
         } else if (typeId === 'runner' && !isDuel) {
             const band = new THREE.Mesh(GEO.headband, typeMat(0x111827));
-            band.position.set(0, 1.55, 0);
+            band.position.set(0, 1.68, 0);       // kafanın tepesinde (yüzü kapatmasın)
             this.group.add(band);
         }
 

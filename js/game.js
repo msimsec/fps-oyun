@@ -58,6 +58,7 @@ function startRun(duel) {
     initAudio();
     // Tıklanan buton odakta kalırsa oyun sırasında Space/Enter onu tekrar tetikleyebilir
     if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+    if (!duel) clearRunSnapshot();          // yeni dalga eli: eski yarım kalan el silinir
     resetWorld(duel);
     hideAllScreens();
     state = 'starting';
@@ -82,7 +83,7 @@ function goToMenu() {
     if (document.pointerLockElement) document.exitPointerLock();
     // Dalga modundan yarıda çıkılırsa o ana kadarki skor/dalga yine rekorlara işlensin
     // (düellodan çıkmak galibiyet ya da mağlubiyet sayılmaz)
-    if (run.active && !isDuelMode) updateRecords(false);
+    if (run.active && !isDuelMode) { updateRecords(false); saveRunSnapshot(); }   // DEVAM ET ile sürdürülebilir
     run.active = false;
     hideBanner();
     state = 'menu';
@@ -97,6 +98,7 @@ function endRun(won) {
     setZoom(false);
     hideBanner();
     saveGameData();
+    if (!isDuelMode) clearRunSnapshot();    // el bitti: sürdürülecek bir şey kalmadı
     const broken = updateRecords(won);
     sfx(won ? 'win' : 'lose');
 
