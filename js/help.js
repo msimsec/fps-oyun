@@ -160,6 +160,7 @@ const HELP_SECTIONS = [
     ] },
     { id: 'progress', title: '🏆 Rekorlar ve Başarımlar', lines: () => [
         'REKORLAR ekranında her bölüm için ayrı sekme vardır; her zorluk seviyesinin en iyi skoru, en uzak dalgası ve düello sonuçları yazar.',
+        'En iyi skorun ve en hızlı düello galibiyetinin altında rekorun kırıldığı gün ve saat yazar (bu özellikten önceki eski rekorlarda "tarih yok").',
         'Rekor kırınca oyun sonu ekranında "YENİ REKOR" yazar.',
         'Rekor ekranındaki Sıfırla yalnızca seçili bölümün rekorlarını siler; önce onay sorulur.',
         `BAŞARIMLAR ekranında ${ACHIEVEMENTS.length} başarım vardır; her biri bir kez açılır ve altın ödülü verir.`,

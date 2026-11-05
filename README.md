@@ -72,7 +72,7 @@ Kafa vuruşu her silahta 2 kat hasar verir. Mağazadaki "Silah Hasarı" yükselt
 
 ## Rekorlar ve başarımlar
 
-**Rekorlar** her bölüm için ayrı tutulur; rekor ekranının üstündeki sekmelerden bölüm seçilir. (Bölüm ayrımından önceki rekorlar Depo'ya aktarılır.)
+**Rekorlar** her bölüm için ayrı tutulur; en iyi skorun ve en hızlı düellonun kırıldığı tarih ve saat de yazar; rekor ekranının üstündeki sekmelerden bölüm seçilir. (Bölüm ayrımından önceki rekorlar Depo'ya aktarılır.)
 
 **Başarımlar** ana menüdeki **BAŞARIMLAR 🎖️** ekranındadır. Her biri bir kez açılır ve altın verir:
 
