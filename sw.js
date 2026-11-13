@@ -7,7 +7,7 @@
 //  yayınlanınca hemen gelir. Önbellek adı sürüm anahtarıyla (?v=) değişir; eski önbellek silinir.
 //  Her yayında VERSION, index.html'deki ?v= değeriyle aynı olmalı.
 // =====================================================================
-const VERSION = '20261113c';
+const VERSION = '20261113d';
 const CACHE = 'fps-oyun-' + VERSION;
 const FILES = [
     './',
@@ -28,6 +28,7 @@ const FILES = [
     'js/world.js?v=' + VERSION,
     'js/maps.js?v=' + VERSION,
     'js/input.js?v=' + VERSION,
+    'js/touch.js?v=' + VERSION,
     'js/game.js?v=' + VERSION,
     'js/weapons.js?v=' + VERSION,
     'js/enemies.js?v=' + VERSION,

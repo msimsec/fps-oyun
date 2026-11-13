@@ -46,7 +46,20 @@ function setDifficulty(kind, value) {
     updateDifficultyInfo();
 }
 
+function setTouchMode(value) {
+    if (!TOUCH_MODES.includes(value)) return;
+    settings.touch = value;
+    saveSettings();
+    applyTouchMode();
+    updateSettingsScreen();
+    updateMobileNote();
+}
+
 function updateSettingsScreen() {
+    $('touchButtons').querySelectorAll('.seg-btn').forEach(b => b.classList.toggle('active', b.dataset.value === settings.touch));
+    $('touchDesc').textContent = touchActive()
+        ? 'Dokunmatik kontroller AÇIK: sol yarıda çubukla yürü, sağ yarıda kaydırarak nişan al, butonlarla ateş et.'
+        : 'Dokunmatik kontroller kapalı: klavye ve fare ile oynanır.' + (touchDevice() ? ' (Bu cihaz dokunmatik; Otomatik ya da Açık seç.)' : '');
     $('gameDiffButtons').querySelectorAll('.seg-btn').forEach(b => b.classList.toggle('active', b.dataset.value === settings.game));
     $('duelDiffButtons').querySelectorAll('.seg-btn').forEach(b => b.classList.toggle('active', b.dataset.value === settings.duel));
     $('sensSlider').value = settings.sens;

@@ -85,6 +85,7 @@ function onPointerLockChange() {
 }
 
 function requestLock() {
+    if (touchActive()) { touchStartPlaying(); return; }   // dokunmatik: fare kilidi yok
     try {
         const p = canvas.requestPointerLock();
         if (p && typeof p.catch === 'function') p.catch(lockFailed);

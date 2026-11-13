@@ -3,7 +3,7 @@
 // =====================================================================
 //  GÜNCELLEMELER (dt = saniye)
 // =====================================================================
-const isMoving = () => keys.forward || keys.back || keys.left || keys.right;
+const isMoving = () => keys.forward || keys.back || keys.left || keys.right || touchMove.active;
 // İleri giderken, yerdeyken ve dürbünsüzken koşulur
 const isSprinting = () => keys.sprint && keys.forward && player.onGround && !player.zoomed && !keys.crouch && !isCrouching();
 // Çömelik sayılır: tuş basılı ya da hâlâ kalkıyor (göz hizası tam yükselmedi)
@@ -38,17 +38,24 @@ function updatePlayer(dt) {
     f.y = 0; f.normalize();
     const rx = -f.z, rz = f.x;      // kameranın sağ yönü
 
-    let mx = 0, mz = 0;
-    if (keys.forward) { mx += f.x; mz += f.z; }
-    if (keys.back) { mx -= f.x; mz -= f.z; }
-    if (keys.right) { mx += rx; mz += rz; }
-    if (keys.left) { mx -= rx; mz -= rz; }
+    let mx = 0, mz = 0, analog = 1;
+    if (touchMove.active) {
+        // Dokunmatik çubuk: her yöne, itme miktarıyla orantılı hız (yarım itme = yarım hız)
+        mx = f.x * touchMove.y + rx * touchMove.x;
+        mz = f.z * touchMove.y + rz * touchMove.x;
+        analog = Math.min(1, Math.hypot(touchMove.x, touchMove.y));
+    } else {
+        if (keys.forward) { mx += f.x; mz += f.z; }
+        if (keys.back) { mx -= f.x; mz -= f.z; }
+        if (keys.right) { mx += rx; mz += rz; }
+        if (keys.left) { mx -= rx; mz -= rz; }
+    }
     const len = Math.hypot(mx, mz);
     const feet = footY();
     if (len > 0) {
         const speed = CFG.playerSpeed * speedMul() * (isSprinting() ? CFG.sprintMul : 1) * (player.zoomed ? 0.5 : 1) *
             (isCrouching() ? CFG.crouchSpeed : 1);
-        const s = speed * dt / len;   // çapraz giderken hız artmaz
+        const s = speed * analog * dt / len;   // çapraz giderken hız artmaz
         moveWithCollision(camera.position, mx * s, mz * s, CFG.playerRadius, feet);
     }
     // Rampanın verdiği yatay hız (havadayken)
@@ -233,6 +240,7 @@ function animate() {
         if (state === 'playing') { updateGrenades(dt); updateRockets(dt); updateBolts(dt); updateDrops(dt); updateFx(dt); }
         updateHitDirections(dt);
         updateHUD();
+        updateTouchUI();
     }
     updateFloaters(dt);
     updateMapEffects(dt);

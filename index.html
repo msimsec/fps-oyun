@@ -2,10 +2,10 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>3D Tactical FPS - 1v1 Düello ve Tüfek Skinleri</title>
     <!-- ?v=… : her yayında değiştirilir (tarih); tarayıcı önbellekteki eski CSS/JS dosyalarını kullanmasın -->
-    <link rel="stylesheet" href="css/style.css?v=20261113c">
+    <link rel="stylesheet" href="css/style.css?v=20261113d">
     <!-- Uygulama olarak kurulabilme (PWA): ad, ikon, tam ekran; internetsiz açılış için sw.js -->
     <link rel="manifest" href="manifest.webmanifest">
     <meta name="theme-color" content="#050914">
@@ -52,6 +52,22 @@
         <div class="kill-feed" id="killFeed"></div>
     </div>
 
+    <!-- Dokunmatik kontroller (yalnızca body.touch iken ve oyun sırasında görünür) -->
+    <div id="touchUI">
+        <div id="touchPad"></div>
+        <div id="touchStick"><div id="touchKnob"></div></div>
+        <button class="tbtn tpause" data-act="pause" aria-label="Duraklat">⏸</button>
+        <button class="tbtn tfire" id="touchFire" aria-label="Ateş">🔥</button>
+        <button class="tbtn tjump" data-act="jump" aria-label="Zıpla">⤒</button>
+        <button class="tbtn tcrouch" id="touchCrouch" data-act="crouch" aria-label="Çömel">⬇</button>
+        <button class="tbtn treload" data-act="reload" aria-label="Şarjör">↻</button>
+        <button class="tbtn tgrenade" data-act="grenade" aria-label="Bomba">💣</button>
+        <button class="tbtn tweapon" data-act="weapon" aria-label="Silah değiştir">⇄</button>
+        <button class="tbtn tscope" id="touchScope" data-act="scope" aria-label="Dürbün" hidden>🔭</button>
+        <button class="tbtn tlight" id="touchLight" data-act="light" aria-label="Fener" hidden>🔦</button>
+    </div>
+    <div id="rotateHint">📱↻ Oynamak için cihazı yan çevir</div>
+
     <!-- Giriş: kim oynuyor? -->
     <div class="overlay" id="profileScreen">
         <h1 class="cyan">KİM OYNUYOR?</h1>
@@ -93,7 +109,14 @@
             <button class="link-btn" onclick="openProfiles()">Oyuncu değiştir</button></div>
         <h1 class="cyan">3D TACTICAL FPS</h1>
         <div class="version">v1.6</div>
-        <div class="controls">
+        <div class="controls touch-controls-info">
+            <div><kbd>Sol yarı</kbd> Parmağını koy, çubukla yürü (sonuna kadar ileri: koş)</div>
+            <div><kbd>Sağ yarı</kbd> Kaydırarak nişan al</div>
+            <div><kbd>🔥</kbd> Ateş (basılı tut, kaydırınca nişan da döner)</div>
+            <div><kbd>⤒ ⬇ ↻ 💣 ⇄</kbd> Zıpla · Çömel · Şarjör · Bomba · Silah</div>
+            <div><kbd>🔭 🔦 ⏸</kbd> Dürbün · Fener · Duraklat</div>
+        </div>
+        <div class="controls key-controls-info">
             <div><kbd>W A S D</kbd> Hareket</div>
             <div><kbd>Shift</kbd> Koş</div>
             <div><kbd>Space</kbd> Zıpla</div>
@@ -209,7 +232,7 @@
             <div class="settings-desc" id="duelDiffDesc"></div>
         </div>
         <div class="settings-group">
-            <div class="settings-label">Fare Hassasiyeti</div>
+            <div class="settings-label">Fare / Dokunmatik Bakış Hassasiyeti</div>
             <div class="sens-row">
                 <input type="range" id="sensSlider" min="0.2" max="3" step="0.1" oninput="setSensitivity(this.value)">
                 <span class="sens-value" id="sensValue">1.0x</span>
@@ -223,6 +246,15 @@
                 <span class="sens-value" id="volumeValue">60%</span>
             </div>
             <div class="settings-desc">0% sesi tamamen kapatır</div>
+        </div>
+        <div class="settings-group">
+            <div class="settings-label">Dokunmatik Kontroller (tablet / telefon)</div>
+            <div class="seg" id="touchButtons">
+                <button class="seg-btn normal" data-value="auto" onclick="setTouchMode('auto')">OTOMATİK</button>
+                <button class="seg-btn easy" data-value="on" onclick="setTouchMode('on')">AÇIK</button>
+                <button class="seg-btn hard" data-value="off" onclick="setTouchMode('off')">KAPALI</button>
+            </div>
+            <div class="settings-desc" id="touchDesc"></div>
         </div>
         <div class="note" id="settingsNote"></div>
         <div class="menu-buttons">
@@ -331,28 +363,29 @@
         </div>
     </div>
 
-    <script src="js/profiles.js?v=20261113c"></script>
-    <script src="js/config.js?v=20261113c"></script>
-    <script src="js/save.js?v=20261113c"></script>
-    <script src="js/state.js?v=20261113c"></script>
-    <script src="js/utils.js?v=20261113c"></script>
-    <script src="js/audio.js?v=20261113c"></script>
-    <script src="js/feedback.js?v=20261113c"></script>
-    <script src="js/world.js?v=20261113c"></script>
-    <script src="js/maps.js?v=20261113c"></script>
-    <script src="js/input.js?v=20261113c"></script>
-    <script src="js/game.js?v=20261113c"></script>
-    <script src="js/weapons.js?v=20261113c"></script>
-    <script src="js/enemies.js?v=20261113c"></script>
-    <script src="js/items.js?v=20261113c"></script>
-    <script src="js/waves.js?v=20261113c"></script>
-    <script src="js/records.js?v=20261113c"></script>
-    <script src="js/achievements.js?v=20261113c"></script>
-    <script src="js/resume.js?v=20261113c"></script>
-    <script src="js/update.js?v=20261113c"></script>
-    <script src="js/shop.js?v=20261113c"></script>
-    <script src="js/settings.js?v=20261113c"></script>
-    <script src="js/help.js?v=20261113c"></script>
-    <script src="js/main.js?v=20261113c"></script>
+    <script src="js/profiles.js?v=20261113d"></script>
+    <script src="js/config.js?v=20261113d"></script>
+    <script src="js/save.js?v=20261113d"></script>
+    <script src="js/state.js?v=20261113d"></script>
+    <script src="js/utils.js?v=20261113d"></script>
+    <script src="js/audio.js?v=20261113d"></script>
+    <script src="js/feedback.js?v=20261113d"></script>
+    <script src="js/world.js?v=20261113d"></script>
+    <script src="js/maps.js?v=20261113d"></script>
+    <script src="js/input.js?v=20261113d"></script>
+    <script src="js/touch.js?v=20261113d"></script>
+    <script src="js/game.js?v=20261113d"></script>
+    <script src="js/weapons.js?v=20261113d"></script>
+    <script src="js/enemies.js?v=20261113d"></script>
+    <script src="js/items.js?v=20261113d"></script>
+    <script src="js/waves.js?v=20261113d"></script>
+    <script src="js/records.js?v=20261113d"></script>
+    <script src="js/achievements.js?v=20261113d"></script>
+    <script src="js/resume.js?v=20261113d"></script>
+    <script src="js/update.js?v=20261113d"></script>
+    <script src="js/shop.js?v=20261113d"></script>
+    <script src="js/settings.js?v=20261113d"></script>
+    <script src="js/help.js?v=20261113d"></script>
+    <script src="js/main.js?v=20261113d"></script>
 </body>
 </html>

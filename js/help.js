@@ -18,7 +18,7 @@ const HELP_SECTIONS = [
         'OYUNA BAŞLA dalga modunu, 1v1 DÜELLO bota karşı teke tek maçı başlatır.',
         'Oyun başlayınca fare ekrana kilitlenir. Kilitlenmezse ekrana bir kez tıkla.',
         'ESC oyunu duraklatır. Duraklatma menüsünden devam edebilir, mağazaya, ayarlara ya da ana menüye gidebilirsin.',
-        'Oyun klavye ve fare ile oynanır; dokunmatik ekranlarda oynanamaz.',
+        'Bilgisayarda klavye ve fare ile, tablet ve telefonda dokunmatik kontrollerle oynanır (ayrıntılar "Dokunmatik (Tablet / Telefon)" konusunda).',
         'Uygulama olarak yükle: Chrome ya da Edge\'de ana menüde UYGULAMA OLARAK YÜKLE 📲 butonu çıkar (ya da adres çubuğundaki yükle simgesi). Yüklenince oyun masaüstünden/başlat menüsünden kendi penceresinde, tam ekran açılır.',
         'İnternetsiz oynama: oyunu bir kez açtıktan sonra dosyaları bilgisayarda saklanır; internet yokken de açılır ve oynanır. Yeni sürüm çıkınca internet varken kendiliğinden gelir.',
         'Uygulama olarak yüklense de kayıtların aynı tarayıcıda durur: yüklü oyun ile tarayıcıdaki oyun aynı oyuncuları, altını ve rekorları görür.'
@@ -49,6 +49,19 @@ const HELP_SECTIONS = [
         'F: feneri aç / kapat (yalnızca Gece Limanı\'nda; bölüme girince açık gelir).',
         `1-${WEAPON_ORDER.length}: silah seç (${WEAPON_ORDER.map((id, i) => `${i + 1} ${WEAPONS[id].name}`).join(', ')}). Fare tekerleği de silahlar arasında gezer.`,
         'ESC: duraklat.'
+    ] },
+    { id: 'touch', title: '📱 Dokunmatik (Tablet / Telefon)', lines: () => [
+        'Tablet ve telefonda dokunmatik kontroller kendiliğinden açılır. Ayarlar → Dokunmatik Kontroller: OTOMATİK (dokunmatik ekranda açık), AÇIK (her zaman), KAPALI (klavye ve fare).',
+        'Cihazı yan çevirerek (yatay) oyna. Dik tutarsan oyun duraklar ve "cihazı yan çevir" yazar. Oyun başlarken mümkünse tam ekrana geçer.',
+        'Yürümek: ekranın sol yarısına parmağını koy, orada bir çubuk çıkar. Parmağını kaydırdığın yöne yürürsün; az itersen yavaş, çok itersen hızlı. Sonuna kadar ileri itersen koşarsın.',
+        'Nişan almak: ekranın sağ yarısında parmağını kaydır. Hassasiyeti Ayarlar\'daki "Fare / Dokunmatik Bakış Hassasiyeti" ile değiştirebilirsin.',
+        '🔥 ATEŞ (sağ altta büyük kırmızı buton): basılı tuttukça ateş eder (otomatik silahlar ve testere sürekli, diğerleri her dokunuşta bir). ATEŞ\'e basarken parmağını kaydırırsan nişan da döner: aynı anda yürüyüp nişan alıp ateş edebilirsin.',
+        '⤒ zıpla · ⬇ çömel (bir dokunuşla çömelir, tekrar dokununca kalkar; açıkken yeşil) · ↻ şarjör değiştir · 💣 bomba at · ⇄ sıradaki silaha geç.',
+        '🔭 dürbün yalnızca Keskin Nişancı elindeyken, 🔦 fener yalnızca Gece Limanı\'nda görünür. ⏸ (üst ortada) oyunu duraklatır.',
+        'Başka uygulamaya geçersen ya da ekran kilitlenirse oyun kendiliğinden duraklar; DEVAM ET ile sürersin.',
+        'Göstergeler (can, skor, altın, silah ve mermi) dokunmatikte ekranın üstündedir; alt köşeler çubuğa ve butonlara kalır.',
+        'En rahat oyun için oyunu uygulama olarak yükle (tarayıcı menüsünde "Ana ekrana ekle" / "Uygulamayı yükle"): tam ekran açılır, internetsiz de oynanır.',
+        'Tablet/telefonda oyun daha akıcı çalışsın diye görüntü çözünürlüğü ve gölge kalitesi biraz düşük tutulur.'
     ] },
     { id: 'modes', title: '⚔️ Oyun Modları', lines: () => [
         'DALGA MODU: Düşmanlar dalgalar halinde gelir. Ekranın sol üstünde dalga numarası ve kalan düşman sayısı yazar.',
@@ -183,6 +196,7 @@ const HELP_SECTIONS = [
         'Zorluk değişikliği bir sonraki elde geçerli olur (oynanan el aynı zorlukta biter).',
         `Fare Hassasiyeti: ${SENS_MIN}x ile ${SENS_MAX}x arasında; hemen geçerli olur.`,
         'Ses Düzeyi: %0 sesi tamamen kapatır.',
+        'Dokunmatik Kontroller: OTOMATİK / AÇIK / KAPALI (ayrıntılar "Dokunmatik" konusunda).',
         'Ayarlar her oyuncu için ayrı kaydedilir.'
     ] },
     { id: 'tips', title: '💡 İpuçları', lines: () => [

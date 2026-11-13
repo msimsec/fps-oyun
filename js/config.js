@@ -180,7 +180,9 @@ const settings = (() => {
         duel: o && DIFFICULTIES.includes(o.duel) ? o.duel : 'normal',
         sens: o && Number.isFinite(o.sens) ? Math.min(SENS_MAX, Math.max(SENS_MIN, o.sens)) : 1,
         volume: o && Number.isFinite(o.volume) ? Math.min(1, Math.max(0, o.volume)) : 0.6,
-        map: o && ['depot', 'space', 'desert', 'snow'].includes(o.map) ? o.map : 'depot'
+        // (maps.js bu dosyadan sonra yüklenir; bölüm eklenince bu liste de güncellenmeli)
+        map: o && ['depot', 'space', 'desert', 'snow', 'harbor'].includes(o.map) ? o.map : 'depot',
+        touch: o && ['auto', 'on', 'off'].includes(o.touch) ? o.touch : 'auto'     // dokunmatik kontroller
     };
 })();
 function saveSettings() {

@@ -2,6 +2,8 @@
 
 document.body.classList.add('in-menu');   // ilk açılışta ana menü gösteriliyor
 init();
+initTouch();
+updateMobileNote();
 updateDifficultyInfo();
 updatePlayerTag();
 // Bu sekmede henüz giriş yapılmadıysa (ya da hiç oyuncu yoksa) önce "Kim oynuyor?" ekranı
