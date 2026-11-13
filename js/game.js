@@ -60,9 +60,17 @@ function startRun(duel) {
     if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
     if (!duel) clearRunSnapshot();          // yeni dalga eli: eski yarım kalan el silinir
     resetWorld(duel);
+    run.recBase = duel ? null : recordBaseline();
     hideAllScreens();
     state = 'starting';
     requestLock();
+}
+
+// Oyun sonu ekranındaki YENİDEN BAŞLA: biten elin modunu tekrar başlatır (düello → düello).
+// Dalga modunda yarım kalan bir el varsa (ör. düellodan önce kaydedilen) sormadan silinmez.
+function restartRun() {
+    if (isDuelMode) startRun(true);
+    else startNewRun();
 }
 
 function pauseGame() {

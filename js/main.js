@@ -12,6 +12,7 @@ updateResumeButton();
 // dalga modunda skor ve ulaşılan dalga rekorlara işlenir, altın ve diğer kayıtlar yazılır.
 // (Düello yarıda bırakılırsa galibiyet ya da mağlubiyet sayılmaz — ana menüye dönmekle aynı.)
 window.addEventListener('pagehide', () => {
+    if (profileDeleted) return;                  // oynayan oyuncu az önce silindi
     try {
         if (run.active && !isDuelMode) { updateRecords(false); saveRunSnapshot(); }   // DEVAM ET için
         saveGameData();

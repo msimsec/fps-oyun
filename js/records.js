@@ -77,16 +77,26 @@ function updateRecords(won) {
         }
     } else {
         const r = m.game[run.game];
+        // Elin başındaki rekor: yarıda çıkınca (menü / tarayıcı kapanınca) yazılan skor,
+        // aynı el bitince "yeni rekor" duyurusunu engellemesin
+        const base = run.recBase || { score: r.score, wave: r.wave };
+        if (base.score && player.score > base.score) broken.push('En yüksek skor');
+        if (base.wave && wave.num > base.wave) broken.push('En uzak dalga');
         if (player.score > r.score) {
-            if (r.score) broken.push('En yüksek skor');
             r.score = player.score;
             r.scoreAt = Date.now();            // rekorun kırıldığı an (aynı elin sonraki kayıtları değiştirmez)
         }
-        if (wave.num > r.wave) { if (r.wave) broken.push('En uzak dalga'); r.wave = wave.num; }
+        if (wave.num > r.wave) r.wave = wave.num;
         if (player.kills > r.kills) r.kills = player.kills;
     }
     saveRecords();
     return broken;
+}
+
+// Yeni dalga eli başlarken: bu bölüm ve zorluktaki o anki rekor
+function recordBaseline() {
+    const r = (records[run.map] || records.depot).game[run.game];
+    return { score: r.score, wave: r.wave };
 }
 
 // Rekor tarihi: "05.11.2026 14:32". has: rekor var mı (yoksa boş); tarih tutulmadan önceki
@@ -131,6 +141,8 @@ function resetRecords() {
         onOk: () => {
             records[mapId] = emptyDiffRecords();
             saveRecords();
+            // Oyun duraklatılmışken sıfırlandıysa bu elin "yeni rekor" karşılaştırması da sıfırdan
+            if (run.active && !isDuelMode && run.map === mapId) run.recBase = recordBaseline();
             openRecords(recordsReturn, mapId);
             showToast('Rekorlar sıfırlandı');
         }
