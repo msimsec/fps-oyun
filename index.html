@@ -5,7 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>3D Tactical FPS - 1v1 Düello ve Tüfek Skinleri</title>
     <!-- ?v=… : her yayında değiştirilir (tarih); tarayıcı önbellekteki eski CSS/JS dosyalarını kullanmasın -->
-    <link rel="stylesheet" href="css/style.css?v=20261113a">
+    <link rel="stylesheet" href="css/style.css?v=20261113b">
+    <!-- Uygulama olarak kurulabilme (PWA): ad, ikon, tam ekran; internetsiz açılış için sw.js -->
+    <link rel="manifest" href="manifest.webmanifest">
+    <meta name="theme-color" content="#050914">
+    <link rel="icon" type="image/png" href="icons/icon-192.png">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
 
     <!-- Three.js r128 — üçüncü taraf CDN yerine oyunla aynı klasörden yüklenir.
          Dosya index.html ile aynı yerden geldiği için CDN ele geçirilme riski yoktur.
@@ -93,6 +98,7 @@
             <div><kbd>Shift</kbd> Koş</div>
             <div><kbd>Space</kbd> Zıpla</div>
             <div><kbd>C / Ctrl</kbd> Çömel</div>
+            <div><kbd>F</kbd> Fener (Gece Limanı)</div>
             <div><kbd>Fare</kbd> Nişan</div>
             <div><kbd>Sol tık</kbd> Ateş</div>
             <div><kbd>Sağ tık</kbd> Dürbün</div>
@@ -113,6 +119,7 @@
             <button class="btn records-btn" onclick="openRecords('menu')">REKORLAR 🏆</button>
             <button class="btn ach-btn" onclick="openAchievements('menu')">BAŞARIMLAR 🎖️</button>
             <button class="btn settings-btn" onclick="openSettings('menu')">AYARLAR ⚙️</button>
+            <button class="btn install-btn" id="installBtn" onclick="installApp()" style="display:none">UYGULAMA OLARAK YÜKLE 📲</button>
         </div>
         <div class="resume-info" id="resumeInfo" style="display:none"></div>
         <div class="note" id="difficultyInfo" style="margin-top: 18px;"></div>
@@ -324,28 +331,28 @@
         </div>
     </div>
 
-    <script src="js/profiles.js?v=20261113a"></script>
-    <script src="js/config.js?v=20261113a"></script>
-    <script src="js/save.js?v=20261113a"></script>
-    <script src="js/state.js?v=20261113a"></script>
-    <script src="js/utils.js?v=20261113a"></script>
-    <script src="js/audio.js?v=20261113a"></script>
-    <script src="js/feedback.js?v=20261113a"></script>
-    <script src="js/world.js?v=20261113a"></script>
-    <script src="js/maps.js?v=20261113a"></script>
-    <script src="js/input.js?v=20261113a"></script>
-    <script src="js/game.js?v=20261113a"></script>
-    <script src="js/weapons.js?v=20261113a"></script>
-    <script src="js/enemies.js?v=20261113a"></script>
-    <script src="js/items.js?v=20261113a"></script>
-    <script src="js/waves.js?v=20261113a"></script>
-    <script src="js/records.js?v=20261113a"></script>
-    <script src="js/achievements.js?v=20261113a"></script>
-    <script src="js/resume.js?v=20261113a"></script>
-    <script src="js/update.js?v=20261113a"></script>
-    <script src="js/shop.js?v=20261113a"></script>
-    <script src="js/settings.js?v=20261113a"></script>
-    <script src="js/help.js?v=20261113a"></script>
-    <script src="js/main.js?v=20261113a"></script>
+    <script src="js/profiles.js?v=20261113b"></script>
+    <script src="js/config.js?v=20261113b"></script>
+    <script src="js/save.js?v=20261113b"></script>
+    <script src="js/state.js?v=20261113b"></script>
+    <script src="js/utils.js?v=20261113b"></script>
+    <script src="js/audio.js?v=20261113b"></script>
+    <script src="js/feedback.js?v=20261113b"></script>
+    <script src="js/world.js?v=20261113b"></script>
+    <script src="js/maps.js?v=20261113b"></script>
+    <script src="js/input.js?v=20261113b"></script>
+    <script src="js/game.js?v=20261113b"></script>
+    <script src="js/weapons.js?v=20261113b"></script>
+    <script src="js/enemies.js?v=20261113b"></script>
+    <script src="js/items.js?v=20261113b"></script>
+    <script src="js/waves.js?v=20261113b"></script>
+    <script src="js/records.js?v=20261113b"></script>
+    <script src="js/achievements.js?v=20261113b"></script>
+    <script src="js/resume.js?v=20261113b"></script>
+    <script src="js/update.js?v=20261113b"></script>
+    <script src="js/shop.js?v=20261113b"></script>
+    <script src="js/settings.js?v=20261113b"></script>
+    <script src="js/help.js?v=20261113b"></script>
+    <script src="js/main.js?v=20261113b"></script>
 </body>
 </html>

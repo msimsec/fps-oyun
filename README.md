@@ -15,7 +15,12 @@ Ana menüdeki **BÖLÜM SEÇ** kısmından oynanacak harita seçilir (seçim oyu
 - **Depo:** Tuğla duvarlı kapalı alan, kasalar ve siperler.
 - **Çöl:** Kum taşı evlerden oluşan bir kasaba. Ortada kuyulu ve gölgelikli tezgâhlı bir pazar meydanı, kuzey-güney ana cadde, iki yanda dar sokaklar, altından geçilen kemerler, palmiyeler ve basamaklarla çatısına çıkılan bir gözetleme evi var.
 - **Kar Üssü:** Karlı bir dağdaki askerî üs. Kuzeyde komuta binası, iki yanda kışlalar, ortada açık avlu ve renkli konteyner yığınları, batıda yakıt tankları, doğuda basamaklarla çıkılan gözetleme kulesi; sürekli kar yağar.
+- **Gece Limanı:** Gece, karanlık bir konteyner limanı. Ay ışığı ve sokak lambaları dışında karanlıktır; oyuncunun **feneri (F)** baktığı yönü aydınlatır, düşmanların yüzleri karanlıkta hafifçe parlar. Doğuda üst üste konteyner sıraları (basamak kasalarıyla bir konteynerin üstüne çıkılır), batıda içine girilen çatılı açık depo, kuzeyde rıhtım, sarı vinç ve demirli gemi.
 - **Space:** Uzay boşluğunda yüzen 6 platform. Platformlar arası yürünemez; turuncu **zıplatma rampaları** oyuncuyu karşı platforma fırlatır. Platformdan düşen 35 can kaybeder ve başlangıç platformuna döner. Düşmanlar platformlarından ayrılmaz, uzaktan ateş eder. Yüksek nişancı kulesine kuzey platformundaki rampayla çıkılır.
+
+## Uygulama olarak yükleme ve internetsiz oynama
+
+Chrome ya da Edge'de ana menüde **UYGULAMA OLARAK YÜKLE 📲** butonu çıkar (adres çubuğundaki yükle simgesi de olur). Yüklenen oyun masaüstünden kendi penceresinde, tam ekran açılır. Oyun bir kez açıldıktan sonra dosyaları bilgisayarda saklanır (servis çalışanı, `sw.js`); internet yokken de açılır. Yeni sürüm internet varken kendiliğinden gelir. Kayıtlar tarayıcıda durduğu için yüklü oyun ile tarayıcıdaki oyun aynı oyuncuları görür.
 
 ## Oyun modları
 
@@ -52,6 +57,7 @@ Her iki modun zorluğu **Ayarlar** ekranından ayrı ayrı seçilir (Kolay / Ort
 | Sağ tık | Dürbün (keskin nişancı) |
 | R | Şarjör değiştir |
 | B | Bomba at (G de çalışır) |
+| F | Fener aç / kapat (yalnızca Gece Limanı) |
 | 1-7 / fare tekerleği | Silah değiştir |
 | ESC | Duraklat |
 
@@ -108,6 +114,9 @@ Fiyat her seviyede artar. Skinler (Standart, Kraliyet, Gölge, Kor, Buz, Zehir, 
 ```
 index.html        Sayfa iskeleti: HUD, menüler, mağaza, ayarlar, rekorlar, başarımlar
 three.min.js      Three.js r128 (yerel kopya)
+manifest.webmanifest  Uygulama olarak kurulma bilgileri (ad, ikon, tam ekran)
+sw.js             Servis çalışanı: dosyaları önbelleğe alır, internetsiz açılış
+icons/            Uygulama ikonları
 css/style.css     Tüm stiller
 js/
   profiles.js     Oyuncu girişi (profiller); kayıt anahtarlarını profile göre ayırır
@@ -118,7 +127,7 @@ js/
   audio.js        Web Audio ile üretilen ses efektleri
   feedback.js     Hasar sayıları, öldürme akışı, duyurular, düello can çubuğu, hasar yönü
   world.js        Sahne, ışıklar, Depo duvarları/kasaları, silah modelleri, başlangıç (init)
-  maps.js         Bölümler: Depo, Space, Çöl, Kar Üssü; zıplatma rampaları, boşluğa düşme
+  maps.js         Bölümler: Depo, Space, Çöl, Kar Üssü, Gece Limanı (fener); zıplatma rampaları, boşluğa düşme
   input.js        Klavye/fare, pointer lock
   game.js         El başlatma/bitirme, hasar alma
   weapons.js      Atış, şarjör, silah değiştirme, dürbün

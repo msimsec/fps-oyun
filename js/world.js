@@ -64,9 +64,10 @@ function init() {
     container.appendChild(renderer.domElement);
     canvas = renderer.domElement;
 
-    scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+    ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+    scene.add(ambientLight);
 
-    const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    const dirLight = sunLight = new THREE.DirectionalLight(0xffffff, 0.8);
     dirLight.position.set(25, 50, 25);
     dirLight.castShadow = true;
     // Gölge kamerası tüm haritayı kapsasın (varsayılan ±5 birimdi)
@@ -383,6 +384,12 @@ function createWeaponModels() {
     updateWeaponSkinColors();
     camera.add(weapon3DGroup);
     scene.add(camera);
+    // Fener: kameraya bağlı, baktığın yönü aydınlatan koni ışık (yalnızca gece bölümünde)
+    flashlight = new THREE.SpotLight(0xfff1d0, 0, 42, 0.42, 0.5, 1.1);
+    flashlight.position.set(0.3, -0.25, -1.2);          // silahın önünde: eldeki silah parlamasın
+    flashlight.target.position.set(0, -0.6, -10);
+    camera.add(flashlight, flashlight.target);
+    updateFlashlight();
 }
 
 // Kabza ve şarjör için tırtıklı (çapraz taramalı) doku

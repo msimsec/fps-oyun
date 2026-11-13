@@ -47,9 +47,18 @@ function faceMaterials(color) {
     }
     const tex = new THREE.CanvasTexture(c);
     const plain = new THREE.MeshStandardMaterial({ color, roughness: 0.5 });
-    const face = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.6 });
+    // emissiveMap: gece bölümünde yüz hafifçe parlar (karanlıkta kızgın yüzler seçilsin); gündüz emissive siyah
+    const face = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.6, emissiveMap: tex,
+        emissive: curMap().night ? NIGHT_FACE_GLOW : 0x000000 });
     // BoxGeometry yüz sırası: +x, -x, +y, -y, +z (ön), -z (arka)
     return (faceMatCache[color] = [plain, plain, plain, plain, face, plain]);
+}
+
+const NIGHT_FACE_GLOW = 0x5a5a5a;
+// Bölüm değişince var olan yüz materyallerinin parlaklığını ayarla
+function updateNightFaces() {
+    const glow = curMap().night ? NIGHT_FACE_GLOW : 0x000000;
+    Object.values(faceMatCache).forEach(m => m[4].emissive.setHex(glow));
 }
 
 class HumanoidEnemy {

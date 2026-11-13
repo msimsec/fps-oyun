@@ -413,7 +413,7 @@ kbd {
 .banner-sub { font-size: clamp(13px, 1.4vw, 18px); max-width: 44vw; margin-left: auto; margin-right: auto; }
 .duel-bar { width: min(360px, 40vw); }
 .map-option.map-desert { background: linear-gradient(135deg, #7c5a2a, #3a2a14); }
-.map-picker .map-option { width: 250px; }
+.map-picker .map-option { width: 222px; }
 
 /* Can yenilenirken can göstergesi yeşil parlar */
 .health-hud.regen { color: #4ade80; box-shadow: 0 0 12px rgba(74, 222, 128, 0.45); }
@@ -499,3 +499,5 @@ kbd {
 .resume-btn:hover { background: #22c55e; box-shadow: 0 0 15px rgba(34, 197, 94, 0.8); }
 .resume-info { color: #86efac; font-family: var(--ui-font); font-size: 14px; margin-top: 12px; }
 .rec-date { font-size: 11px; color: #94a3b8; margin-top: 2px; white-space: nowrap; }
+.map-option.map-harbor { background: radial-gradient(circle at 85% 15%, #3b4a6b 0, #0b1328 40%, #03060f 100%); }
+.install-btn { background: #0f766e; color: #ffffff; }
