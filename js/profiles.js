@@ -270,6 +270,7 @@ function doDelete(p) {
     }), 0);
 }
 
+let profileDeleted = false;
 function reallyDelete(id) {
     refreshProfiles();
     PROFILE_DATA_KEYS.forEach(k => lsDel(`${k}::${id}`));
@@ -278,6 +279,7 @@ function reallyDelete(id) {
         profiles.current = profiles.list[0] ? profiles.list[0].id : null;
         saveProfiles();
         try { sessionStorage.removeItem(PROFILE_CHOSEN_KEY); } catch (e) {}
+        profileDeleted = true;                   // sayfa kapanırken silinen oyuncunun kaydı yeniden yazılmasın
         location.reload();                       // oynayan oyuncu silindi: giriş ekranına dön
         return;
     }

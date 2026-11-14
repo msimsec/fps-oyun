@@ -40,7 +40,9 @@ let duelBot = null;
 let duelTime = 0;
 let pendingDuelWin = false;
 // Elin hangi zorlukta başladığı (duraklatmada ayar değişse de rekor doğru seviyeye yazılsın)
-const run = { active: false, game: 'normal', duel: 'normal', map: 'depot' };
+// recBase: el başladığında o bölüm/zorluktaki rekor; el yarıda kaydedilip DEVAM ET ile sürse de
+// "YENİ REKOR" bu değere göre duyurulur
+const run = { active: false, game: 'normal', duel: 'normal', map: 'depot', recBase: null };
 let firing = false;
 let lockTimer = null;
 const keys = { forward: false, back: false, left: false, right: false, sprint: false, crouch: false };
@@ -54,6 +56,9 @@ let scene, camera, renderer, canvas;
 let enemies = [], bullets = [], particles = [], walls = [];
 let cameraAngleY = 0, cameraAngleX = 0;
 let brickMaterial, crateMaterial;
+// Sahne ışıkları (gece bölümü kısar) ve oyuncunun feneri (yalnızca gece bölümünde yanar, F ile açılıp kapanır)
+let ambientLight, sunLight, flashlight;
+let flashlightOn = true;
 let weapon3DGroup, weaponBodyMat, weaponAccentMat;
 const weaponModels = {};
 let weaponKick = 0;

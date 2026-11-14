@@ -58,15 +58,17 @@ function init() {
     camera.position.set(0, CFG.eyeHeight, 10);
 
     renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    // Tablet/telefonda çözünürlük biraz düşük tutulur: daha akıcı oynanır, pil daha az gider
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, touchDevice() ? 1.25 : 2));
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.shadowMap.enabled = true;
     container.appendChild(renderer.domElement);
     canvas = renderer.domElement;
 
-    scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+    ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+    scene.add(ambientLight);
 
-    const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    const dirLight = sunLight = new THREE.DirectionalLight(0xffffff, 0.8);
     dirLight.position.set(25, 50, 25);
     dirLight.castShadow = true;
     // Gölge kamerası tüm haritayı kapsasın (varsayılan ±5 birimdi)
@@ -76,7 +78,7 @@ function init() {
     dirLight.shadow.camera.bottom = -55;
     dirLight.shadow.camera.near = 1;
     dirLight.shadow.camera.far = 150;
-    dirLight.shadow.mapSize.set(2048, 2048);
+    dirLight.shadow.mapSize.set(touchDevice() ? 1024 : 2048, touchDevice() ? 1024 : 2048);
     dirLight.shadow.bias = -0.0005;
     scene.add(dirLight);
 
@@ -99,8 +101,7 @@ function init() {
     window.addEventListener('blur', () => { resetKeys(); });
     window.addEventListener('resize', onWindowResize);
 
-    const finePointer = window.matchMedia && window.matchMedia('(pointer: fine)').matches;
-    if (!finePointer) $('mobileNote').textContent = 'Bu oyun klavye ve fare gerektirir; dokunmatik cihazlarda oynanamaz.';
+    updateMobileNote();
 
     resetArsenal();
     updateHUD();
@@ -383,6 +384,12 @@ function createWeaponModels() {
     updateWeaponSkinColors();
     camera.add(weapon3DGroup);
     scene.add(camera);
+    // Fener: kameraya bağlı, baktığın yönü aydınlatan koni ışık (yalnızca gece bölümünde)
+    flashlight = new THREE.SpotLight(0xfff1d0, 0, 42, 0.42, 0.5, 1.1);
+    flashlight.position.set(0.3, -0.25, -1.2);          // silahın önünde: eldeki silah parlamasın
+    flashlight.target.position.set(0, -0.6, -10);
+    camera.add(flashlight, flashlight.target);
+    updateFlashlight();
 }
 
 // Kabza ve şarjör için tırtıklı (çapraz taramalı) doku

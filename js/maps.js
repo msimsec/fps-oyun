@@ -11,7 +11,7 @@ let currentMapId = null;
 let jumpPads = [];
 let mapAnimators = [];          // her karede çağrılan görsel efektler (ör. rampa parlaması)
 
-const MAP_IDS = ['depot', 'space', 'desert', 'snow'];
+const MAP_IDS = ['depot', 'space', 'desert', 'snow', 'harbor'];
 
 // Zeminli bölümlerde düşman doğma noktası: oyuncudan 18-28 birim uzakta, engelsiz ve
 // oyuncuya yürüyerek ulaşılabilen (yol bulma alanında mesafesi olan) bir yer
@@ -82,6 +82,17 @@ MAPS.snow = {
     enemySpawn: floorSpawn
 };
 
+MAPS.harbor = {
+    name: 'Gece Limanı',
+    desc: 'Gece, konteyner limanı; lamba ışıkları, vinç, açık depo ve rıhtımdaki gemi. Fenerin F tuşunda',
+    night: true,
+    floorY: 0, killY: -Infinity, bulletMinY: 0, bulletMaxY: 60, enemyRange: 30,
+    spawn: { x: 0, y: 0, z: 36, angle: 0 },
+    duel: { player: { x: 0, y: 0, z: 18, angle: 0 }, bot: { x: 0, y: 0, z: -12 } },
+    build: buildHarbor,
+    enemySpawn: floorSpawn
+};
+
 const curMap = () => MAPS[currentMapId] || MAPS.depot;
 
 function addWall(x, y, z, w, h, d, material) {
@@ -108,7 +119,25 @@ function buildMap(id) {
     // Önceki bölümden kalan cesetler, bombalar ve yerdeki eşyalar yeni bölüme taşınmasın
     clearCorpses(); clearGrenades(); clearDrops();
     currentMapId = id;
+    // Gündüz ışıkları; gece bölümü kendi kurulumunda kısar
+    ambientLight.color.setHex(0xffffff); ambientLight.intensity = 0.6;
+    sunLight.color.setHex(0xffffff); sunLight.intensity = 0.8;
     MAPS[id].build();
+    updateFlashlight();
+    updateNightFaces();
+}
+
+// Fener yalnızca gece bölümünde ve açıkken yanar
+function updateFlashlight() {
+    if (!flashlight) return;
+    flashlight.intensity = curMap().night && flashlightOn ? 2.2 : 0;
+}
+function toggleFlashlight() {
+    if (!curMap().night) { showToast('Fener yalnızca gece bölümünde (Gece Limanı) yanar'); return; }
+    flashlightOn = !flashlightOn;
+    updateFlashlight();
+    sfx('switch');
+    showToast(flashlightOn ? '🔦 Fener açık' : '🔦 Fener kapalı');
 }
 
 function updateMapEffects(dt) {
@@ -701,5 +730,217 @@ function buildSnow() {
             arr[i * 3] += Math.sin(t * 0.7 + i) * dt * 0.3;               // hafif rüzgâr salınımı
         }
         geo.attributes.position.needsUpdate = true;
+    });
+}
+
+// ---------------------------------------------------------------------
+//  GECE LİMANI — karanlık konteyner limanı. Ay ışığı ve sokak lambaları dışında karanlık;
+//  oyuncunun feneri (F) baktığı yeri aydınlatır. Kuzeyde rıhtım ve deniz (geçilemez korkuluk).
+// ---------------------------------------------------------------------
+function createAsphaltTexture() {
+    const c = document.createElement('canvas');
+    c.width = c.height = 256;
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = '#3a3f47';
+    ctx.fillRect(0, 0, 256, 256);
+    for (let i = 0; i < 2600; i++) {
+        const v = 40 + Math.floor(Math.random() * 50);
+        ctx.fillStyle = `rgba(${v},${v + 2},${v + 6},0.55)`;
+        ctx.fillRect(Math.random() * 256, Math.random() * 256, 1 + Math.random() * 2, 1 + Math.random() * 2);
+    }
+    ctx.strokeStyle = 'rgba(0,0,0,0.35)'; ctx.lineWidth = 2;           // asfalt çatlakları
+    for (let i = 0; i < 6; i++) {
+        ctx.beginPath(); let x = Math.random() * 256, y = Math.random() * 256; ctx.moveTo(x, y);
+        for (let k = 0; k < 5; k++) { x += (Math.random() - 0.5) * 50; y += (Math.random() - 0.5) * 50; ctx.lineTo(x, y); }
+        ctx.stroke();
+    }
+    const t = new THREE.CanvasTexture(c);
+    t.wrapS = t.wrapT = THREE.RepeatWrapping;
+    return t;
+}
+
+function buildHarbor() {
+    scene.background = new THREE.Color(0x050914);
+    scene.fog = new THREE.FogExp2(0x060b17, 0.02);
+    // Ay ışığı: soluk mavi, zayıf; ortam ışığı çok az (fener ve lambalar olmadan görüş kısa)
+    ambientLight.color.setHex(0x5a6e9c); ambientLight.intensity = 0.2;
+    sunLight.color.setHex(0x9db4ff); sunLight.intensity = 0.24;
+    mapGroup.add(new THREE.HemisphereLight(0x33476e, 0x0b0d12, 0.18));
+
+    const QUAY = -44;                                   // rıhtım kenarı (kuzey); ötesi deniz
+    const asphalt = createAsphaltTexture();
+    asphalt.repeat.set(18, 18);
+    const floor = new THREE.Mesh(new THREE.PlaneGeometry(100, 50 - QUAY),
+        new THREE.MeshStandardMaterial({ map: asphalt, roughness: 0.95 }));
+    floor.rotation.x = -Math.PI / 2;
+    floor.position.z = (50 + QUAY) / 2;
+    floor.receiveShadow = true;
+    mapGroup.add(floor);
+    // Yer çizgileri (sarı, yalnızca görsel)
+    const lineMat = new THREE.MeshBasicMaterial({ color: 0x8a6d1c });
+    const line = (x, z, w, d) => {
+        const m = new THREE.Mesh(new THREE.PlaneGeometry(w, d), lineMat);
+        m.rotation.x = -Math.PI / 2; m.position.set(x, 0.01, z); mapGroup.add(m);
+    };
+    line(0, 6, 0.25, 70); line(-24, -2, 0.2, 40); line(10, -4, 40, 0.2); line(10, 30, 50, 0.2);
+
+    // Deniz: rıhtımın kuzeyinde koyu, hafif parlak su ve ay
+    const water = new THREE.Mesh(new THREE.PlaneGeometry(320, 160),
+        new THREE.MeshStandardMaterial({ color: 0x0a1a33, roughness: 0.25, metalness: 0.7 }));
+    water.rotation.x = -Math.PI / 2;
+    water.position.set(0, -1.2, QUAY - 80);
+    mapGroup.add(water);
+    const quayWall = new THREE.Mesh(new THREE.BoxGeometry(100, 1.2, 0.8),
+        new THREE.MeshStandardMaterial({ color: 0x4b5563, roughness: 0.9 }));
+    quayWall.position.set(0, -0.6, QUAY - 0.4);
+    mapGroup.add(quayWall);
+    const moon = new THREE.Mesh(new THREE.SphereGeometry(7, 20, 16), new THREE.MeshBasicMaterial({ color: 0xe8eefc, fog: false }));
+    moon.position.set(-70, 60, -190);
+    mapGroup.add(moon);
+    // Yıldızlar
+    const starN = 500, sp = new Float32Array(starN * 3);
+    for (let i = 0; i < starN; i++) {
+        const a = Math.random() * Math.PI * 2, el = 0.15 + Math.random() * 1.2, r = 220;
+        sp[i * 3] = Math.cos(a) * Math.cos(el) * r; sp[i * 3 + 1] = Math.sin(el) * r; sp[i * 3 + 2] = Math.sin(a) * Math.cos(el) * r;
+    }
+    const sg = new THREE.BufferGeometry();
+    sg.setAttribute('position', new THREE.BufferAttribute(sp, 3));
+    mapGroup.add(new THREE.Points(sg, new THREE.PointsMaterial({ color: 0xffffff, size: 0.9, fog: false })));
+
+    const concTex = createConcreteTexture();
+    const concMat = (w, h) => {
+        const t = concTex.clone(); t.needsUpdate = true; t.repeat.set(Math.max(1, w / 4), Math.max(1, h / 4));
+        return new THREE.MeshStandardMaterial({ map: t, color: 0x9aa3ad, roughness: 0.9 });
+    };
+    const metalMat = new THREE.MeshStandardMaterial({ color: 0x374151, roughness: 0.5, metalness: 0.6 });
+    const glowMat = new THREE.MeshBasicMaterial({ color: 0xffd58a });           // yanan lamba / pencere
+
+    // Çevre: güney, doğu, batı beton duvar; kuzeyde rıhtım korkuluğu (alçak görünür, aşılamaz)
+    const B = 45;
+    addWall(0, 3, B, 90, 6, 2, concMat(90, 6));
+    addWall(-B, 3, 0, 2, 6, 90, concMat(90, 6));
+    addWall(B, 3, 0, 2, 6, 90, concMat(90, 6));
+    walls.push({ x: 0, z: QUAY - 1, w: 92, d: 2, h: 4, b: 0 });                 // korkuluğun çarpışma kutusu
+    const railMat = new THREE.MeshStandardMaterial({ color: 0xb45309, roughness: 0.6, metalness: 0.4 });
+    for (let x = -44; x <= 44; x += 4) {
+        const post = new THREE.Mesh(new THREE.BoxGeometry(0.15, 1.1, 0.15), railMat);
+        post.position.set(x, 0.55, QUAY - 0.3); mapGroup.add(post);
+    }
+    [0.5, 1.05].forEach(y => {
+        const bar = new THREE.Mesh(new THREE.BoxGeometry(90, 0.08, 0.08), railMat);
+        bar.position.set(0, y, QUAY - 0.3); mapGroup.add(bar);
+    });
+
+    // Rıhtımdaki gemi (yalnızca manzara): koyu gövde, beyaz köprü üstü, yanan lombozlar
+    const hull = new THREE.Mesh(new THREE.BoxGeometry(70, 7, 12), new THREE.MeshStandardMaterial({ color: 0x1f2937, roughness: 0.7 }));
+    hull.position.set(6, 1.5, QUAY - 14); mapGroup.add(hull);
+    const stripe = new THREE.Mesh(new THREE.BoxGeometry(70.2, 0.6, 12.2), new THREE.MeshStandardMaterial({ color: 0x991b1b }));
+    stripe.position.set(6, -1.4, QUAY - 14); mapGroup.add(stripe);
+    const bridge = new THREE.Mesh(new THREE.BoxGeometry(10, 6, 9), new THREE.MeshStandardMaterial({ color: 0xd1d5db, roughness: 0.8 }));
+    bridge.position.set(30, 8, QUAY - 14); mapGroup.add(bridge);
+    for (let i = 0; i < 4; i++) {
+        const w = new THREE.Mesh(new THREE.PlaneGeometry(1.4, 0.7), glowMat);
+        w.position.set(26.5 + i * 2.4, 9.5, QUAY - 9.45); mapGroup.add(w);
+    }
+    for (let i = 0; i < 14; i++) {
+        const p = new THREE.Mesh(new THREE.CircleGeometry(0.3, 10), glowMat);
+        p.position.set(-24 + i * 4, 2.8, QUAY - 7.95); mapGroup.add(p);
+    }
+
+    // Konteynerler (renkli, gece koyu tonlu); y: üst üste koymak için alt yükseklik
+    const contColors = [0x9f1239, 0x1e40af, 0x166534, 0xb45309, 0x115e59, 0x6b21a8];
+    let ci = 0;
+    const container = (x, z, alongX, y = 0) => {
+        const w = alongX ? 6 : 2.5, d = alongX ? 2.5 : 6, h = 2.6;
+        addWall(x, y + h / 2, z, w, h, d,
+            new THREE.MeshStandardMaterial({ color: contColors[ci++ % contColors.length], roughness: 0.7, metalness: 0.3 }));
+    };
+    // Doğu sahası: sıralar arasında koridorlar
+    container(16, -24, false); container(16, -24, false, 2.6);
+    container(22, -24, false);
+    container(34, -26, false); container(34, -26, false, 2.6);
+    container(18, -2, true);
+    container(32, -6, true); container(32, -6, true, 2.6);
+    container(28, 12, false);
+    container(38, 14, false); container(38, 14, false, 2.6);
+    container(16, 22, true);
+    // Batı / orta
+    container(-14, -16, true);
+    container(-12, 22, false);
+    container(-30, 32, true);
+    // Basamaklarla çıkılan konteyner: kasa (1) → kasa (2) → konteyner üstü (2.6); yüksekten bakış
+    container(26, 34, true);
+    addWall(20.6, 0.5, 34, 1.4, 1, 2, crateMaterial);
+    addWall(22.15, 1, 34, 1.7, 2, 2, crateMaterial);
+
+    // Batıda açık depo: üç duvar ve çatı, doğuya açık; içinde lamba ve kasalar
+    const WX = -34, WZ = 2;
+    addWall(WX - 7.5, 3, WZ, 1, 6, 24, concMat(24, 6));                 // arka (batı)
+    addWall(WX, 3, WZ - 11.5, 16, 6, 1, concMat(16, 6));                // kuzey
+    addWall(WX, 3, WZ + 11.5, 16, 6, 1, concMat(16, 6));                // güney
+    const roof = new THREE.Mesh(new THREE.BoxGeometry(17, 0.4, 25), metalMat);
+    roof.position.set(WX, 6.2, WZ); mapGroup.add(roof);
+    walls.push({ x: WX, z: WZ, w: 17, d: 25, h: 6.4, b: 6 });          // çatı: altından geçilir
+    [[WX - 2, WZ - 6, 2, 1, 2], [WX - 3, WZ + 5, 1.4, 1, 1.4], [WX + 3, WZ - 1, 2, 1, 1.2]]
+        .forEach(([x, z, w, h, d]) => addWall(x, h / 2, z, w, h, d, crateMaterial));
+    const shedLight = new THREE.PointLight(0xffc977, 1.2, 16, 1.6);
+    shedLight.position.set(WX, 5.4, WZ); mapGroup.add(shedLight);
+    const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.25, 10, 8), glowMat);
+    bulb.position.set(WX, 5.7, WZ); mapGroup.add(bulb);
+
+    // Vinç (rıhtımda): dört bacak çarpışmalı, kiriş ve kabin görsel; tepede kırmızı ışık
+    const craneMat = new THREE.MeshStandardMaterial({ color: 0xca8a04, roughness: 0.6, metalness: 0.4 });
+    [[6, -30], [6, -40], [26, -30], [26, -40]].forEach(([x, z]) => addWall(x, 8, z, 0.9, 16, 0.9, craneMat));
+    [[-30], [-40]].forEach(([z]) => {
+        const beam = new THREE.Mesh(new THREE.BoxGeometry(22, 1, 1), craneMat);
+        beam.position.set(16, 16.5, z); mapGroup.add(beam);
+    });
+    const boom = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1, 40), craneMat);
+    boom.position.set(16, 17.5, -42); mapGroup.add(boom);
+    const cab = new THREE.Mesh(new THREE.BoxGeometry(3, 2.5, 3), metalMat);
+    cab.position.set(16, 15, -35); mapGroup.add(cab);
+    const red = new THREE.Mesh(new THREE.SphereGeometry(0.35, 10, 8), new THREE.MeshBasicMaterial({ color: 0xff2222, fog: false }));
+    red.position.set(16, 18.4, -62); mapGroup.add(red);
+
+    // Alçak siperler: beton bariyerler (üstünden atlanır), varil ve kasalar
+    const barrierMat = new THREE.MeshStandardMaterial({ color: 0x9ca3af, roughness: 0.9 });
+    [[-8, 8, 1, 5], [8, 4, 1, 5], [-20, -14, 6, 1], [-26, 24, 6, 1], [24, 2, 1, 4], [-8, -32, 6, 1], [36, 30, 1, 4]]
+        .forEach(([x, z, w, d]) => addWall(x, 0.5, z, w, 1, d, barrierMat));
+    const drumMat = new THREE.MeshStandardMaterial({ color: 0x1d4ed8, roughness: 0.6, metalness: 0.3 });
+    [[-6, -24], [-4.8, -25.2], [12, 10], [-20, 12]].forEach(([x, z]) => {
+        walls.push({ x, z, w: 1.1, d: 1.1, h: 1.3, b: 0 });
+        const drum = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.55, 1.3, 14), drumMat);
+        drum.position.set(x, 0.65, z); drum.castShadow = true; mapGroup.add(drum);
+    });
+    [[-10, -22, 2, 1, 2], [6, 32, 1.4, 1, 1.4], [-38, 38, 2, 1, 2], [38, -40, 2, 1, 2], [-38, -36, 2, 1.2, 2]]
+        .forEach(([x, z, w, h, d]) => addWall(x, h / 2, z, w, h, d, crateMaterial));
+
+    // Güney kapısında bekçi kulübesi (yanan pencere)
+    addWall(32, 1.5, 40, 4, 3, 4, concMat(4, 3));
+    const win = new THREE.Mesh(new THREE.PlaneGeometry(1.6, 0.9), glowMat);
+    win.position.set(32, 1.8, 37.98); win.rotation.y = Math.PI; mapGroup.add(win);
+    const win2 = win.clone(); win2.position.set(32, 1.8, 37.97); win2.rotation.y = 0; mapGroup.add(win2);
+
+    // Sokak lambaları: direk (çarpışmalı), yanan başlık ve yere düşen ışık havuzu
+    const poleMat = new THREE.MeshStandardMaterial({ color: 0x1f2937, roughness: 0.6, metalness: 0.5 });
+    [[-16, -34], [18, -12], [-14, 4], [10, 24], [-22, 30], [36, 34]].forEach(([x, z]) => {
+        walls.push({ x, z, w: 0.4, d: 0.4, h: 7, b: 0 });
+        const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.16, 7, 8), poleMat);
+        pole.position.set(x, 3.5, z); mapGroup.add(pole);
+        const head = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.2, 0.5), glowMat);
+        head.position.set(x, 7, z); mapGroup.add(head);
+        const lamp = new THREE.PointLight(0xffc56b, 1.5, 20, 1.6);
+        lamp.position.set(x, 6.6, z); mapGroup.add(lamp);
+    });
+
+    // Bulutlar ayın önünden yavaşça geçer; denizde ay ışığı yansıması hafifçe kıpırdar
+    const glint = new THREE.Mesh(new THREE.PlaneGeometry(6, 60),
+        new THREE.MeshBasicMaterial({ color: 0x8fa6d8, transparent: true, opacity: 0.18, fog: false }));
+    glint.rotation.x = -Math.PI / 2; glint.position.set(-30, -1.15, QUAY - 70); mapGroup.add(glint);
+    let t = 0;
+    mapAnimators.push((dt) => {
+        t += dt;
+        glint.material.opacity = 0.14 + Math.sin(t * 1.3) * 0.05;
+        red.visible = (t % 1.6) < 0.8;                                  // vinç ışığı yanıp söner
     });
 }

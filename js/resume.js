@@ -29,7 +29,7 @@ function saveRunSnapshot() {
     if (!run.active || isDuelMode || !['playing', 'paused', 'shop', 'settings', 'records', 'starting', 'achievements', 'help'].includes(state)) return;
     const c = camera.position;
     const snap = {
-        v: 1, t: Date.now(), map: run.map, game: run.game,
+        v: 1, t: Date.now(), map: run.map, game: run.game, recBase: run.recBase,
         wave: { num: wave.num, toSpawn: wave.toSpawn, breakTimer: wave.breakTimer, inBreak: wave.inBreak, hurt: wave.hurt },
         player: {
             health: player.health, armor: player.armor, score: player.score, kills: player.kills,
@@ -89,8 +89,14 @@ function resumeRun() {
     const prevGame = settings.game;
     settings.game = s.game;
     if (settings.map !== s.map) { settings.map = s.map; saveSettings(); }
+    // Menüdeki mağazadan "sonraki el için" alınan kalkan bu ele harcanmasın (kalkan kayıttan gelir)
+    const pendingShield = player.hasShield;
     resetWorld(false);
     settings.game = prevGame;
+    if (pendingShield) { player.hasShield = true; saveGameData(); }
+    const rb = s.recBase;
+    run.recBase = rb && Number.isFinite(rb.score) && Number.isFinite(rb.wave)
+        ? { score: Math.max(0, rb.score), wave: Math.max(0, rb.wave) } : recordBaseline();
     updateDifficultyInfo();
 
     const P = s.player;

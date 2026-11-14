@@ -413,7 +413,7 @@ kbd {
 .banner-sub { font-size: clamp(13px, 1.4vw, 18px); max-width: 44vw; margin-left: auto; margin-right: auto; }
 .duel-bar { width: min(360px, 40vw); }
 .map-option.map-desert { background: linear-gradient(135deg, #7c5a2a, #3a2a14); }
-.map-picker .map-option { width: 250px; }
+.map-picker .map-option { width: 222px; }
 
 /* Can yenilenirken can göstergesi yeşil parlar */
 .health-hud.regen { color: #4ade80; box-shadow: 0 0 12px rgba(74, 222, 128, 0.45); }
@@ -499,3 +499,96 @@ kbd {
 .resume-btn:hover { background: #22c55e; box-shadow: 0 0 15px rgba(34, 197, 94, 0.8); }
 .resume-info { color: #86efac; font-family: var(--ui-font); font-size: 14px; margin-top: 12px; }
 .rec-date { font-size: 11px; color: #94a3b8; margin-top: 2px; white-space: nowrap; }
+.map-option.map-harbor { background: radial-gradient(circle at 85% 15%, #3b4a6b 0, #0b1328 40%, #03060f 100%); }
+.install-btn { background: #0f766e; color: #ffffff; }
+
+/* =====================================================================
+   DOKUNMATİK KONTROLLER (body.touch) — yalnızca oyun sırasında (menü açık değilken) görünür
+   ===================================================================== */
+#touchUI, #rotateHint { display: none; }
+body.touch:not(.in-menu) #touchUI { display: block; }
+#touchUI { position: fixed; inset: 0; z-index: 50; touch-action: none; user-select: none; -webkit-user-select: none;
+    -webkit-touch-callout: none; }
+#touchPad { position: absolute; inset: 0; touch-action: none; }
+#touchStick { position: absolute; width: 132px; height: 132px; margin: -66px 0 0 -66px; border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.35); background: rgba(255, 255, 255, 0.08); display: none; pointer-events: none; }
+#touchStick.show { display: block; }
+#touchKnob { position: absolute; left: 50%; top: 50%; width: 58px; height: 58px; margin: -29px 0 0 -29px; border-radius: 50%;
+    background: rgba(0, 212, 255, 0.45); border: 2px solid rgba(0, 212, 255, 0.9); }
+.tbtn { position: absolute; width: 58px; height: 58px; border-radius: 50%; border: 2px solid rgba(255, 255, 255, 0.45);
+    background: rgba(2, 6, 23, 0.45); color: #fff; font-size: 24px; line-height: 1; display: flex; align-items: center;
+    justify-content: center; touch-action: none; padding: 0; -webkit-tap-highlight-color: transparent; }
+.tbtn[hidden] { display: none; }
+.tbtn.pressed, .tbtn:active { background: rgba(0, 212, 255, 0.45); }
+.tbtn.on { background: rgba(34, 197, 94, 0.5); border-color: #4ade80; }
+/* Sağ alt: büyük ATEŞ ve çevresindeki butonlar (güvenli alan payıyla) */
+.tfire { width: 92px; height: 92px; font-size: 38px; right: calc(28px + env(safe-area-inset-right)); bottom: 34px;
+    background: rgba(220, 38, 38, 0.45); border-color: rgba(252, 165, 165, 0.8); }
+.tjump    { right: calc(132px + env(safe-area-inset-right)); bottom: 22px; }
+.tcrouch  { right: calc(150px + env(safe-area-inset-right)); bottom: 92px; }
+.treload  { right: calc(110px + env(safe-area-inset-right)); bottom: 152px; }
+.tgrenade { right: calc(40px + env(safe-area-inset-right)); bottom: 140px; }
+.tweapon  { right: calc(196px + env(safe-area-inset-right)); bottom: 22px; }
+.tscope   { right: calc(212px + env(safe-area-inset-right)); bottom: 92px; }
+.tlight   { right: calc(176px + env(safe-area-inset-right)); bottom: 158px; }
+.tpause   { left: 50%; top: 8px; margin-left: -24px; width: 48px; height: 40px; border-radius: 10px; font-size: 18px; }
+
+/* Dokunmatikte HUD küçük ve üstte: alt köşeler çubuğa ve butonlara kalsın */
+body.touch .health-hud, body.touch .ammo-hud, body.touch .score-hud, body.touch .gold-hud, body.touch .mode-hud {
+    font-size: 11px; padding: 4px 8px; }
+body.touch .mode-hud { top: 6px; left: 8px; max-width: 34vw; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+body.touch .health-hud { top: 34px; left: 8px; bottom: auto; }
+body.touch .gold-hud { top: 52px; }
+body.touch .score-hud { top: 6px; right: 8px; }
+body.touch .ammo-hud { top: 50px; right: 8px; bottom: auto; text-align: right; }
+body.touch .weapon-slots { display: none; }
+body.touch .grenade-line { font-size: 1em; }
+body.touch .kill-feed { top: 150px; font-size: 11px; }
+body.touch .duel-bar { top: 92px; }
+body.touch .banner { top: 24%; transform: translateX(-50%) scale(0.72); }
+
+/* Menüde: dokunmatikte klavye listesi yerine dokunmatik kontrol listesi */
+.touch-controls-info { display: none; }
+body.touch .touch-controls-info { display: grid; }
+body.touch .key-controls-info { display: none; }
+
+/* Küçük (telefon) ekranlar: menüler kaydırılabilir, başlıklar ve butonlar daha küçük */
+@media (max-height: 500px), (max-width: 700px) {
+    .overlay { padding: 10px; }
+    .overlay h1 { font-size: 26px; margin-bottom: 6px; }
+    .btn { padding: 9px 14px; font-size: 14px; }
+    .menu-buttons { gap: 8px; }
+    .map-picker .map-option { width: 170px; padding: 8px 10px; }
+    .map-name { font-size: 15px; }
+    .map-desc { font-size: 11px; }
+    .controls { font-size: 12px; padding: 8px 10px; gap: 4px 12px; margin-bottom: 8px; }
+    .map-picker { margin-bottom: 10px; gap: 8px; }
+}
+/* Dik tutulan telefon: oyun sırasında yan çevir uyarısı */
+@media (orientation: portrait) {
+    body.touch:not(.in-menu) #rotateHint { display: flex; position: fixed; inset: 0; z-index: 60; background: rgba(0, 0, 0, 0.92);
+        color: #00d4ff; font-size: 22px; align-items: center; justify-content: center; text-align: center; padding: 30px; }
+}
+body.touch .touch-controls-info { grid-template-columns: repeat(2, auto); text-align: left; }
+body.touch .touch-controls-info div { white-space: normal; }
+/* Telefon (alçak ekran): menü tek ekrana sığsın — kontrol listesi ve bölüm açıklamaları yardımda var */
+@media (max-height: 500px) {
+    #menuScreen .controls, #menuScreen .map-picker-sub, #menuScreen .map-desc, #menuScreen .map-badge { display: none !important; }
+    #menuScreen h1 { font-size: 22px; margin: 0; }
+    #menuScreen .version { margin-bottom: 4px; }
+    #menuScreen .map-picker-title { font-size: 14px; }
+    #menuScreen .map-picker .map-option { width: auto; min-width: 110px; padding: 6px 10px; }
+    #menuScreen .player-tag { font-size: 12px; padding: 4px 8px; }
+    #mobileNote { font-size: 11px; margin-bottom: 6px; }
+    #menuScreen .btn { padding: 7px 10px; font-size: 12px; }
+}
+/* Telefon: yardım konu başlıkları tek satırda yana kayar, metne yer kalsın */
+@media (max-height: 500px) {
+    #helpTabs { flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start; max-width: 100%; padding-bottom: 4px; margin-bottom: 6px; }
+    #helpTabs > * { flex: 0 0 auto; font-size: 12px; padding: 5px 10px; }
+    #helpScreen h1 { font-size: 22px; margin: 0; }
+}
+@media (max-height: 500px) {
+    #helpTabs { flex-shrink: 0; min-height: 36px; align-items: center; }
+    #helpScreen h1 + * { display: none; }
+}

@@ -22,6 +22,7 @@ function onKeyDown(e) {
         case 'KeyC': case 'ControlLeft': case 'ControlRight': if (state === 'playing') keys.crouch = true; break;
         case 'Space': if (state === 'playing') jump(); break;
         case 'KeyR': if (state === 'playing') startReload(); break;
+        case 'KeyF': if (state === 'playing' && !e.repeat) toggleFlashlight(); break;   // fener (gece bölümü)
         case 'KeyB': case 'KeyG': if (state === 'playing') throwGrenade(); break;   // bomba: B (G de çalışır)
         default:
             if (WEAPON_KEYS[e.code] && state === 'playing') selectWeapon(WEAPON_KEYS[e.code]);
@@ -84,6 +85,7 @@ function onPointerLockChange() {
 }
 
 function requestLock() {
+    if (touchActive()) { touchStartPlaying(); return; }   // dokunmatik: fare kilidi yok
     try {
         const p = canvas.requestPointerLock();
         if (p && typeof p.catch === 'function') p.catch(lockFailed);
