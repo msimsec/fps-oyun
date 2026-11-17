@@ -18,7 +18,9 @@ const STICK_R = 56;                       // çubuğun en fazla gidebildiği yar
 const touchMove = { x: 0, y: 0, active: false };
 const touchPtr = { stick: null, look: null, fire: null };
 let stickOrigin = { x: 0, y: 0 };
-let lookLast = { x: 0, y: 0 };
+// Her bakış parmağının son konumu ayrı tutulur (sağ yarıdaki parmak ile ATEŞ'teki parmak aynı anda
+// kayarsa biri ötekinin konumundan fark hesaplayıp kamerayı sıçratmasın)
+const lookLast = new Map();
 
 function touchDevice() {
     const coarse = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
@@ -43,6 +45,7 @@ function applyTouchMode() {
 function resetTouch() {
     touchMove.x = touchMove.y = 0; touchMove.active = false;
     touchPtr.stick = touchPtr.look = touchPtr.fire = null;
+    lookLast.clear();
     const knob = $('touchStick');
     if (knob) knob.classList.remove('show');
 }
@@ -109,7 +112,7 @@ function onPadDown(e) {
         setStick(e.clientX, e.clientY);
     } else if (!left && touchPtr.look === null) {
         touchPtr.look = e.pointerId;
-        lookLast = { x: e.clientX, y: e.clientY };
+        lookLast.set(e.pointerId, { x: e.clientX, y: e.clientY });
     }
     try { e.target.setPointerCapture(e.pointerId); } catch (err) {}
 }
@@ -117,13 +120,14 @@ function onPadMove(e) {
     if (e.pointerId === touchPtr.stick) { e.preventDefault(); setStick(e.clientX, e.clientY); }
     else if (e.pointerId === touchPtr.look || e.pointerId === touchPtr.fire) {
         e.preventDefault();
-        if (state === 'playing') touchLook(e.clientX - lookLast.x, e.clientY - lookLast.y);
-        lookLast = { x: e.clientX, y: e.clientY };
+        const last = lookLast.get(e.pointerId);
+        if (last && state === 'playing') touchLook(e.clientX - last.x, e.clientY - last.y);
+        lookLast.set(e.pointerId, { x: e.clientX, y: e.clientY });
     }
 }
 function onPadUp(e) {
     if (e.pointerId === touchPtr.stick) releaseStick();
-    if (e.pointerId === touchPtr.look) touchPtr.look = null;
+    if (e.pointerId === touchPtr.look) { touchPtr.look = null; lookLast.delete(e.pointerId); }
 }
 
 // ATEŞ: basılı tuttukça ateş eder; parmağı kaydırınca nişan da döner
@@ -131,13 +135,14 @@ function onFireDown(e) {
     if (state !== 'playing') return;
     e.preventDefault(); e.stopPropagation();
     touchPtr.fire = e.pointerId;
-    lookLast = { x: e.clientX, y: e.clientY };
+    lookLast.set(e.pointerId, { x: e.clientX, y: e.clientY });
     firing = true;
     try { e.currentTarget.setPointerCapture(e.pointerId); } catch (err) {}
 }
 function onFireUp(e) {
     if (e.pointerId !== touchPtr.fire) return;
     touchPtr.fire = null;
+    lookLast.delete(e.pointerId);
     firing = false;
     player.semiFired = false;            // yarı otomatik silah: her dokunuşta bir atış
 }

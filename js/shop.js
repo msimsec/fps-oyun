@@ -128,7 +128,7 @@ function buyShield() {
         if (player.armor >= CFG.armorAmount) { showToast('Kalkanın zaten dolu'); return; }
         if (!spend(CFG.shieldCost)) return;
         player.armor = CFG.armorAmount;
-        afterPurchase('Kalkan kuşanıldı (+50)');
+        afterPurchase(`Kalkan kuşanıldı (+${CFG.armorAmount})`);
     } else {
         if (player.hasShield) { showToast('Sonraki el için kalkanın zaten hazır'); return; }
         if (!spend(CFG.shieldCost)) return;

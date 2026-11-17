@@ -23,6 +23,8 @@ function onKeyDown(e) {
         case 'Space': if (state === 'playing') jump(); break;
         case 'KeyR': if (state === 'playing') startReload(); break;
         case 'KeyF': if (state === 'playing' && !e.repeat) toggleFlashlight(); break;   // fener (gece bölümü)
+        // Dokunmatik modda fare kilidi yok: klavyeli tablette ESC yine duraklatsın
+        case 'Escape': if (state === 'playing' && touchActive()) TOUCH_ACTIONS.pause(); break;
         case 'KeyB': case 'KeyG': if (state === 'playing') throwGrenade(); break;   // bomba: B (G de çalışır)
         default:
             if (WEAPON_KEYS[e.code] && state === 'playing') selectWeapon(WEAPON_KEYS[e.code]);
