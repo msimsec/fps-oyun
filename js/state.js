@@ -100,7 +100,7 @@ function basicMat(color) {
 }
 
 // Yükseltmelerin etkisi
-const speedMul = () => 1 + UPGRADES.speed.per * player.upgrades.speed;
+const speedMul = () => (1 + UPGRADES.speed.per * player.upgrades.speed) * hasteMul();   // Rüzgâr gücü hızlandırır
 const reloadMul = () => 1 - UPGRADES.reload.per * player.upgrades.reload;
 function applyMaxHealth() { player.maxHealth = 100 + UPGRADES.health.per * player.upgrades.health; }
 

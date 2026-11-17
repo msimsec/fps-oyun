@@ -63,6 +63,14 @@ function updatePlayer(dt) {
         moveWithCollision(camera.position, player.airVX * dt, player.airVZ * dt, CFG.playerRadius, feet);
     }
 
+    // Harita sınırı ve tavan: roketle zıplayan oyuncu duvarın üstünden dışarı çıkamasın
+    const M = curMap();
+    if (M.bound) {
+        camera.position.x = Math.max(-M.bound, Math.min(M.bound, camera.position.x));
+        camera.position.z = Math.max(-M.bound, Math.min(M.bound, camera.position.z));
+    }
+    if (M.ceiling && feet + player.eye > M.ceiling - 0.3 && player.velY > 0) player.velY = 0;
+
     // Dikey hareket: yerçekimi, zıplama, kasaların üstüne çıkma / kenardan düşme
     const ground = groundHeight(camera.position.x, camera.position.z, feet, CFG.playerRadius);
     if (player.onGround && feet > ground + 0.01) player.onGround = false;   // kenardan yürüyüp düştü
@@ -196,6 +204,7 @@ function updateEnemies(dt) {
 function updateHUD() {
     const w = curWeapon(), a = curAmmo();
     setHud('hpDisplay', Math.max(0, Math.ceil(player.health)));
+    $('healthHud').classList.toggle('over', player.health > player.maxHealth + 0.5);   // Büyük Can fazlası
     setHud('hpMaxDisplay', player.maxHealth);
     $('healthHud').classList.toggle('regen', isRegenerating());
     setHud('shieldDisplay', player.armor > 0 ? String(Math.ceil(player.armor)) : (player.hasShield ? 'HAZIR' : 'YOK'));
@@ -224,6 +233,7 @@ function animate() {
         if (isDuelMode) duelTime += dt;
         tickRunSave(dt);
         updatePlayer(dt);
+        if (state === 'playing') updateArena(dt);
         updateBullets(dt);
         if (pendingDuelWin) {
             pendingDuelWin = false;

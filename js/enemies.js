@@ -450,6 +450,7 @@ class HumanoidEnemy {
         const dist = origin.distanceTo(target);
         const dir = target.sub(origin).normalize();
         // küçük sapma: bot her atışı tam isabetle yapmasın
+        spread *= shadowMul();                       // Gölge gücü: düşman mermisi çok sapar
         dir.x += (Math.random() - 0.5) * spread;
         dir.y += (Math.random() - 0.5) * spread;
         dir.z += (Math.random() - 0.5) * spread;
@@ -576,6 +577,7 @@ function onEnemyKilled(e, hit) {
     makeCorpse(e, hit === 'head');
     if (e.isDuel) {
         if (hit === 'head') player.headshots++;   // düelloyu kafadan bitiren vuruş da sayılsın
+        medalOnKill(hit === 'head');
         duelBot = null;
         pendingDuelWin = true;
         achKill();
@@ -590,6 +592,7 @@ function onEnemyKilled(e, hit) {
     player.score += score;
     player.kills++;
     if (head) player.headshots++;
+    medalOnKill(head);
     player.gold += gold;
     player.goldEarned += gold;
     // Her sahip olunan silaha biraz yedek mermi (tabancanınki zaten sınırsız)

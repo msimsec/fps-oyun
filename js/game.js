@@ -20,6 +20,7 @@ function resetWorld(duel) {
     clearDrops();
     player.grenades = CFG.grenadeStart; player.grenadeCd = 0;
     runStats.pickups = 0; runStats.bestBlast = 0; runStats.cleanWave = false; runStats.duelWon = false;
+    resetArena(); resetMedals();          // harita eşyaları yerinde, güç yok, madalyalar sıfır
     hideBanner();
 
     player.health = player.maxHealth;
@@ -129,6 +130,7 @@ function endRun(won) {
         DIFF_LABELS[isDuelMode ? run.duel : run.game] + ` · Bölüm: ${curMap().name}`;
     $('finalExtra').textContent = isDuelMode ? `Süre: ${formatTime(duelTime)}` : `Ulaşılan dalga: ${wave.num}`;
     $('newRecord').textContent = broken.length ? `🏆 YENİ REKOR: ${broken.join(' · ')}` : '';
+    $('finalMedals').textContent = medalSummary();
     showScreen('gameOverScreen');
     if (document.pointerLockElement) document.exitPointerLock();
 }

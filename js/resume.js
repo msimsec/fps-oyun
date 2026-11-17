@@ -44,6 +44,7 @@ function saveRunSnapshot() {
             const p = e.group.position;
             return [e.typeId, p.x, p.y, p.z, e.health, e.maxHealth, e.speed, Object.keys(e.skills || {})];
         }),
+        arena: arenaSnapshot(),
         drops: drops.map(d => [d.type, d.weapon, d.amount, d.mesh.position.x, d.baseY, d.mesh.position.z, d.life])
     };
     try { localStorage.setItem(RUN_KEY, JSON.stringify(snap)); } catch (e) {}
@@ -100,7 +101,7 @@ function resumeRun() {
     updateDifficultyInfo();
 
     const P = s.player;
-    player.health = Math.min(player.maxHealth, Math.max(1, finite(P.health, player.maxHealth)));
+    player.health = Math.min(healthCap(), Math.max(1, finite(P.health, player.maxHealth)));   // Büyük Can fazlası da gelsin
     player.armor = Math.min(CFG.armorAmount, Math.max(0, finite(P.armor)));
     player.score = Math.max(0, Math.floor(finite(P.score)));
     player.kills = Math.max(0, Math.floor(finite(P.kills)));
@@ -170,6 +171,7 @@ function resumeRun() {
         if (Number.isFinite(life)) drops[drops.length - 1].life = Math.max(1, Math.min(CFG.dropLife, life));
     });
 
+    arenaRestore(s.arena);
     if (wave.num > 0) showBanner(`DALGA ${wave.num}`, 'Kaldığın yerden devam', 1800);
     updateHUD();
     hideAllScreens();

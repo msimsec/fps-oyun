@@ -49,6 +49,14 @@ Dalgalar ilerledikçe düşmanlar yetenek kazanır: **2. dalga** zıplama (alça
 
 **Can yenilenmesi (dalga modu):** Bir süre hasar almazsan can kendiliğinden dolar; can göstergesi yeşil parlar ve kısa bir ses çalar. Kolay: 3 sn sonra saniyede 14, Orta: 4 sn sonra saniyede 10, Zor: 5 sn sonra saniyede 7 can. Düelloda can yenilenmez. Can kiti yoktur; eski kayıtlardaki kitler 50'şer altın olarak iade edilir.
 
+**Harita eşyaları:** Her bölümde sabit noktalarda dönen eşyalar durur ve alındıktan sonra aynı yerde yeniden çıkar: ➕ Can +25 (25 sn), 💚 Büyük Can +50 (45 sn; canı sınırın 50 üstüne çıkarır, fazlası saniyede 2 erir), 🛡️ Kalkan +25 (30 sn), 📦 Cephane kutusu (30 sn; her silaha bir şarjör yedek).
+
+**Güç kutusu (dalga modu):** Elin başından 40 sn sonra belirir, alındıktan 75 sn sonra yenisi çıkar; 20 saniye sürer. 🔥 **Öfke** 3 kat hasar · 💨 **Rüzgâr** %35 hızlı koşu ve ateş · 👤 **Gölge** düşman mermileri 3 kat sapar · ✚ **Şifa** saniyede 15 can.
+
+**Madalyalar ve sesli anons:** 🏅 Harika! (2 sn içinde iki düşman), Keskin Göz! (art arda iki kafa vuruşuyla öldürme), Rezil Oldu! (testereyle öldürme), Kusursuz! (dalgayı hasarsız bitirme). Ekranda yazı ve tarayıcının Türkçe sesiyle anons (Ayarlar'dan kapatılabilir); oyun sonunda sayılır.
+
+**Roket zıplaması:** Kendi roketin/bomban yakınında patlarsa seni iter; ayağının dibine roket atınca ~3 birim yükseğe fırlarsın (canın yine azalır). Duvarların ve tavanın dışına çıkılamaz.
+
 **Bomba (B):** Her ele 2 bombayla başlanır (en fazla 4). Atılan bomba sekerek yuvarlanır, 1.8 sn sonra patlar; 6 birim içindeki düşmanlara uzaklıkla azalan hasar verir, duvarın arkasındakiler korunur. Çok yakındaysan sana da yarı hasar verir. Her dalga sonunda +1 bomba.
 
 **Yerden toplananlar:** Ölen düşman %35 ihtimalle bir eşya düşürür. Her eşyanın üstünde ne olduğunu yazan renkli bir etiket ve altında parlayan bir halka vardır. **Cephane silaha özeldir** (kutunun üstünde o silahın küçük modeli yatar): 🏹 OK +5 (Yaylı Tüfek), 🔴 SAÇMA +6 (Av Tüfeği), 🎯 MERMİ +5 (Keskin Nişancı), 🔫 MERMİ +şarjör (Taramalı Tabanca), 🚀 ROKET +2 (Roketatar); yalnızca sahip olduğun silahlarınki düşer, elindeki silahın yedeği azsa onunki daha sık düşer. Diğerleri: **🛡️ KALKAN +25**, **🪙 ALTIN**, **💣 BOMBA +1**. Üstünden geçince alınır; ne alındığı sağ üstte yazar. Kasanın ya da duvarın dibine düşen eşya en yakın boş yere kayar. Bomba çantası (4/4) ya da kalkan doluyken o eşya alınmaz; etiketi soluklaşır ve üstüne gelince nedeni yazar. 20 sn sonra (son saniyelerde yanıp sönerek) kaybolur.
@@ -57,7 +65,7 @@ Dalgalar ilerledikçe düşmanlar yetenek kazanır: **2. dalga** zıplama (alça
 
 Her iki modun zorluğu **Ayarlar** ekranından ayrı ayrı seçilir (Kolay / Orta / Zor).
 
-**Yardım:** Ayarlar ekranındaki **YARDIM ❓** butonu, oyunun nasıl oynandığını 16 konu başlığında (Başlarken, Oyuncu ve Parola, Kontroller, Dokunmatik, Oyun Modları, Can ve Kalkan, Silahlar, Bomba, Düşmanlar, Yerden Toplananlar, Bölümler, Skor ve Altın, Mağaza, Rekorlar ve Başarımlar, Ayarlar, İpuçları) satır satır anlatır. Metindeki sayılar oyunun ayarlarından okunur, oyun değişince yardım da güncel kalır.
+**Yardım:** Ayarlar ekranındaki **YARDIM ❓** butonu, oyunun nasıl oynandığını 17 konu başlığında (Başlarken, Oyuncu ve Parola, Kontroller, Dokunmatik, Oyun Modları, Can ve Kalkan, Silahlar, Bomba, Düşmanlar, Harita Eşyaları ve Güçler, Yerden Toplananlar, Bölümler, Skor ve Altın, Mağaza, Rekorlar ve Başarımlar, Ayarlar, İpuçları) satır satır anlatır. Metindeki sayılar oyunun ayarlarından okunur, oyun değişince yardım da güncel kalır.
 
 ## Kontroller
 
@@ -151,6 +159,7 @@ js/
   weapons.js      Atış, şarjör, silah değiştirme, dürbün
   enemies.js      Düşman ve düello botu, yol bulma, ölüm efekti
   items.js        Bomba ve yerden toplanan eşyalar
+  arena.js        Harita eşyaları, güç kutusu, madalyalar ve sesli anons, roket zıplaması
   waves.js        Dalga sistemi
   records.js      Rekorlar (bölüm ve zorluk başına)
   achievements.js Başarımlar

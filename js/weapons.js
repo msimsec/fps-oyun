@@ -84,13 +84,13 @@ function tryShoot() {
         return;
     }
     a.ammo--;
-    player.fireCooldown = w.interval;
+    player.fireCooldown = w.interval * fireMul();      // Rüzgâr: hızlı ateş
     player.semiFired = true;
 
     const dir = new THREE.Vector3();
     camera.getWorldDirection(dir);
     const origin = camera.position.clone().addScaledVector(dir, 0.3);
-    const damage = player.damage * w.dmgMul;
+    const damage = player.damage * w.dmgMul * dmgBoost();   // Öfke: 3 kat
     // Koşarken ve havadayken isabet biraz bozulur (dürbünle bakarken bozulmaz)
     const extra = player.zoomed ? 0 : (isSprinting() ? 0.02 : 0) + (player.onGround ? 0 : 0.03);
     const spread = (w.spread + extra) * (isCrouching() ? CFG.crouchSpread : 1);   // çömelince daha isabetli
@@ -154,7 +154,7 @@ function setZoom(on) {
 // Testereli Eldiven: önündeki (menzil ve görüş konisi içindeki) en yakın hedefe kesme hasarı.
 // Bakılan noktaya göre kafa vuruşu da sayılır. Mermi harcamaz, şarjör değiştirmez.
 function sawAttack(w) {
-    player.fireCooldown = w.interval;
+    player.fireCooldown = w.interval * fireMul();
     player.sawSpin = 0.25;                       // testere bu kadar süre hızlı döner (görsel)
     const dir = new THREE.Vector3();
     camera.getWorldDirection(dir);
@@ -177,11 +177,11 @@ function sawAttack(w) {
     // Bakılan noktanın düşmanın neresine geldiği: kafa mı gövde mi
     const pt = camera.position.clone().addScaledVector(dir, Math.max(0.3, bestD - best.radius * 0.5));
     const hit = best.hitTest(pt) === 'head' ? 'head' : 'body';
-    const dmg = player.damage * w.dmgMul * (hit === 'head' ? 2 : 1);
+    const dmg = player.damage * w.dmgMul * dmgBoost() * (hit === 'head' ? 2 : 1);
     best.takeDamage(dmg);
     createParticles(pt, 0xb91c1c, 5);
     createParticles(pt, 0xfbbf24, 3);                        // kıvılcım
     flashClass('crosshair', hit === 'head' ? 'head' : 'hit', 120);
     showDamageNumber(best, dmg, hit === 'head');
-    if (best.health <= 0) onEnemyKilled(best, hit);
+    if (best.health <= 0) { killSource = 'saw'; onEnemyKilled(best, hit); killSource = null; }   // "Rezil oldu" madalyası
 }

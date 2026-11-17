@@ -46,6 +46,13 @@ function setDifficulty(kind, value) {
     updateDifficultyInfo();
 }
 
+function setAnnouncer(on) {
+    settings.announcer = !!on;
+    saveSettings();
+    updateSettingsScreen();
+    if (on) { initAudio(); announce('Harika!'); }
+}
+
 function setTouchMode(value) {
     if (!TOUCH_MODES.includes(value)) return;
     settings.touch = value;
@@ -56,6 +63,7 @@ function setTouchMode(value) {
 }
 
 function updateSettingsScreen() {
+    $('announcerButtons').querySelectorAll('.seg-btn').forEach(b => b.classList.toggle('active', (b.dataset.value === 'on') === settings.announcer));
     $('touchButtons').querySelectorAll('.seg-btn').forEach(b => b.classList.toggle('active', b.dataset.value === settings.touch));
     $('touchDesc').textContent = touchActive()
         ? 'Dokunmatik kontroller AÇIK: sol yarıda çubukla yürü, sağ yarıda kaydırarak nişan al, butonlarla ateş et.'

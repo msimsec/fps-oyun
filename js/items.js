@@ -130,8 +130,9 @@ function explode(pos, R = CFG.grenadeRadius, power = CFG.grenadeDamage, opts = {
             ? Math.round(Math.max(e === opts.direct ? power : 0, e.maxHealth * ROCKET_SPLASH(dist, R)))
             : Math.round(e === opts.direct ? Math.max(power, dmgAt(dist)) : dmgAt(dist));
         if (dmg <= 0) continue;
-        e.takeDamage(dmg);
-        showDamageNumber(e, dmg, false);
+        const boosted = Math.round(dmg * dmgBoost());            // Öfke: patlama da 3 kat
+        e.takeDamage(boosted);
+        showDamageNumber(e, boosted, false);
         if (e.health <= 0) { onEnemyKilled(e, 'body'); kills++; }
     }
     if (kills) runStats.bestBlast = Math.max(runStats.bestBlast, kills);
@@ -142,6 +143,8 @@ function explode(pos, R = CFG.grenadeRadius, power = CFG.grenadeDamage, opts = {
         const self = opts.pct ? player.maxHealth * ROCKET_SPLASH(pd, R) * 0.5 : dmgAt(pd) * 0.5;
         if (self > 0) damagePlayer(self, false, 300, pos);
     }
+    // Patlama oyuncuyu iter: ayağının dibine atılan roketle yükseğe zıplanır (roket zıplaması)
+    if (state === 'playing') blastKnockback(pos, R);
     if (kills) checkAchievements();
 }
 
