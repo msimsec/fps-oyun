@@ -190,7 +190,9 @@ class HumanoidEnemy {
             return;
         }
         // Altındaki zemin bittiyse (kasanın kenarından yürüdü) düşmeye başla
-        if (!this.isDuel && groundHeight(p.x, p.z, p.y, 0.3) < p.y - 0.05) {
+        // Zemin payı gövde yarıçapıyla aynı (utils.js groundHeight notu): daha dar olursa iri düşman
+        // kenara indiğinde engelin içine gömülür
+        if (!this.isDuel && groundHeight(p.x, p.z, p.y, this.radius) < p.y - 0.05) {
             this.air = true; this.vy = 0; this.avx = 0; this.avz = 0;
             return;
         }
@@ -256,8 +258,10 @@ class HumanoidEnemy {
     move(dx, dz) {
         const p = this.group.position;
         const y = p.y;
+        // Space: boşluğa yürümesin (altında hiçbir zemin yoksa adım atılmaz). Siperin ya da kasanın
+        // üstünden platforma inmek serbest; yoksa siperin kenarına çıkan düşman orada takılı kalır.
         const canStand = curMap().floorY === -Infinity
-            ? (x, z) => groundHeight(x, z, y, 0.3) >= y - 0.05 : null;
+            ? (x, z) => groundHeight(x, z, y, 0.3) > -Infinity : null;
         moveWithCollision(p, dx, dz, this.radius, y, canStand);
     }
 
@@ -344,7 +348,7 @@ class HumanoidEnemy {
         const p = this.group.position;
         this.vy -= CFG.gravity * dt;
         moveWithCollision(p, this.avx * dt, this.avz * dt, this.radius, p.y);
-        const ground = groundHeight(p.x, p.z, p.y, 0.3);
+        const ground = groundHeight(p.x, p.z, p.y, this.radius);
         const ny = p.y + this.vy * dt;
         if (this.vy <= 0 && ny <= ground) {
             p.y = ground;
