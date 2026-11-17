@@ -90,6 +90,8 @@ function updatePlayer(dt) {
         player.reloadTimer -= dt;
         if (player.reloadTimer <= 0) finishReload();
     }
+    // Şarjör de yedek de bittiyse (son atışın bekleme süresi dolunca) bir alttaki silaha geç
+    if (!player.reloading && player.fireCooldown <= 0 && weaponEmpty(player.weapon)) autoSwitchFromEmpty();
     if (firing) tryShoot();
 
     // Görüş açısı: dürbünde yakın, koşarken biraz geniş

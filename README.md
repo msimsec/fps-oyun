@@ -92,6 +92,8 @@ Silahları birinci şahıs görünümde eldivenli eller tutar. Denge gerçeğe y
 
 Kafa vuruşu her silahta 2 kat hasar verir. Mağazadaki "Silah Hasarı" yükseltmesi tüm silahlara işler.
 
+**Mermi bitince:** Bir silahın şarjörü de yedeği de tamamen biterse oyun kendiliğinden bir alt sıradaki mermisi olan silaha geçer (en geç Tabanca'ya, onun yedeği sınırsız). Mermisi bitmiş silah, yerden cephanesi toplanana kadar seçilemez; fare tekerleği ve dokunmatikteki ⇄ butonu onu atlar.
+
 ## Rekorlar ve başarımlar
 
 **Rekorlar** her bölüm için ayrı tutulur; en iyi skorun ve en hızlı düellonun kırıldığı tarih ve saat de yazar; rekor ekranının üstündeki sekmelerden bölüm seçilir. (Bölüm ayrımından önceki rekorlar Depo'ya aktarılır.)

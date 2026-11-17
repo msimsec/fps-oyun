@@ -31,9 +31,30 @@ function showWeapon(id) {
     WEAPON_ORDER.forEach(w => { if (weaponModels[w]) weaponModels[w].visible = (w === id); });
 }
 
+// Şarjörü de yedeği de boş mu (testere ve tabanca hiç boşalmaz: testere mermi kullanmaz, tabancanın yedeği sınırsız)
+function weaponEmpty(id) {
+    const a = player.arsenal[id];
+    return !!a && !WEAPONS[id].melee && a.ammo <= 0 && a.pool <= 0;
+}
+
+// Mermisi tamamen biten silahtan bir alt sıradaki mermisi olan silaha geç (en geç Tabanca)
+function autoSwitchFromEmpty() {
+    const i = WEAPON_ORDER.indexOf(player.weapon);
+    for (let k = i - 1; k >= 0; k--) {
+        const id = WEAPON_ORDER[k];
+        if (player.ownedWeapons[id] && !weaponEmpty(id)) {
+            const from = WEAPONS[player.weapon].name;
+            selectWeapon(id);
+            showToast(`${from} mermisi bitti → ${WEAPONS[id].name}`);
+            return;
+        }
+    }
+}
+
 function selectWeapon(id) {
     if (id === player.weapon) return;
     if (!player.ownedWeapons[id]) { showToast(`${WEAPONS[id].name} kilitli (mağazadan alabilirsin)`); return; }
+    if (weaponEmpty(id)) { showToast(`${WEAPONS[id].name}: mermisi yok (yerden cephane topla)`); return; }
     player.reloading = false;                    // silah değişince şarjör değiştirme iptal
     player.fireCooldown = Math.max(player.fireCooldown, 0.25);
     // Tetik basılıyken silah değişirse yeni (yarı otomatik) silah kendiliğinden ateş etmesin
@@ -45,7 +66,8 @@ function selectWeapon(id) {
 }
 
 function cycleWeapon(step) {
-    const owned = WEAPON_ORDER.filter(id => player.ownedWeapons[id]);
+    // Mermisi tamamen bitmiş silahlar atlanır (elindeki boş olsa bile sıradakine geçilebilsin)
+    const owned = WEAPON_ORDER.filter(id => player.ownedWeapons[id] && (id === player.weapon || !weaponEmpty(id)));
     const i = owned.indexOf(player.weapon);
     selectWeapon(owned[(i + step + owned.length) % owned.length]);
 }

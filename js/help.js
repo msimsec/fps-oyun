@@ -105,6 +105,8 @@ const HELP_SECTIONS = [
         'Kendi roketine çok yakın durursan sen de aynı kuralla, yarı şiddette can kaybedersin (dibinde patlarsa canının yarısı gider).',
         'Taramalı Tabanca tamamen siyah, tırtıklı kabzalı AR tipi bir silahtır; skin seçimi gövdesinin rengini değiştirmez, yalnızca mermi rengi skine göre değişir.',
         'Tabancanın yedek mermisi sınırsızdır; diğer silahların mermisi bitse bile tabancayla savaşmaya devam edebilirsin.',
+        'Bir silahın şarjörü de yedek mermisi de tamamen biterse oyun kendiliğinden bir alt sıradaki mermisi olan silaha geçer (en geç Tabanca\'ya); ekranda "… mermisi bitti → …" yazar.',
+        'Mermisi tamamen bitmiş silah, yerden cephanesini toplayana kadar seçilemez: numara tuşuyla seçersen "mermisi yok" yazar; fare tekerleği ve ⇄ butonu onu atlar.',
         'Her öldürdüğün düşman, sahip olduğun silahlara biraz yedek mermi verir.',
         'Kafa vuruşu her silahta 2 kat hasar verir; nişangâh kırmızı yanar. Göğsün biraz üstüne nişan al.',
         'Koşarken ve havadayken atışların biraz dağılır; durarak ateş etmek daha isabetlidir.',
