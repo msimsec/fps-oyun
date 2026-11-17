@@ -592,3 +592,24 @@ body.touch .touch-controls-info div { white-space: normal; }
     #helpTabs { flex-shrink: 0; min-height: 36px; align-items: center; }
     #helpScreen h1 + * { display: none; }
 }
+
+/* Arena: güç göstergesi, madalya, güç rengi, sınır üstü can */
+.power-hud { position: absolute; top: clamp(60px, 6vw, 84px); left: 50%; transform: translateX(-50%); display: none;
+    font-family: 'Courier New', monospace; font-weight: bold; font-size: clamp(14px, 1.4vw, 20px); padding: 4px 14px;
+    border: 2px solid; border-radius: 8px; background: rgba(2, 6, 23, 0.8); white-space: nowrap; }
+.power-hud.show { display: block; animation: powerPulse 1s ease-in-out infinite alternate; }
+@keyframes powerPulse { from { box-shadow: 0 0 4px currentColor; } to { box-shadow: 0 0 16px currentColor; } }
+.medal-pop { position: absolute; top: 38%; left: 50%; transform: translate(-50%, -50%) scale(0.6); opacity: 0;
+    font-family: var(--ui-font, Arial); font-weight: 800; font-size: clamp(26px, 3.4vw, 46px); color: #fde047;
+    text-shadow: 0 0 14px rgba(250, 204, 21, 0.9), 0 2px 0 #000; pointer-events: none; white-space: nowrap; }
+.medal-pop.show { animation: medalPop 1.6s ease-out forwards; }
+@keyframes medalPop { 0% { opacity: 0; transform: translate(-50%, -50%) scale(0.6); } 12% { opacity: 1; transform: translate(-50%, -50%) scale(1.15); }
+    25% { transform: translate(-50%, -50%) scale(1); } 80% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -60%) scale(1); } }
+.power-tint { position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity 0.4s; }
+body[data-power="rage"] .power-tint   { opacity: 1; box-shadow: inset 0 0 90px rgba(239, 68, 68, 0.55); }
+body[data-power="haste"] .power-tint  { opacity: 1; box-shadow: inset 0 0 90px rgba(250, 204, 21, 0.45); }
+body[data-power="shadow"] .power-tint { opacity: 1; box-shadow: inset 0 0 90px rgba(167, 139, 250, 0.55); }
+body[data-power="heal"] .power-tint   { opacity: 1; box-shadow: inset 0 0 90px rgba(34, 197, 94, 0.45); }
+.health-hud.over { color: #a3e635; border-color: #a3e635; }
+#finalMedals { color: #fde047; }
+body.touch .power-hud { top: 80px; font-size: 12px; }

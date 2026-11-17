@@ -35,6 +35,7 @@ const MAPS = {
         name: 'Depo',
         desc: 'Tuğla duvarlı kapalı depo; kasalar ve siperler',
         floorY: 0, killY: -Infinity, bulletMinY: 0, bulletMaxY: 10, enemyRange: 25,
+        bound: 43.4, ceiling: 10,     // roketle zıplayan oyuncu duvar/tavan dışına çıkmasın
         spawn: { x: 0, y: 0, z: 10, angle: 0 },
         duel: { player: { x: 0, y: 0, z: 12, angle: Math.PI }, bot: { x: 0, y: 0, z: 34 } },
         build: buildDepot,
@@ -65,7 +66,7 @@ const MAPS = {
 MAPS.desert = {
     name: 'Çöl',
     desc: 'Kum taşı kasaba; dar sokaklar, kemerler, pazar meydanı ve çatısına çıkılan gözetleme evi',
-    floorY: 0, killY: -Infinity, bulletMinY: 0, bulletMaxY: 60, enemyRange: 30,
+    floorY: 0, killY: -Infinity, bulletMinY: 0, bulletMaxY: 60, enemyRange: 30, bound: 43.4,
     spawn: { x: 0, y: 0, z: 36, angle: 0 },
     duel: { player: { x: 0, y: 0, z: 20, angle: 0 }, bot: { x: 0, y: 0, z: -10 } },
     build: buildDesert,
@@ -75,7 +76,7 @@ MAPS.desert = {
 MAPS.snow = {
     name: 'Kar Üssü',
     desc: 'Karlı dağdaki askerî üs; konteynerler, yakıt tankları, kışla ve basamaklı gözetleme kulesi',
-    floorY: 0, killY: -Infinity, bulletMinY: 0, bulletMaxY: 60, enemyRange: 30,
+    floorY: 0, killY: -Infinity, bulletMinY: 0, bulletMaxY: 60, enemyRange: 30, bound: 43.4,
     spawn: { x: 0, y: 0, z: 34, angle: 0 },
     duel: { player: { x: 0, y: 0, z: 18, angle: 0 }, bot: { x: 0, y: 0, z: -12 } },
     build: buildSnow,
@@ -86,7 +87,7 @@ MAPS.harbor = {
     name: 'Gece Limanı',
     desc: 'Gece, konteyner limanı; lamba ışıkları, vinç, açık depo ve rıhtımdaki gemi. Fenerin F tuşunda',
     night: true,
-    floorY: 0, killY: -Infinity, bulletMinY: 0, bulletMaxY: 60, enemyRange: 30,
+    floorY: 0, killY: -Infinity, bulletMinY: 0, bulletMaxY: 60, enemyRange: 30, bound: 43.4,
     spawn: { x: 0, y: 0, z: 36, angle: 0 },
     duel: { player: { x: 0, y: 0, z: 18, angle: 0 }, bot: { x: 0, y: 0, z: -12 } },
     build: buildHarbor,
@@ -123,6 +124,7 @@ function buildMap(id) {
     ambientLight.color.setHex(0xffffff); ambientLight.intensity = 0.6;
     sunLight.color.setHex(0xffffff); sunLight.intensity = 0.8;
     MAPS[id].build();
+    buildMapItems(id);            // sabit eşyalar ve güç kutusu (arena.js)
     updateFlashlight();
     updateNightFaces();
 }

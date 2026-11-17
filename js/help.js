@@ -140,6 +140,17 @@ const HELP_SECTIONS = [
         'Ölen düşman geriye doğru devrilir, birkaç saniye yerde kalır, sonra toprağa gömülür. Kafadan öldürülürse kafası parçalanır.',
         'Cesetler engel değildir: mermiler içinden geçer, üstünden yürüyebilirsin.'
     ] },
+    { id: 'arena', title: '⚡ Harita Eşyaları, Güçler, Madalyalar', lines: () => [
+        'Her bölümde sabit noktalarda, parlayan bir altlığın üstünde dönen eşyalar durur. Üstünden geçince alınır; aynı yerde bir süre sonra yeniden çıkar. Nerede olduklarını öğrenip zamanlamak avantaj sağlar.',
+        `➕ CAN +25 (her bölümde 2 tane, ${ITEM_DEFS.health.respawn} sn'de yeniden çıkar; canın doluysa alınmaz).`,
+        `💚 BÜYÜK CAN +50 (${ITEM_DEFS.mega.respawn} sn): canını sınırın ${MEGA_EXTRA} üstüne kadar çıkarır; sınırın üstündeki kısım saniyede ${OVERHEAL_DECAY} erir. Genelde ulaşması zor bir yerdedir (kule, çatı, konteyner üstü).`,
+        `🛡️ KALKAN +25 (${ITEM_DEFS.armor.respawn} sn; kalkan doluysa alınmaz) · 📦 CEPHANE KUTUSU (${ITEM_DEFS.ammo.respawn} sn): sahip olduğun her silaha bir şarjör yedek mermi.`,
+        `Güç kutusu (yalnızca dalga modu): elin başından ${POWER_FIRST} sn sonra bölümün belli bir noktasında renkli, dönen bir taş olarak belirir (ekranda duyurulur); alınınca ${POWER_RESPAWN} sn sonra yenisi çıkar. Güç ${POWER_TIME} saniye sürer; ekranın üstünde kalan süre yazar, ekranın kenarı gücün rengine boyanır.`,
+        ...POWER_IDS.map(k => `${POWERUPS[k].icon} ${POWERUPS[k].name}: ${POWERUPS[k].desc}.` + (k === 'rage' ? ' Kurşun, ok, testere, roket ve bomba hepsi 3 kat vurur.' : k === 'haste' ? ' %35 daha hızlı koşarsın, silahlar %35 daha seri atar.' : k === 'shadow' ? ' Düşman mermileri 3 kat daha fazla sapar.' : ' Saniyede 15 can dolar (hasar alsan da).')),
+        'Madalyalar: belli başarılarda ekranın ortasında yazı çıkar ve sesli duyurulur (Ayarlar → Sesli Anons ile kapatılabilir). Oyun sonunda o elde kazanılan madalyalar sayılır.',
+        ...Object.keys(MEDALS).map(k => `🏅 ${MEDALS[k].name} — ${MEDALS[k].desc}.`),
+        'Roket zıplaması: kendi roketin ya da bomban yakınında patlarsa seni iter. Ayağının dibine roket atıp aynı anda zıplarsan yaklaşık 3 birim yükseğe fırlarsın (yüksek kasalara, çatılara, Büyük Can\'a ulaşmak için). Patlama sana yine hasar verir (dibinde canının yaklaşık yarısı); kalkan bunu azaltır.'
+    ] },
     { id: 'drops', title: '🎁 Yerden Toplananlar', lines: () => [
         `Ölen düşman %${Math.round(CFG.dropChance * 100)} ihtimalle yere dönen, parlayan bir eşya bırakır.`,
         'Her eşyanın üstünde ne olduğunu yazan renkli bir etiket, altında da aynı renkte parlayan bir halka vardır.',
@@ -199,6 +210,7 @@ const HELP_SECTIONS = [
         `Fare Hassasiyeti: ${SENS_MIN}x ile ${SENS_MAX}x arasında; hemen geçerli olur.`,
         'Ses Düzeyi: %0 sesi tamamen kapatır.',
         'Dokunmatik Kontroller: OTOMATİK / AÇIK / KAPALI (ayrıntılar "Dokunmatik" konusunda).',
+        'Sesli Anons: madalyaları ve güçleri tarayıcının Türkçe konuşma sesiyle söyler; AÇIK / KAPALI. Ses düzeyini izler (%0\'da susar).',
         'Ayarlar her oyuncu için ayrı kaydedilir.'
     ] },
     { id: 'tips', title: '💡 İpuçları', lines: () => [

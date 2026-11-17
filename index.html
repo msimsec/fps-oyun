@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>3D Tactical FPS - 1v1 Düello ve Tüfek Skinleri</title>
     <!-- ?v=… : her yayında değiştirilir (tarih); tarayıcı önbellekteki eski CSS/JS dosyalarını kullanmasın -->
-    <link rel="stylesheet" href="css/style.css?v=20261117b">
+    <link rel="stylesheet" href="css/style.css?v=20261117c">
     <!-- Uygulama olarak kurulabilme (PWA): ad, ikon, tam ekran; internetsiz açılış için sw.js -->
     <link rel="manifest" href="manifest.webmanifest">
     <meta name="theme-color" content="#050914">
@@ -50,6 +50,9 @@
             <div>VURULAN: <span id="killsDisplay">0</span></div>
         </div>
         <div class="kill-feed" id="killFeed"></div>
+        <div class="power-hud" id="powerHud"></div>
+        <div class="medal-pop" id="medalPop"></div>
+        <div class="power-tint" id="powerTint"></div>
     </div>
 
     <!-- Dokunmatik kontroller (yalnızca body.touch iken ve oyun sırasında görünür) -->
@@ -168,6 +171,7 @@
         <div class="stats-box">
             <div>Skor: <span id="finalScore">0</span> | Vurulan: <span id="finalKills">0</span> | Kafa vuruşu: <span id="finalHeadshots">0</span></div>
             <div id="finalExtra"></div>
+            <div id="finalMedals"></div>
             <div>Bu elde kazanılan altın: <span id="finalGold">0</span> 🪙</div>
             <div>Toplam altın: <span id="finalTotalGold">0</span> 🪙</div>
             <div>Zorluk: <span id="finalDifficulty">-</span></div>
@@ -255,6 +259,14 @@
                 <button class="seg-btn hard" data-value="off" onclick="setTouchMode('off')">KAPALI</button>
             </div>
             <div class="settings-desc" id="touchDesc"></div>
+        </div>
+        <div class="settings-group">
+            <div class="settings-label">Sesli Anons (madalya ve güç)</div>
+            <div class="seg" id="announcerButtons">
+                <button class="seg-btn easy" data-value="on" onclick="setAnnouncer(true)">AÇIK</button>
+                <button class="seg-btn hard" data-value="off" onclick="setAnnouncer(false)">KAPALI</button>
+            </div>
+            <div class="settings-desc">Tarayıcının Türkçe konuşma sesiyle söylenir; ses düzeyini izler</div>
         </div>
         <div class="note" id="settingsNote"></div>
         <div class="menu-buttons">
@@ -363,29 +375,30 @@
         </div>
     </div>
 
-    <script src="js/profiles.js?v=20261117b"></script>
-    <script src="js/config.js?v=20261117b"></script>
-    <script src="js/save.js?v=20261117b"></script>
-    <script src="js/state.js?v=20261117b"></script>
-    <script src="js/utils.js?v=20261117b"></script>
-    <script src="js/audio.js?v=20261117b"></script>
-    <script src="js/feedback.js?v=20261117b"></script>
-    <script src="js/world.js?v=20261117b"></script>
-    <script src="js/maps.js?v=20261117b"></script>
-    <script src="js/input.js?v=20261117b"></script>
-    <script src="js/touch.js?v=20261117b"></script>
-    <script src="js/game.js?v=20261117b"></script>
-    <script src="js/weapons.js?v=20261117b"></script>
-    <script src="js/enemies.js?v=20261117b"></script>
-    <script src="js/items.js?v=20261117b"></script>
-    <script src="js/waves.js?v=20261117b"></script>
-    <script src="js/records.js?v=20261117b"></script>
-    <script src="js/achievements.js?v=20261117b"></script>
-    <script src="js/resume.js?v=20261117b"></script>
-    <script src="js/update.js?v=20261117b"></script>
-    <script src="js/shop.js?v=20261117b"></script>
-    <script src="js/settings.js?v=20261117b"></script>
-    <script src="js/help.js?v=20261117b"></script>
-    <script src="js/main.js?v=20261117b"></script>
+    <script src="js/profiles.js?v=20261117c"></script>
+    <script src="js/config.js?v=20261117c"></script>
+    <script src="js/save.js?v=20261117c"></script>
+    <script src="js/state.js?v=20261117c"></script>
+    <script src="js/utils.js?v=20261117c"></script>
+    <script src="js/audio.js?v=20261117c"></script>
+    <script src="js/feedback.js?v=20261117c"></script>
+    <script src="js/world.js?v=20261117c"></script>
+    <script src="js/maps.js?v=20261117c"></script>
+    <script src="js/input.js?v=20261117c"></script>
+    <script src="js/touch.js?v=20261117c"></script>
+    <script src="js/game.js?v=20261117c"></script>
+    <script src="js/weapons.js?v=20261117c"></script>
+    <script src="js/enemies.js?v=20261117c"></script>
+    <script src="js/items.js?v=20261117c"></script>
+    <script src="js/arena.js?v=20261117c"></script>
+    <script src="js/waves.js?v=20261117c"></script>
+    <script src="js/records.js?v=20261117c"></script>
+    <script src="js/achievements.js?v=20261117c"></script>
+    <script src="js/resume.js?v=20261117c"></script>
+    <script src="js/update.js?v=20261117c"></script>
+    <script src="js/shop.js?v=20261117c"></script>
+    <script src="js/settings.js?v=20261117c"></script>
+    <script src="js/help.js?v=20261117c"></script>
+    <script src="js/main.js?v=20261117c"></script>
 </body>
 </html>

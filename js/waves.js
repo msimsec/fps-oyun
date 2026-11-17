@@ -57,7 +57,7 @@ function waveCleared() {
     player.gold += gold;
     player.goldEarned += gold;
     player.score += score;
-    if (!wave.hurt) runStats.cleanWave = true;
+    if (!wave.hurt) { runStats.cleanWave = true; giveMedal('kusursuz'); }
     checkAchievements();
     const bomb = player.grenades < CFG.grenadeMax;
     if (bomb) player.grenades++;
