@@ -309,6 +309,29 @@ function createWeaponModels() {
     addPart(rocketL, box(0.17, 0.02, 0.02), hazardMat, 0.27, -0.13, -0.3);                               // uyarı bandı
     rocketL.userData.warhead = warhead;
 
+    // Işın Tüfeği: uzun ince gövde, namlu boyunca parlayan camgöbeği halkalar, arkada enerji hücresi
+    const railGlow = new THREE.MeshStandardMaterial({ color: 0x22d3ee, emissive: 0x22d3ee, emissiveIntensity: 0.9, roughness: 0.3 });
+    const rail = new THREE.Group();
+    addPart(rail, box(0.07, 0.08, 0.62), B, 0.25, -0.14, -0.5);                                   // gövde
+    addPart(rail, cyl(0.022, 0.5, 12), gripMat, 0.25, -0.12, -1.02, R);                         // namlu
+    for (let i = 0; i < 5; i++) addPart(rail, new THREE.TorusGeometry(0.042, 0.009, 8, 18), railGlow, 0.25, -0.12, -0.84 - i * 0.08);
+    addPart(rail, box(0.05, 0.05, 0.16), railGlow, 0.25, -0.08, -0.32);                            // enerji hücresi
+    addPart(rail, box(0.03, 0.05, 0.14), A, 0.25, -0.075, -0.6);                                  // üst ray
+    addPart(rail, box(0.06, 0.16, 0.08), gripMat, 0.25, -0.27, -0.36, 0.25);                       // kabza
+    addPart(rail, box(0.05, 0.1, 0.2), B, 0.25, -0.15, -0.12);                                     // dipçik
+
+    // Yıldırım: kısa kalın gövde, ortada parlayan mavi çekirdek, önde iki uçlu verici
+    const zapGlow = new THREE.MeshStandardMaterial({ color: 0x60a5fa, emissive: 0x3b82f6, emissiveIntensity: 1.1, roughness: 0.3 });
+    const lightning = new THREE.Group();
+    addPart(lightning, box(0.12, 0.12, 0.42), B, 0.25, -0.15, -0.5);                              // gövde
+    addPart(lightning, cyl(0.045, 0.2, 14), zapGlow, 0.25, -0.07, -0.5, R);                       // çekirdek
+    addPart(lightning, box(0.02, 0.02, 0.22), gripMat, 0.21, -0.12, -0.8);                        // verici uçları
+    addPart(lightning, box(0.02, 0.02, 0.22), gripMat, 0.29, -0.12, -0.8);
+    const zapTip = addPart(lightning, new THREE.SphereGeometry(0.025, 10, 8), zapGlow, 0.25, -0.12, -0.92);
+    addPart(lightning, box(0.06, 0.16, 0.08), gripMat, 0.25, -0.29, -0.38, 0.25);                 // kabza
+    addPart(lightning, box(0.05, 0.1, 0.07), gripMat, 0.25, -0.24, -0.66);                        // ön tutamak
+    lightning.userData.tip = zapTip;
+
     // Eller ve kollar: parmaksız taktik eldivenli eller silahı tutar, kollar ekranın altından gelir.
     // Kamera silahı sol üstten gördüğü için parmaklar ve başparmak silahın sol (görünen) yüzüne sarılır;
     // ten rengi parmaklar koyu silahın üstünde net seçilir.
@@ -355,6 +378,8 @@ function createWeaponModels() {
     gripHand(sniper, 0.25, -0.33, -0.28, 0.06);   foreHand(sniper, 0.25, -0.3, -0.78, 0.1);
     gripHand(smg, 0.24, -0.33, -0.34, 0.06);      foreHand(smg, 0.24, -0.245, -0.8, 0.085);
     gripHand(rocketL, 0.27, -0.27, -0.45, 0.06);  foreHand(rocketL, 0.27, -0.25, -0.82, 0.05);
+    gripHand(rail, 0.25, -0.31, -0.36, 0.06);     foreHand(rail, 0.25, -0.2, -0.7, 0.07);
+    gripHand(lightning, 0.25, -0.33, -0.38, 0.06); foreHand(lightning, 0.25, -0.3, -0.66, 0.05);
     // Tabanca: sağ el kabzada, sol el altından destekler (iki elle tutuş)
     gripHand(pistol, 0.14, -0.36, -0.46, 0.07);
     addPart(pistol, box(0.06, 0.14, 0.12), gloveMat, 0.07, -0.38, -0.45);            // destek eli
@@ -368,7 +393,7 @@ function createWeaponModels() {
     for (let i = 0; i < 4; i++) addPart(saw, box(0.03, 0.026, 0.03), skinMat, 0.05, -0.32 - i * 0.026, -0.57);
     forearm(saw, -1, 0.0, -0.42, -0.45);
 
-    Object.assign(weaponModels, { crossbow, pistol, shotgun, sniper, smg, saw, rocket: rocketL });
+    Object.assign(weaponModels, { crossbow, pistol, shotgun, sniper, smg, saw, rocket: rocketL, rail, lightning });
     WEAPON_ORDER.forEach(id => {
         const m = weaponModels[id];
         // Kameraya çok yakın parçalar ekranı kaplamasın: biraz küçült ve ileri it

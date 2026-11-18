@@ -11,7 +11,7 @@ let currentMapId = null;
 let jumpPads = [];
 let mapAnimators = [];          // her karede çağrılan görsel efektler (ör. rampa parlaması)
 
-const MAP_IDS = ['depot', 'space', 'desert', 'snow', 'harbor'];
+const MAP_IDS = ['depot', 'space', 'desert', 'snow', 'harbor', 'tower'];
 
 // Zeminli bölümlerde düşman doğma noktası: oyuncudan 18-28 birim uzakta, engelsiz ve
 // oyuncuya yürüyerek ulaşılabilen (yol bulma alanında mesafesi olan) bir yer
@@ -91,6 +91,17 @@ MAPS.harbor = {
     spawn: { x: 0, y: 0, z: 36, angle: 0 },
     duel: { player: { x: 0, y: 0, z: 18, angle: 0 }, bot: { x: 0, y: 0, z: -12 } },
     build: buildHarbor,
+    enemySpawn: floorSpawn
+};
+
+MAPS.tower = {
+    name: 'Kule Arenası',
+    desc: 'Gün batımında çok katlı arena; ortada kule, köşelerde balkonlar, zıplatma rampaları ve ışınlayıcılar',
+    floorY: 0, killY: -Infinity, bulletMinY: 0, bulletMaxY: 60, enemyRange: 30, bound: 43.4,
+    spawn: { x: 0, y: 0, z: 36, angle: 0 },
+    // Düello hattı (x=22) kule ve balkonların dışında, arada duvar yok
+    duel: { player: { x: 22, y: 0, z: 22, angle: 0 }, bot: { x: 22, y: 0, z: -16 } },
+    build: buildTower,
     enemySpawn: floorSpawn
 };
 
@@ -944,5 +955,135 @@ function buildHarbor() {
         t += dt;
         glint.material.opacity = 0.14 + Math.sin(t * 1.3) * 0.05;
         red.visible = (t % 1.6) < 0.8;                                  // vinç ışığı yanıp söner
+    });
+}
+
+// ---------------------------------------------------------------------
+//  KULE ARENASI — gün batımında çok katlı arena. Ortada 4 birim yüksek kule (kuzeyden basamaklarla,
+//  güneyden ve doğudan zıplatma rampasıyla çıkılır), dört köşede 3 birim yüksek balkonlar (iç
+//  taraflarındaki iki basamakla çıkılır), iki tek yönlü ışınlayıcı. Rampa ve ışınlayıcıyı yalnızca
+//  oyuncu kullanır; düşmanlar basamaklardan zıplayarak çıkar.
+// ---------------------------------------------------------------------
+const TOWER_PADS = [
+    { x: 0, z: 14, to: { x: 0, z: 1.5, y: 4 } },      // güney rampası → kule tepesi
+    { x: 14, z: 0, to: { x: 1.5, z: 0, y: 4 } }       // doğu rampası → kule tepesi
+];
+const TOWER_TELEPORTS = [
+    { x: -20, z: 0, y: 0, to: { x: 30, z: -30, y: 3, angle: Math.PI * 0.25 } },     // zemin → kuzeydoğu balkonu
+    { x: -32, z: 32, y: 3, to: { x: 20, z: 6, y: 0, angle: Math.PI } }              // güneybatı balkonu → zemin
+];
+
+function buildTower() {
+    scene.background = new THREE.Color(0x2b1a3a);
+    scene.fog = new THREE.FogExp2(0x3b2440, 0.012);
+    mapGroup.add(new THREE.HemisphereLight(0xffc58a, 0x3b2440, 0.35));
+    sunLight.color.setHex(0xffb37a); sunLight.intensity = 0.9;
+
+    const floorTex = createConcreteTexture();
+    floorTex.repeat.set(16, 16);
+    const floor = new THREE.Mesh(new THREE.PlaneGeometry(100, 100),
+        new THREE.MeshStandardMaterial({ map: floorTex, color: 0x6b5b73, roughness: 0.85 }));
+    floor.rotation.x = -Math.PI / 2;
+    floor.receiveShadow = true;
+    mapGroup.add(floor);
+    // Zeminde ızgara çizgileri (görsel)
+    const lineMat = new THREE.MeshBasicMaterial({ color: 0xf97316, transparent: true, opacity: 0.35 });
+    for (let k = -40; k <= 40; k += 10) {
+        const a = new THREE.Mesh(new THREE.PlaneGeometry(80, 0.08), lineMat); a.rotation.x = -Math.PI / 2; a.position.set(0, 0.01, k); mapGroup.add(a);
+        const b = new THREE.Mesh(new THREE.PlaneGeometry(0.08, 80), lineMat); b.rotation.x = -Math.PI / 2; b.position.set(k, 0.01, 0); mapGroup.add(b);
+    }
+
+    const concTex = createConcreteTexture();
+    const panel = (w, h, tint = 0x8b7f99) => {
+        const t = concTex.clone(); t.needsUpdate = true; t.repeat.set(Math.max(1, w / 4), Math.max(1, h / 4));
+        return new THREE.MeshStandardMaterial({ map: t, color: tint, roughness: 0.75, metalness: 0.2 });
+    };
+    const glow = new THREE.MeshBasicMaterial({ color: 0xff8a3d });
+    const strip = (x, y, z, w, d) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w, 0.12, d), glow); m.position.set(x, y, z); mapGroup.add(m); };
+
+    // Çevre duvarları ve üstlerinde parlayan şerit
+    const B = 45;
+    addWall(0, 4, -B, 90, 8, 2, panel(90, 8)); addWall(0, 4, B, 90, 8, 2, panel(90, 8));
+    addWall(-B, 4, 0, 2, 8, 90, panel(90, 8)); addWall(B, 4, 0, 2, 8, 90, panel(90, 8));
+    strip(0, 6, -B + 1.05, 88, 0.1); strip(0, 6, B - 1.05, 88, 0.1); strip(-B + 1.05, 6, 0, 0.1, 88); strip(B - 1.05, 6, 0, 0.1, 88);
+
+    // Orta kule (12x12, 4 birim) ve kuzey basamakları (1 → 2 → 3)
+    addWall(0, 2, 0, 12, 4, 12, panel(12, 4, 0x9a8aa8));
+    strip(0, 4.06, -6, 12.1, 0.12); strip(0, 4.06, 6, 12.1, 0.12); strip(-6, 4.06, 0, 0.12, 12.1); strip(6, 4.06, 0, 0.12, 12.1);
+    [[3, -7, 1.5], [2, -8.5, 1.5], [1, -10, 1.5]].forEach(([h, z, d]) => addWall(0, h / 2, z, 4, h, d, panel(4, h, 0x7d6f8c)));
+
+    // Köşe balkonları (10x10, 3 birim) ve iç taraflarındaki basamaklar (2 → 1)
+    [[-32, -32], [32, -32], [-32, 32], [32, 32]].forEach(([bx, bz]) => {
+        addWall(bx, 1.5, bz, 10, 3, 10, panel(10, 3, 0x857894));
+        strip(bx, 3.06, bz - Math.sign(bz) * 5, 10.1, 0.12);
+        const sx = Math.sign(bx);
+        addWall(bx - sx * 5.75, 1, bz, 1.5, 2, 3, panel(2, 2, 0x7d6f8c));
+        addWall(bx - sx * 7.25, 0.5, bz, 1.5, 1, 3, panel(2, 1, 0x7d6f8c));
+    });
+
+    // Sütunlar ve alçak siperler
+    [[-16, 0], [16, -8], [0, 20], [-8, -20]].forEach(([x, z]) => addWall(x, 4, z, 1.6, 8, 1.6, panel(1.6, 8, 0x6e6280)));
+    [[-12, 12, 5, 1], [12, 12, 1, 5], [-12, -12, 1, 5], [10, -18, 5, 1], [-26, 8, 1, 5], [28, 10, 5, 1], [8, 30, 5, 1], [-10, 30, 5, 1]]
+        .forEach(([x, z, w, d]) => addWall(x, 0.5, z, w, 1, d, panel(Math.max(w, d), 1, 0x9c8fae)));
+    [[-36, 0, 2, 1, 2], [36, -12, 2, 1, 2], [-20, -36, 1.4, 1, 1.4]].forEach(([x, z, w, h, d]) => addWall(x, h / 2, z, w, h, d, crateMaterial));
+
+    // Gökyüzü: batan güneş ve uzak kayalık siluetler
+    const sun = new THREE.Mesh(new THREE.SphereGeometry(18, 24, 16), new THREE.MeshBasicMaterial({ color: 0xffa25e, fog: false }));
+    sun.position.set(-40, 12, -200); mapGroup.add(sun);
+    const rockMat = new THREE.MeshBasicMaterial({ color: 0x1e1328, fog: false });
+    for (let i = 0; i < 16; i++) {
+        const a = (i / 16) * Math.PI * 2, r = 140 + (i % 3) * 20, h = 20 + (i * 7) % 25;
+        const rock = new THREE.Mesh(new THREE.ConeGeometry(14, h, 5), rockMat);
+        rock.position.set(Math.cos(a) * r, h / 2 - 2, Math.sin(a) * r); mapGroup.add(rock);
+    }
+
+    // Zıplatma rampaları: hedefe 1.1 sn'de ulaşacak hız
+    const padMat = new THREE.MeshBasicMaterial({ color: 0xff8c1a });
+    const T = 1.1;
+    const pads = TOWER_PADS.map(pd => {
+        const vx = (pd.to.x - pd.x) / T, vz = (pd.to.z - pd.z) / T, vy = (pd.to.y + 0.5 * CFG.gravity * T * T) / T;
+        const m = new THREE.Mesh(new THREE.CylinderGeometry(1.1, 1.2, 0.12, 24), padMat);
+        m.position.set(pd.x, 0.06, pd.z); mapGroup.add(m);
+        const ring = new THREE.Mesh(new THREE.TorusGeometry(0.8, 0.06, 6, 24), new THREE.MeshBasicMaterial({ color: 0xffe0b0, transparent: true, opacity: 0.8 }));
+        ring.rotation.x = -Math.PI / 2; ring.position.set(pd.x, 0.15, pd.z); mapGroup.add(ring);
+        return { ...pd, vx, vy, vz, ring };
+    });
+    // Işınlayıcılar: mor halka ve dönen ışık sütunu
+    const tpMat = new THREE.MeshBasicMaterial({ color: 0xc084fc, transparent: true, opacity: 0.5, side: THREE.DoubleSide, depthWrite: false });
+    const tps = TOWER_TELEPORTS.map(tp => {
+        const base = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 0.1, 24), new THREE.MeshBasicMaterial({ color: 0x7e22ce }));
+        base.position.set(tp.x, tp.y + 0.05, tp.z); mapGroup.add(base);
+        const col = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 0.9, 2.6, 20, 1, true), tpMat);
+        col.position.set(tp.x, tp.y + 1.35, tp.z); mapGroup.add(col);
+        return { ...tp, col };
+    });
+
+    let t = 0, tpCd = 0;
+    mapAnimators.push((dt) => {
+        t += dt; tpCd = Math.max(0, tpCd - dt);
+        pads.forEach(p => { p.ring.position.y = 0.15 + (t * 1.5 % 1) * 0.8; p.ring.material.opacity = 0.8 * (1 - (t * 1.5 % 1)); });
+        tps.forEach(p => { p.col.rotation.y += dt * 2; p.col.material.opacity = 0.35 + Math.sin(t * 4) * 0.12; });
+        if (state !== 'playing') return;
+        const feet = footY(), px = camera.position.x, pz = camera.position.z;
+        if (player.onGround) {
+            for (const p of pads) {
+                if (Math.abs(feet) > 0.1 || Math.hypot(px - p.x, pz - p.z) > 1.1) continue;
+                player.velY = p.vy; player.airVX = p.vx; player.airVZ = p.vz; player.onGround = false;
+                sfx('jumpPad');
+                break;
+            }
+        }
+        if (tpCd > 0) return;
+        for (const p of tps) {
+            if (Math.abs(feet - p.y) > 0.6 || Math.hypot(px - p.x, pz - p.z) > 1) continue;
+            makePuff(camera.position.clone(), 0xc084fc, 1.6, 0.5, true, null, 2);
+            camera.position.set(p.to.x, p.to.y + player.eye, p.to.z);
+            cameraAngleY = p.to.angle; applyCameraRotation();
+            player.velY = 0; player.airVX = 0; player.airVZ = 0; player.onGround = false;
+            makePuff(camera.position.clone(), 0xc084fc, 1.6, 0.5, true, null, 2);
+            sfx('jumpPad');
+            tpCd = 1;
+            break;
+        }
     });
 }

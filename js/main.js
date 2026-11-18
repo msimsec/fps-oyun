@@ -3,6 +3,7 @@
 document.body.classList.add('in-menu');   // ilk açılışta ana menü gösteriliyor
 init();
 initTouch();
+applyView();                    // görüş açısı ve nişangâh ayarı
 updateMobileNote();
 updateDifficultyInfo();
 updatePlayerTag();

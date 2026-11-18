@@ -366,7 +366,7 @@ function updateBolts(dt) {
                 createParticles(p, 0xb91c1c, 6);
                 flashClass('crosshair', hit === 'head' ? 'head' : 'hit', 120);
                 showDamageNumber(e, dmg, hit === 'head');
-                sfx(hit === 'head' ? 'head' : 'hit');
+                sfx(hit === 'head' ? 'head' : 'hit', dmg);
                 if (e.health <= 0) onEnemyKilled(e, hit);
                 scene.remove(b.mesh); bolts.splice(i, 1);
                 done = true;
@@ -439,7 +439,9 @@ const AMMO_INFO = {
     shotgun:  { icon: '🔴', unit: 'SAÇMA', word: 'saçma', color: 0xef4444, amount: () => 6 },
     sniper:   { icon: '🎯', unit: 'MERMİ', word: 'mermi', color: 0x22d3ee, amount: () => 5 },
     smg:      { icon: '🔫', unit: 'MERMİ', word: 'mermi', color: 0xe5e7eb, amount: () => magSize('smg') },
-    rocket:   { icon: '🚀', unit: 'ROKET', word: 'roket', color: 0xf97316, amount: () => 2 }
+    rocket:   { icon: '🚀', unit: 'ROKET', word: 'roket', color: 0xf97316, amount: () => 2 },
+    rail:     { icon: '🔷', unit: 'ŞARJ',  word: 'şarj',  color: 0x22d3ee, amount: () => 3 },
+    lightning:{ icon: '⚡', unit: 'ENERJİ', word: 'enerji', color: 0x60a5fa, amount: () => 40 }
 };
 
 // Hangi silahın cephanesi düşsün: yalnızca sahip olunanlar; elindeki silahın yedeği azsa
@@ -513,6 +515,18 @@ function dropModel(type, weapon) {
             add(box('smGrip', 0.04, 0.1, 0.04), dark, -0.08, Y - 0.07, 0);
             add(box('smStock', 0.14, 0.065, 0.04), dark, -0.24, Y - 0.01, 0);
             add(box('smTip', 0.05, 0.02, 0.045), C['band' + weapon], 0.05, Y - 0.15, 0);   // açık renk şarjör tabanı
+        } else if (weapon === 'rail') {          // ışın tüfeği: uzun ince gövde, namluda parlayan halkalar
+            add(box('rlBody', 0.34, 0.06, 0.05), dark, -0.02, Y, 0);
+            add(rod('rlBarrel', 0.016, 0.34), dark, 0.3, Y + 0.01, 0, 0, R);
+            const coil = G('rlCoil', () => new THREE.TorusGeometry(0.03, 0.008, 6, 14));
+            for (let k = 0; k < 4; k++) { const c = add(coil, C['band' + weapon], 0.2 + k * 0.07, Y + 0.01, 0); c.rotation.y = R; }
+            add(box('rlStock', 0.16, 0.08, 0.045), dark, -0.25, Y - 0.01, 0);
+        } else if (weapon === 'lightning') {     // yıldırım: kısa kalın gövde, mavi çekirdek, iki uçlu verici
+            add(box('ltBody', 0.26, 0.09, 0.08), dark, -0.02, Y, 0);
+            add(rod('ltCore', 0.03, 0.12), C['band' + weapon], 0.08, Y + 0.06, 0, 0, R);
+            add(box('ltProng', 0.14, 0.015, 0.015), dark, 0.18, Y + 0.025, 0.03);
+            add(box('ltProng', 0.14, 0.015, 0.015), dark, 0.18, Y + 0.025, -0.03);
+            add(box('ltGrip', 0.04, 0.1, 0.04), dark, -0.06, Y - 0.07, 0);
         } else {                                 // roketatar: yeşil tüp, sarı roket başlığı, kabza
             add(rod('rkTube', 0.055, 0.6), olive, -0.02, Y + 0.02, 0, 0, R);
             const head = add(G('rkHead', () => new THREE.ConeGeometry(0.05, 0.14, 10)), yellow, 0.34, Y + 0.02, 0, 0, -R);

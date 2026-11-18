@@ -17,15 +17,27 @@ body {
 }
 
 .crosshair {
+    --ch: rgba(0, 255, 255, 0.85);      /* nişangâh rengi (Ayarlar) */
     position: absolute; top: 50%; left: 50%;
     transform: translate(-50%, -50%);
     width: 10px; height: 10px;
-    border: 2px solid rgba(0, 255, 255, 0.8);
+    border: 2px solid var(--ch);
     border-radius: 50%;
-    transition: border-color 0.08s;
+    transition: border-color 0.08s, background-color 0.08s;
 }
-.crosshair.hit { border-color: #ffffff; }
-.crosshair.head { border-color: #ff3333; }
+.crosshair.hit { --ch: #ffffff; }
+.crosshair.head { --ch: #ff3333; }
+/* Nişangâh şekilleri: halka (varsayılan), artı, nokta, halka + nokta */
+.crosshair[data-shape="dot"] { width: 5px; height: 5px; border: none; background: var(--ch); }
+.crosshair[data-shape="cross"] { width: 20px; height: 20px; border: none; border-radius: 0; }
+.crosshair[data-shape="cross"]::before, .crosshair[data-shape="cross"]::after {
+    content: ''; position: absolute; background: var(--ch); }
+.crosshair[data-shape="cross"]::before { left: 9px; top: 0; width: 2px; height: 20px;
+    -webkit-mask: linear-gradient(#000 0 7px, transparent 7px 13px, #000 13px); mask: linear-gradient(#000 0 7px, transparent 7px 13px, #000 13px); }
+.crosshair[data-shape="cross"]::after { top: 9px; left: 0; height: 2px; width: 20px;
+    -webkit-mask: linear-gradient(90deg, #000 0 7px, transparent 7px 13px, #000 13px); mask: linear-gradient(90deg, #000 0 7px, transparent 7px 13px, #000 13px); }
+.crosshair[data-shape="circledot"]::after { content: ''; position: absolute; left: 50%; top: 50%; width: 2px; height: 2px;
+    border-radius: 50%; background: var(--ch); transform: translate(-50%, -50%); }
 
 .health-hud {
     position: absolute; bottom: 30px; left: 30px; font-size: 20px;
@@ -413,7 +425,7 @@ kbd {
 .banner-sub { font-size: clamp(13px, 1.4vw, 18px); max-width: 44vw; margin-left: auto; margin-right: auto; }
 .duel-bar { width: min(360px, 40vw); }
 .map-option.map-desert { background: linear-gradient(135deg, #7c5a2a, #3a2a14); }
-.map-picker .map-option { width: 222px; }
+.map-picker .map-option { width: 190px; }
 
 /* Can yenilenirken can göstergesi yeşil parlar */
 .health-hud.regen { color: #4ade80; box-shadow: 0 0 12px rgba(74, 222, 128, 0.45); }
@@ -613,3 +625,10 @@ body[data-power="heal"] .power-tint   { opacity: 1; box-shadow: inset 0 0 90px r
 .health-hud.over { color: #a3e635; border-color: #a3e635; }
 #finalMedals { color: #fde047; }
 body.touch .power-hud { top: 80px; font-size: 12px; }
+/* Ayarlar: nişangâh önizleme ve renk kutuları */
+.ch-row { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 8px; }
+.ch-preview-box { position: relative; display: inline-block; width: 46px; height: 46px; border-radius: 8px; background: #1f2937; border: 1px solid #334155; }
+.ch-preview { position: absolute; }
+.color-swatch { width: 26px; height: 26px; border-radius: 50%; border: 2px solid #334155; margin: 0 3px; cursor: pointer; padding: 0; }
+.color-swatch.active { border-color: #ffffff; box-shadow: 0 0 8px rgba(255, 255, 255, 0.7); }
+.map-option.map-tower { background: radial-gradient(circle at 20% 80%, #f97316 0, #5b2a4a 45%, #1e1328 100%); }

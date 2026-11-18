@@ -92,7 +92,7 @@ const HELP_SECTIONS = [
             const w = WEAPONS[id];
             const how = w.cost ? `mağazada ${w.cost} altın` : 'başlangıçta açık';
             if (w.melee) return `${w.name} (${i + 1} tuşu): yakın dövüş, basılı tutunca dönen testere önündeki düşmanı keser (${w.range} birim menzil), ${w.dmgMul}x hasar, mermi harcamaz; ${how}.`;
-            const kind = w.bolt ? 'ok atar, tek atış, tam isabetli' : w.rocket ? `roket, ${w.blastRadius} birimlik patlama` : w.pellets > 1 ? `${w.pellets} saçma` : (w.auto ? 'otomatik' : 'yarı otomatik');
+            const kind = w.hitscan ? 'anında isabet eden ışın, yolundaki bütün düşmanları deler' : w.beam ? `sürekli elektrik akımı, ${w.range} birim menzil, tam isabet` : w.bolt ? 'ok atar, tek atış, tam isabetli' : w.rocket ? `roket, ${w.blastRadius} birimlik patlama` : w.pellets > 1 ? `${w.pellets} saçma` : (w.auto ? 'otomatik' : 'yarı otomatik');
             const mag = id === 'smg' ? `${numSuffix(w.mag)} şarjör (mağazadan ${maxSmgMag()}'a kadar büyür)` : `${numSuffix(w.mag)} şarjör`;
             return `${w.name} (${i + 1} tuşu): ${kind}, ${w.dmgMul}x hasar, ${mag}; ${how}.`;
         }),
@@ -103,6 +103,8 @@ const HELP_SECTIONS = [
         "Roket en öldürücü silahtır: düşmana doğrudan çarparsa ya da çok yakınına (ayağının dibine) düşerse öldürür. Patlamadan uzaklaştıkça hasar hızla azalır: yarıçapın yarısında canının ~%65'i, dörtte üçünde ~%28'i gider, kenarda hiç.",
         'Düello botunun canı çok yüksek olduğu için ona yüzdeli değil, bombadaki gibi uzaklıkla azalan normal patlama hasarı işler.',
         'Kendi roketine çok yakın durursan sen de aynı kuralla, yarı şiddette can kaybedersin (dibinde patlarsa canının yarısı gider).',
+        'Işın Tüfeği (8): mermi uçmaz, ışın anında hedefe ulaşır ve duvara kadar yolundaki BÜTÜN düşmanları deler (sıraya girmiş düşmanları tek atışta vurur). Havada camgöbeği sarmal bir iz kalır. Yavaş atar (1.5 sn) ve dürbünü yoktur; duvarı delmez.',
+        'Yıldırım (9): basılı tuttukça önündeki ilk düşmana zikzaklı bir elektrik akımı verir; menzili kısadır (14 birim) ama tam isabetlidir. Her vuruş az hasar verir, saniyede yaklaşık 20 kez vurur; nişanı düşmanın üstünde tut.',
         'Taramalı Tabanca tamamen siyah, tırtıklı kabzalı AR tipi bir silahtır; skin seçimi gövdesinin rengini değiştirmez, yalnızca mermi rengi skine göre değişir.',
         'Tabancanın yedek mermisi sınırsızdır; diğer silahların mermisi bitse bile tabancayla savaşmaya devam edebilirsin.',
         'Bir silahın şarjörü de yedek mermisi de tamamen biterse oyun kendiliğinden bir alt sıradaki mermisi olan silaha geçer (en geç Tabanca\'ya); ekranda "… mermisi bitti → …" yazar.',
@@ -168,6 +170,8 @@ const HELP_SECTIONS = [
         ...MAP_IDS.map(id => `${MAPS[id].name}: ${MAPS[id].desc}.`),
         'Space\'te platformlar arasında yürünemez: turuncu zıplatma rampasına basınca karşı platforma fırlatılırsın.',
         'Çöl ve Kar Üssü\'ndeki gözetleme yerlerine basamak kasalarından zıplayarak çıkılır; yukarıdan uzağı görürsün.',
+        'Kule Arenası: ortadaki kuleye kuzeyden basamaklarla (zıplayarak) çıkılır; güneydeki ve doğudaki turuncu zıplatma rampasına basınca kulenin tepesine fırlatılırsın (tepede Büyük Can). Köşelerdeki balkonlara iç taraflarındaki iki basamaktan çıkılır.',
+        'Kule Arenası ışınlayıcıları (mor ışık sütunu): batıdaki zemindeki ışınlayıcı seni kuzeydoğu balkonuna, güneybatı balkonundaki ışınlayıcı zemine götürür. Rampaları ve ışınlayıcıları yalnızca sen kullanabilirsin; düşmanlar basamaklardan çıkar.',
         'Gece Limanı karanlıktır: yalnızca ay ışığı, sokak lambaları ve senin fenerin aydınlatır. Fener baktığın yönü aydınlatır; F ile açılıp kapanır.',
         'Gece Limanı\'nda düşmanların kızgın yüzleri karanlıkta hafifçe parlar; lambaların altındaki aydınlık alanlarda daha kolay görünürsün ve görürsün.',
         'Gece Limanı\'nın batısındaki açık depoya girilebilir (çatılı, içi lambalı). Doğudaki konteyner sahasında güneydeki konteynerin batı ucundaki iki kasa basamağından konteynerin üstüne çıkılır. Kuzeyde rıhtım korkuluğu geçilmez.',
@@ -208,7 +212,9 @@ const HELP_SECTIONS = [
         'Düello Zorluğu: botun canı, ateş hızı ve hasarı değişir; zor seviyede kazanınca daha çok altın.',
         'Zorluk değişikliği bir sonraki elde geçerli olur (oynanan el aynı zorlukta biter).',
         `Fare Hassasiyeti: ${SENS_MIN}x ile ${SENS_MAX}x arasında; hemen geçerli olur.`,
-        'Ses Düzeyi: %0 sesi tamamen kapatır.',
+        'Ses Düzeyi: %0 sesi tamamen kapatır. Düşmanı vurunca gelen "tık" sesi hasara göre değişir: az hasarda ince, çok hasarda kalın.',
+        `Görüş Açısı (FOV): ${FOV_MIN}°–${FOV_MAX}° arası; geniş açı daha çok görür ama uzaklar küçülür. Koşarken biraz genişler, dürbünde daralır.`,
+        `Nişangâh: şekli (${CROSSHAIRS.map(s => CROSSHAIR_NAMES[s]).join(', ')}) ve rengi seçilir; vurunca beyaz, kafa vuruşunda kırmızı yanar.`,
         'Dokunmatik Kontroller: OTOMATİK / AÇIK / KAPALI (ayrıntılar "Dokunmatik" konusunda).',
         'Sesli Anons: madalyaları ve güçleri tarayıcının Türkçe konuşma sesiyle söyler; AÇIK / KAPALI. Ses düzeyini izler (%0\'da susar).',
         'Ayarlar her oyuncu için ayrı kaydedilir.'

@@ -91,7 +91,7 @@ function pickEnemyType(waveNum) {
 //  Roketatar > Keskin Nişancı > Av Tüfeği (yakında) > Yaylı Tüfek > Tabanca > Taramalı (tek mermi);
 //  Taramalı hızıyla, testere yalnızca dipte etkilidir.
 // =====================================================================
-const WEAPON_ORDER = ['saw', 'pistol', 'crossbow', 'shotgun', 'sniper', 'smg', 'rocket'];   // 1-7 tuşları bu sırayla
+const WEAPON_ORDER = ['saw', 'pistol', 'crossbow', 'shotgun', 'sniper', 'smg', 'rocket', 'rail', 'lightning'];   // 1-9 tuşları bu sırayla
 const WEAPONS = {
     saw: {
         // Testereli Eldiven: yakın dövüş. Basılı tutunca dönen testere önündeki düşmanı keser;
@@ -129,8 +129,22 @@ const WEAPONS = {
         // (hasar = temel hasar × dmgMul, merkezden uzaklaştıkça azalır). Çok yakına atılırsa sana da vurur.
         name: 'Roketatar', auto: false, rocket: true, interval: 0.9, dmgMul: 10, pellets: 1, spread: 0,
         blastRadius: 4.5, mag: 4, startPool: 12, killAmmo: 1, reload: 2.2, speed: 24, life: 3.5, cost: 600
+    },
+    rail: {
+        // Işın Tüfeği: anında isabet (mermi uçmaz), yolundaki BÜTÜN düşmanları deler; arkasında
+        // sarmal bir ışık izi kalır. Yavaş atar, dürbünü yok; duvarı delmez.
+        name: 'Işın Tüfeği', auto: false, hitscan: true, interval: 1.5, dmgMul: 8, pellets: 1, spread: 0,
+        range: 150, mag: 5, startPool: 15, killAmmo: 2, reload: 2.5, cost: 700
+    },
+    lightning: {
+        // Yıldırım: basılı tuttukça önündeki ilk düşmana sürekli elektrik akımı verir (kısa menzil,
+        // tam isabet). Saniyede ~20 vuruş, her biri az hasar.
+        name: 'Yıldırım', auto: true, beam: true, interval: 0.05, dmgMul: 0.3, pellets: 1, spread: 0,
+        range: 14, mag: 100, startPool: 200, killAmmo: 20, reload: 1.8, cost: 650
     }
 };
+// Mağazadan alınan silahlar (testere, tabanca ve yaylı tüfek her zaman açık)
+const BUY_WEAPONS = WEAPON_ORDER.filter(id => WEAPONS[id].cost > 0);
 
 // =====================================================================
 //  ZORLUK SEVİYELERİ — her elin başında CFG'ye uygulanır
@@ -172,6 +186,10 @@ const DUEL_DIFF = {
 
 const SETTINGS_KEY = profileKey('fps_settings_v1');
 const SENS_MIN = 0.2, SENS_MAX = 3, BASE_SENS = 0.003;   // radyan / piksel (1.0x)
+const CROSSHAIRS = ['circle', 'cross', 'dot', 'circledot'];
+const CROSSHAIR_NAMES = { circle: 'HALKA', cross: 'ARTI', dot: 'NOKTA', circledot: 'HALKA+NOKTA' };
+const CH_COLORS = ['#00ffff', '#4ade80', '#facc15', '#f87171', '#ffffff', '#f472b6'];
+const FOV_MIN = 60, FOV_MAX = 100;
 const settings = (() => {
     let o = null;
     try { o = JSON.parse(localStorage.getItem(SETTINGS_KEY)); } catch (e) {}
@@ -181,9 +199,12 @@ const settings = (() => {
         sens: o && Number.isFinite(o.sens) ? Math.min(SENS_MAX, Math.max(SENS_MIN, o.sens)) : 1,
         volume: o && Number.isFinite(o.volume) ? Math.min(1, Math.max(0, o.volume)) : 0.6,
         // (maps.js bu dosyadan sonra yüklenir; bölüm eklenince bu liste de güncellenmeli)
-        map: o && ['depot', 'space', 'desert', 'snow', 'harbor'].includes(o.map) ? o.map : 'depot',
+        map: o && ['depot', 'space', 'desert', 'snow', 'harbor', 'tower'].includes(o.map) ? o.map : 'depot',
         touch: o && ['auto', 'on', 'off'].includes(o.touch) ? o.touch : 'auto',    // dokunmatik kontroller
-        announcer: !(o && o.announcer === false)                                   // sesli anons (madalya, güç)
+        announcer: !(o && o.announcer === false),                                  // sesli anons (madalya, güç)
+        crosshair: o && CROSSHAIRS.includes(o.crosshair) ? o.crosshair : 'circle',  // nişangâh şekli
+        chColor: o && CH_COLORS.includes(o.chColor) ? o.chColor : CH_COLORS[0],      // nişangâh rengi
+        fov: o && Number.isFinite(o.fov) ? Math.min(FOV_MAX, Math.max(FOV_MIN, Math.round(o.fov / 5) * 5)) : 75   // görüş açısı
     };
 })();
 function saveSettings() {

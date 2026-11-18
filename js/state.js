@@ -8,8 +8,7 @@ const player = {
     health: 100, maxHealth: 100 + UPGRADES.health.per * save.upgrades.health, armor: 0,
     maxAmmo: save.maxAmmo,          // şarjör yükseltmesi seviyesi (Taramalı Tabanca'ya işler)
     weapon: 'crossbow',
-    ownedWeapons: { saw: true, crossbow: true, pistol: true, shotgun: save.weapons.shotgun, sniper: save.weapons.sniper,
-                    smg: save.weapons.smg, rocket: save.weapons.rocket },
+    ownedWeapons: Object.assign({ saw: true, crossbow: true, pistol: true }, save.weapons),
     arsenal: {},                    // silah başına { ammo, pool } — her elin başında doldurulur
     score: 0, kills: 0, headshots: 0, goldEarned: 0,
     gold: save.gold, damage: save.damage,
@@ -27,8 +26,7 @@ function saveGameData() {
         gold: player.gold, damage: player.damage, maxAmmo: player.maxAmmo,
         hasShield: player.hasShield,
         activeSkin: player.activeSkin, unlockedSkins: player.unlockedSkins, upgrades: player.upgrades,
-        weapons: { shotgun: player.ownedWeapons.shotgun, sniper: player.ownedWeapons.sniper,
-                   smg: player.ownedWeapons.smg, rocket: player.ownedWeapons.rocket }
+        weapons: Object.fromEntries(BUY_WEAPONS.map(id => [id, player.ownedWeapons[id] === true]))
     });
 }
 

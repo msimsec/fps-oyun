@@ -18,6 +18,7 @@ function resetWorld(duel) {
     clearCorpses();
     clearGrenades();
     clearDrops();
+    clearBeams();
     player.grenades = CFG.grenadeStart; player.grenadeCd = 0;
     runStats.pickups = 0; runStats.bestBlast = 0; runStats.cleanWave = false; runStats.duelWon = false;
     resetArena(); resetMedals();          // harita eşyaları yerinde, güç yok, madalyalar sıfır
@@ -33,7 +34,7 @@ function resetWorld(duel) {
     if (currentMapId !== settings.map) buildMap(settings.map);
     run.map = currentMapId;
     weaponKick = 0; weaponSwitchAnim = 0;
-    camera.fov = CFG.baseFov; camera.updateProjectionMatrix();
+    camera.fov = CFG.baseFov; camera.updateProjectionMatrix();   // (CFG.baseFov = Ayarlar'daki görüş açısı)
 
     isDuelMode = duel;
     pendingDuelWin = false;

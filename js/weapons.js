@@ -94,6 +94,20 @@ function tryShoot() {
     // Koşarken ve havadayken isabet biraz bozulur (dürbünle bakarken bozulmaz)
     const extra = player.zoomed ? 0 : (isSprinting() ? 0.02 : 0) + (player.onGround ? 0 : 0.03);
     const spread = (w.spread + extra) * (isCrouching() ? CFG.crouchSpread : 1);   // çömelince daha isabetli
+    if (w.hitscan) {                                   // Işın Tüfeği: anında isabet, deler
+        fireRail(dir, damage);
+        weaponKick = 0.16;
+        sfx('shoot_rail');
+        if (a.ammo === 0) startReload();
+        return;
+    }
+    if (w.beam) {                                      // Yıldırım: sürekli akım
+        fireLightning(dir, damage);
+        weaponKick = 0.012;
+        sfx('shoot_lightning');
+        if (a.ammo === 0) startReload();
+        return;
+    }
     if (w.bolt) {
         spawnBolt(origin, dir, w.speed, damage, w.gravity, w.life);
         weaponKick = 0.12;

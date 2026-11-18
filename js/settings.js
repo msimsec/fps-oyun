@@ -46,6 +46,31 @@ function setDifficulty(kind, value) {
     updateDifficultyInfo();
 }
 
+// Görüş açısı ve nişangâh: hemen uygulanır
+function applyView() {
+    CFG.baseFov = settings.fov;
+    CFG.sprintFov = settings.fov + 7;                // koşarken biraz geniş
+    if (camera && !player.zoomed) { camera.fov = CFG.baseFov; camera.updateProjectionMatrix(); }
+    const ch = $('crosshair');
+    ch.dataset.shape = settings.crosshair;
+    ch.style.setProperty('--ch', settings.chColor);
+}
+function setFov(value) {
+    const v = Number(value);
+    if (!Number.isFinite(v)) return;
+    settings.fov = Math.min(FOV_MAX, Math.max(FOV_MIN, Math.round(v / 5) * 5));
+    saveSettings(); applyView();
+    $('fovValue').textContent = settings.fov + '°';
+}
+function setCrosshair(shape) {
+    if (!CROSSHAIRS.includes(shape)) return;
+    settings.crosshair = shape; saveSettings(); applyView(); updateSettingsScreen();
+}
+function setCrosshairColor(c) {
+    if (!CH_COLORS.includes(c)) return;
+    settings.chColor = c; saveSettings(); applyView(); updateSettingsScreen();
+}
+
 function setAnnouncer(on) {
     settings.announcer = !!on;
     saveSettings();
@@ -63,6 +88,14 @@ function setTouchMode(value) {
 }
 
 function updateSettingsScreen() {
+    $('chShapeButtons').innerHTML = CROSSHAIRS.map(s =>
+        `<button class="seg-btn normal${settings.crosshair === s ? ' active' : ''}" onclick="setCrosshair('${s}')">${CROSSHAIR_NAMES[s]}</button>`).join('');
+    $('chColorButtons').innerHTML = CH_COLORS.map(c =>
+        `<button class="color-swatch${settings.chColor === c ? ' active' : ''}" style="background:${c}" title="${c}" onclick="setCrosshairColor('${c}')"></button>`).join('');
+    $('chPreview').dataset.shape = settings.crosshair;
+    $('chPreview').style.setProperty('--ch', settings.chColor);
+    $('fovSlider').value = settings.fov;
+    $('fovValue').textContent = settings.fov + '°';
     $('announcerButtons').querySelectorAll('.seg-btn').forEach(b => b.classList.toggle('active', (b.dataset.value === 'on') === settings.announcer));
     $('touchButtons').querySelectorAll('.seg-btn').forEach(b => b.classList.toggle('active', b.dataset.value === settings.touch));
     $('touchDesc').textContent = touchActive()
