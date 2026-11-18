@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>3D Tactical FPS - 1v1 Düello ve Tüfek Skinleri</title>
     <!-- ?v=… : her yayında değiştirilir (tarih); tarayıcı önbellekteki eski CSS/JS dosyalarını kullanmasın -->
-    <link rel="stylesheet" href="css/style.css?v=20261117c">
+    <link rel="stylesheet" href="css/style.css?v=20261118a">
     <!-- Uygulama olarak kurulabilme (PWA): ad, ikon, tam ekran; internetsiz açılış için sw.js -->
     <link rel="manifest" href="manifest.webmanifest">
     <meta name="theme-color" content="#050914">
@@ -130,7 +130,7 @@
             <div><kbd>Sağ tık</kbd> Dürbün</div>
             <div><kbd>R</kbd> Şarjör</div>
             <div><kbd>B</kbd> Bomba at</div>
-            <div><kbd>1-7</kbd> Silah seç</div>
+            <div><kbd>1-9</kbd> Silah seç</div>
             <div><kbd>ESC</kbd> Duraklat</div>
         </div>
         <div class="note" id="mobileNote"></div>
@@ -261,6 +261,20 @@
             <div class="settings-desc" id="touchDesc"></div>
         </div>
         <div class="settings-group">
+            <div class="settings-label">Görüş Açısı (FOV)</div>
+            <div class="sens-row">
+                <input type="range" id="fovSlider" min="60" max="100" step="5" oninput="setFov(this.value)">
+                <span class="sens-value" id="fovValue">75°</span>
+            </div>
+            <div class="settings-desc">Geniş açı daha çok görür ama uzaklar küçülür · Varsayılan 75°</div>
+        </div>
+        <div class="settings-group">
+            <div class="settings-label">Nişangâh</div>
+            <div class="seg" id="chShapeButtons"></div>
+            <div class="ch-row"><span class="ch-preview-box"><span class="crosshair ch-preview" id="chPreview"></span></span>
+                <span id="chColorButtons"></span></div>
+        </div>
+        <div class="settings-group">
             <div class="settings-label">Sesli Anons (madalya ve güç)</div>
             <div class="seg" id="announcerButtons">
                 <button class="seg-btn easy" data-value="on" onclick="setAnnouncer(true)">AÇIK</button>
@@ -348,6 +362,16 @@
                 <p>En öldürücü silah: doğrudan isabet ya da ayağının dibine düşen roket öldürür, uzaklaştıkça hasar azalır; çok yakına atma · 4'lük şarjör<br>Durum: <span id="rocketStatus">KİLİTLİ</span></p>
                 <button class="buy-btn" id="btnRocket" onclick="buyWeapon('rocket')"></button>
             </div>
+            <div class="shop-card weapon-card">
+                <h3>Işın Tüfeği (8)</h3>
+                <p>Anında isabet eder, yolundaki bütün düşmanları deler; havada sarmal ışık izi kalır. Yavaş atar · 5'lik şarjör<br>Durum: <span id="railStatus">KİLİTLİ</span></p>
+                <button class="buy-btn" id="btnRail" onclick="buyWeapon('rail')"></button>
+            </div>
+            <div class="shop-card weapon-card">
+                <h3>Yıldırım (9)</h3>
+                <p>Basılı tuttukça önündeki düşmana sürekli elektrik akımı; kısa menzil (14), tam isabet · 100 enerji<br>Durum: <span id="lightningStatus">KİLİTLİ</span></p>
+                <button class="buy-btn" id="btnLightning" onclick="buyWeapon('lightning')"></button>
+            </div>
         </div>
 
         <div class="skin-picker-title">Skinler · sahip olduğuna tıklayınca kuşanılır, kilitli olana tıklayınca satın alınır</div>
@@ -375,30 +399,31 @@
         </div>
     </div>
 
-    <script src="js/profiles.js?v=20261117c"></script>
-    <script src="js/config.js?v=20261117c"></script>
-    <script src="js/save.js?v=20261117c"></script>
-    <script src="js/state.js?v=20261117c"></script>
-    <script src="js/utils.js?v=20261117c"></script>
-    <script src="js/audio.js?v=20261117c"></script>
-    <script src="js/feedback.js?v=20261117c"></script>
-    <script src="js/world.js?v=20261117c"></script>
-    <script src="js/maps.js?v=20261117c"></script>
-    <script src="js/input.js?v=20261117c"></script>
-    <script src="js/touch.js?v=20261117c"></script>
-    <script src="js/game.js?v=20261117c"></script>
-    <script src="js/weapons.js?v=20261117c"></script>
-    <script src="js/enemies.js?v=20261117c"></script>
-    <script src="js/items.js?v=20261117c"></script>
-    <script src="js/arena.js?v=20261117c"></script>
-    <script src="js/waves.js?v=20261117c"></script>
-    <script src="js/records.js?v=20261117c"></script>
-    <script src="js/achievements.js?v=20261117c"></script>
-    <script src="js/resume.js?v=20261117c"></script>
-    <script src="js/update.js?v=20261117c"></script>
-    <script src="js/shop.js?v=20261117c"></script>
-    <script src="js/settings.js?v=20261117c"></script>
-    <script src="js/help.js?v=20261117c"></script>
-    <script src="js/main.js?v=20261117c"></script>
+    <script src="js/profiles.js?v=20261118a"></script>
+    <script src="js/config.js?v=20261118a"></script>
+    <script src="js/save.js?v=20261118a"></script>
+    <script src="js/state.js?v=20261118a"></script>
+    <script src="js/utils.js?v=20261118a"></script>
+    <script src="js/audio.js?v=20261118a"></script>
+    <script src="js/feedback.js?v=20261118a"></script>
+    <script src="js/world.js?v=20261118a"></script>
+    <script src="js/maps.js?v=20261118a"></script>
+    <script src="js/input.js?v=20261118a"></script>
+    <script src="js/touch.js?v=20261118a"></script>
+    <script src="js/game.js?v=20261118a"></script>
+    <script src="js/weapons.js?v=20261118a"></script>
+    <script src="js/enemies.js?v=20261118a"></script>
+    <script src="js/items.js?v=20261118a"></script>
+    <script src="js/arena.js?v=20261118a"></script>
+    <script src="js/beams.js?v=20261118a"></script>
+    <script src="js/waves.js?v=20261118a"></script>
+    <script src="js/records.js?v=20261118a"></script>
+    <script src="js/achievements.js?v=20261118a"></script>
+    <script src="js/resume.js?v=20261118a"></script>
+    <script src="js/update.js?v=20261118a"></script>
+    <script src="js/shop.js?v=20261118a"></script>
+    <script src="js/settings.js?v=20261118a"></script>
+    <script src="js/help.js?v=20261118a"></script>
+    <script src="js/main.js?v=20261118a"></script>
 </body>
 </html>

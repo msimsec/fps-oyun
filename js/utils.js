@@ -41,6 +41,18 @@ function overlapDepth(x, z, r, feet = 0) {
     return depth;
 }
 function collides(x, z, r, feet = 0) { return overlapDepth(x, z, r, feet) > 0; }
+// Başın üstündeki en alçak engelin alt yüzeyi (kemer, çatı, yüzen kiriş); yoksa Infinity.
+// Oyuncu boyu overlapDepth'teki gibi 2 birim sayılır.
+function headroom(x, z, r, feet) {
+    let top = Infinity;
+    for (const w of walls) {
+        if (w.b < feet + 2 - 1e-6 || w.b >= top) continue;
+        const px = Math.min(x - (w.x - w.w / 2 - r), (w.x + w.w / 2 + r) - x);
+        const pz = Math.min(z - (w.z - w.d / 2 - r), (w.z + w.d / 2 + r) - z);
+        if (px > 1e-6 && pz > 1e-6) top = w.b;
+    }
+    return top;
+}
 // Durulan zeminin yüksekliği: altındaki ve çıkılabilecek en yüksek engelin üstü (yoksa 0).
 // r çarpışma payıyla aynı olmalı; daha küçük olursa kenardan düşen oyuncu engelin içine düşüp sıkışır.
 function groundHeight(x, z, feet, r) {

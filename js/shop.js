@@ -33,7 +33,7 @@ function updateShopModal() {
     $('modalMag').textContent = `${magSize('smg')} / ${maxSmgMag()}`;
     $('modalShield').textContent = shieldStatusText();
     renderSkinPicker();
-    ['shotgun', 'sniper', 'smg', 'rocket'].forEach(id => {
+    BUY_WEAPONS.forEach(id => {
         $(id + 'Status').textContent = player.ownedWeapons[id] ? 'SAHİPSİNİZ' : 'KİLİTLİ';
     });
     // Yükseltme her silaha kendi çarpanıyla işler; kartta gerçek hasarları göster
@@ -52,6 +52,8 @@ function updateShopModal() {
     setBuyBtn('btnSniper', WEAPONS.sniper.cost, player.ownedWeapons.sniper ? 'Sahipsin ✓' : null);
     setBuyBtn('btnSmg', WEAPONS.smg.cost, player.ownedWeapons.smg ? 'Sahipsin ✓' : null);
     setBuyBtn('btnRocket', WEAPONS.rocket.cost, player.ownedWeapons.rocket ? 'Sahipsin ✓' : null);
+    setBuyBtn('btnRail', WEAPONS.rail.cost, player.ownedWeapons.rail ? 'Sahipsin ✓' : null);
+    setBuyBtn('btnLightning', WEAPONS.lightning.cost, player.ownedWeapons.lightning ? 'Sahipsin ✓' : null);
 
     // Kalıcı yükseltmeler: seviye, şimdiki → sonraki etki, artan fiyat
     const pct = (v) => Math.round(v * 100) + '%';
@@ -80,7 +82,8 @@ function buyUpgrade(id) {
     player.upgrades[id] = lvl + 1;
     if (id === 'health') {
         applyMaxHealth();
-        if (inRun()) player.health = Math.min(player.maxHealth, player.health + u.per);   // yeni kapasite dolu gelsin
+        // Yeni kapasite dolu gelsin; Büyük Can ile sınırın üstündeyse can düşürülmesin
+        if (inRun()) player.health = Math.max(player.health, Math.min(player.maxHealth, player.health + u.per));
         else player.health = player.maxHealth;
     }
     afterPurchase(`${u.name} seviye ${lvl + 1}`);

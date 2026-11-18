@@ -3,7 +3,7 @@
 // =====================================================================
 //  GİRİŞ (klavye düzeninden bağımsız: e.code)
 // =====================================================================
-// 1-7 (üst sıra ya da sayı tuş takımı) → WEAPON_ORDER sırasıyla
+// 1-9 (üst sıra ya da sayı tuş takımı) → WEAPON_ORDER sırasıyla
 const WEAPON_KEYS = {};
 WEAPON_ORDER.forEach((id, i) => { WEAPON_KEYS['Digit' + (i + 1)] = id; WEAPON_KEYS['Numpad' + (i + 1)] = id; });
 

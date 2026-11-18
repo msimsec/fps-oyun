@@ -77,6 +77,11 @@ function updatePlayer(dt) {
     if (!player.onGround) {
         player.velY -= CFG.gravity * dt;
         let newFeet = feet + player.velY * dt;
+        // Yükselirken başını tavana/kemere çarpar (roketle zıplarken kemerin içine girilmesin)
+        if (player.velY > 0) {
+            const top = headroom(camera.position.x, camera.position.z, CFG.playerRadius, feet);
+            if (newFeet + 2 > top) { newFeet = Math.max(feet, top - 2); player.velY = 0; }
+        }
         if (newFeet <= ground) {
             newFeet = ground;
             if (player.velY < -4) sfx('land');
@@ -119,6 +124,8 @@ function updatePlayer(dt) {
     if (cb && cb.visible) cb.userData.bolt.visible = !player.reloading && curAmmo() && curAmmo().ammo > 0;
     const rl = weaponModels.rocket;
     if (rl && rl.visible) rl.userData.warhead.visible = !player.reloading && curAmmo() && curAmmo().ammo > 0;
+    const lt = weaponModels.lightning;
+    if (lt && lt.visible) lt.userData.tip.scale.setScalar(firing && !player.reloading && curAmmo().ammo > 0 ? 1.4 + Math.random() * 1.2 : 1);
     weaponSwitchAnim = Math.max(0, weaponSwitchAnim - dt * 4);
     const bob = player.onGround && isMoving() ? Math.sin(clock.elapsedTime * (isSprinting() ? 14 : 9)) * 0.012 : 0;
     weapon3DGroup.position.z = weaponKick;
@@ -163,7 +170,7 @@ function updateBullets(dt) {
                     createParticles(b.position, b.colorHex, b.geometry === GEO.pellet ? 2 : 6);
                     flashClass('crosshair', hit === 'head' ? 'head' : 'hit', 120);
                     showDamageNumber(e, dmg, hit === 'head');
-                    sfx(hit === 'head' ? 'head' : 'hit');
+                    sfx(hit === 'head' ? 'head' : 'hit', dmg);
                     if (e.health <= 0) onEnemyKilled(e, hit);
                     remove = true;
                     break;
@@ -248,6 +255,7 @@ function animate() {
         }
         if (state === 'playing') updateEnemies(dt);
         updateParticles(dt);
+        updateBeams(dt);
         updateCorpses(dt);
         if (state === 'playing') { updateGrenades(dt); updateRockets(dt); updateBolts(dt); updateDrops(dt); updateFx(dt); }
         updateHitDirections(dt);

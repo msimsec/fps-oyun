@@ -33,6 +33,7 @@ const MAP_ITEM_SPOTS = {
     space:  { items: [['health', 36, -8, 2], ['health', -36, -8, 2], ['armor', 4, 36, -3], ['ammo', 0, -8, 0], ['mega', 18, -25, 11]], power: [0, -42, 4] },
     desert: { items: [['health', -8, -4, 0], ['health', 8, 24, 0], ['armor', 24, -22, 0], ['ammo', -22, 0, 0], ['mega', 25, 4, 3]], power: [0, -8, 0] },
     snow:   { items: [['health', -20, 0, 0], ['health', 20, 22, 0], ['armor', 0, -24, 0], ['ammo', 24, -30, 0], ['mega', 36, 18, 3]], power: [0, 8, 0] },
+    tower:  { items: [['health', -24, 24, 0], ['health', 24, -24, 0], ['armor', -32, -32, 3], ['ammo', 26, 26, 0], ['mega', 0, 0, 4]], power: [32, 32, 3] },
     harbor: { items: [['health', -34, 2, 0], ['health', 30, 22, 0], ['armor', 0, -36, 0], ['ammo', -8, 30, 0], ['mega', 26, 34, 2.6]], power: [0, -20, 0] }
 };
 

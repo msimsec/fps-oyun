@@ -16,6 +16,7 @@ Ana menüdeki **BÖLÜM SEÇ** kısmından oynanacak harita seçilir (seçim oyu
 - **Çöl:** Kum taşı evlerden oluşan bir kasaba. Ortada kuyulu ve gölgelikli tezgâhlı bir pazar meydanı, kuzey-güney ana cadde, iki yanda dar sokaklar, altından geçilen kemerler, palmiyeler ve basamaklarla çatısına çıkılan bir gözetleme evi var.
 - **Kar Üssü:** Karlı bir dağdaki askerî üs. Kuzeyde komuta binası, iki yanda kışlalar, ortada açık avlu ve renkli konteyner yığınları, batıda yakıt tankları, doğuda basamaklarla çıkılan gözetleme kulesi; sürekli kar yağar.
 - **Gece Limanı:** Gece, karanlık bir konteyner limanı. Ay ışığı ve sokak lambaları dışında karanlıktır; oyuncunun **feneri (F)** baktığı yönü aydınlatır, düşmanların yüzleri karanlıkta hafifçe parlar. Doğuda üst üste konteyner sıraları (basamak kasalarıyla bir konteynerin üstüne çıkılır), batıda içine girilen çatılı açık depo, kuzeyde rıhtım, sarı vinç ve demirli gemi.
+- **Kule Arenası:** Gün batımında çok katlı arena. Ortada 4 birim yüksek kule (kuzeyden basamaklarla, güneyden ve doğudan turuncu **zıplatma rampalarıyla** çıkılır; tepede Büyük Can), dört köşede basamaklarla çıkılan balkonlar, iki tek yönlü **ışınlayıcı** (batı zemini → kuzeydoğu balkonu, güneybatı balkonu → zemin), sütunlar ve alçak siperler. Rampaları ve ışınlayıcıları yalnızca oyuncu kullanır.
 - **Space:** Uzay boşluğunda yüzen 6 platform. Platformlar arası yürünemez; turuncu **zıplatma rampaları** oyuncuyu karşı platforma fırlatır. Platformdan düşen 35 can kaybeder ve başlangıç platformuna döner. Düşmanlar platformlarından ayrılmaz, uzaktan ateş eder. Yüksek nişancı kulesine kuzey platformundaki rampayla çıkılır.
 
 ## Tablet ve telefon (dokunmatik kontroller)
@@ -81,8 +82,10 @@ Her iki modun zorluğu **Ayarlar** ekranından ayrı ayrı seçilir (Kolay / Ort
 | R | Şarjör değiştir |
 | B | Bomba at (G de çalışır) |
 | F | Fener aç / kapat (yalnızca Gece Limanı) |
-| 1-7 / fare tekerleği | Silah değiştir |
+| 1-9 / fare tekerleği | Silah değiştir |
 | ESC | Duraklat |
+
+Ayarlar'dan **görüş açısı (FOV)**, **nişangâh şekli ve rengi**, fare/dokunmatik hassasiyeti, ses ve sesli anons değiştirilebilir. Düşmanı vurunca gelen "tık" sesi hasara göre incelir ya da kalınlaşır.
 
 ## Silahlar
 
@@ -95,6 +98,8 @@ Her iki modun zorluğu **Ayarlar** ekranından ayrı ayrı seçilir (Kolay / Ort
 | 5 | Keskin Nişancı | 7x hasar, dürbün | Mağaza, 400 altın |
 | 6 | Taramalı Tabanca | Tamamı siyah AR tipi; çok hızlı otomatik ateş, 0.45x hasar, 40'lık şarjör (mağazadan 70'e büyür) | Mağaza, 300 altın |
 | 7 | Roketatar | Roket namludan alev ve duman izi bırakarak uçar, çarptığı yerde patlar (ateş topu, duman, ekran sarsıntısı). En öldürücü silah: doğrudan isabet (10x) ya da ayağının dibine düşerse öldürür, uzaklaştıkça hasar azalır (yarıçapın yarısında canın ~%65'i); çok yakındaysan sana da vurur | Mağaza, 600 altın |
+| 8 | Işın Tüfeği | Anında isabet eden ışın; yolundaki bütün düşmanları deler, havada camgöbeği sarmal iz bırakır. 8x hasar, yavaş (1.5 sn), 5'lik şarjör | Mağaza, 700 altın |
+| 9 | Yıldırım | Basılı tuttukça önündeki düşmana sürekli elektrik akımı (zikzaklı şimşek); 14 birim menzil, tam isabet, 100 enerji | Mağaza, 650 altın |
 
 Silahları birinci şahıs görünümde eldivenli eller tutar. Denge gerçeğe yakındır (mermi başına öldürücülük): Roketatar > Keskin Nişancı > Av Tüfeği (yakında) > Yaylı Tüfek > Tabanca > Taramalı Tabanca; Taramalı hızıyla, testere yalnızca dipte etkilidir.
 
@@ -159,6 +164,7 @@ js/
   weapons.js      Atış, şarjör, silah değiştirme, dürbün
   enemies.js      Düşman ve düello botu, yol bulma, ölüm efekti
   items.js        Bomba ve yerden toplanan eşyalar
+  beams.js        Işın silahları (Işın Tüfeği, Yıldırım): anında isabet, ışın ve şimşek izleri
   arena.js        Harita eşyaları, güç kutusu, madalyalar ve sesli anons, roket zıplaması
   waves.js        Dalga sistemi
   records.js      Rekorlar (bölüm ve zorluk başına)
@@ -181,6 +187,11 @@ Dosyalar klasik `<script>` etiketleriyle sırayla yüklenir (ES modülü değil)
 python3 -m http.server 8000
 # http://localhost:8000
 ```
+
+## Notlar (sonraya bırakılanlar)
+
+- **Arena modu (herkes herkese karşı, botlar ölünce yeniden doğar, öldürme sınırı/süre):** Şimdilik yapılmadı; dalga ve düello odaklı oyun mantığımıza ters. Oyun tamamen Quake 3 tarzı bir arena oyununa dönüşürse yeniden düşünülecek.
+- Online skor tablosu (sunucu ve hile koruması gerektirir), Valorant tarzı el başı kredi ekonomisi ve hazır karakter modelleri (GLB) de sonraya bırakıldı.
 
 ## Kayıtlar
 
