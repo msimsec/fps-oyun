@@ -1,4 +1,4 @@
-# 3D Tactical FPS (v1.6)
+# 3D Tactical FPS (v1.7)
 
 Tarayıcıda çalışan, Three.js ile yazılmış birinci şahıs nişancı oyunu. Kurulum veya derleme gerektirmez.
 
