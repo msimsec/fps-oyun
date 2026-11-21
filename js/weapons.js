@@ -11,6 +11,7 @@ function spawnBullet(origin, dir, speed, damage, color, isPlayer, life, geo = GE
     b.damage = damage;
     b.colorHex = color;
     b.isPlayer = isPlayer;
+    b.weapon = isPlayer ? player.weapon : null;   // hangi silahın mermisi (madalya: Keskin Göz)
     b.srcX = origin.x; b.srcZ = origin.z;     // hasar yönü göstergesi için atışın geldiği yer
     scene.add(b);
     bullets.push(b);
@@ -43,9 +44,9 @@ function autoSwitchFromEmpty() {
     for (let k = i - 1; k >= 0; k--) {
         const id = WEAPON_ORDER[k];
         if (player.ownedWeapons[id] && !weaponEmpty(id)) {
-            const from = WEAPONS[player.weapon].name;
+            const emptyId = player.weapon, from = WEAPONS[emptyId].name;
             selectWeapon(id);
-            showToast(`${from} mermisi bitti → ${WEAPONS[id].name}`);
+            showToast(`${from}: ${ammoWord(emptyId)} bitti → ${WEAPONS[id].name}`);
             return;
         }
     }
@@ -54,7 +55,7 @@ function autoSwitchFromEmpty() {
 function selectWeapon(id) {
     if (id === player.weapon) return;
     if (!player.ownedWeapons[id]) { showToast(`${WEAPONS[id].name} kilitli (mağazadan alabilirsin)`); return; }
-    if (weaponEmpty(id)) { showToast(`${WEAPONS[id].name}: mermisi yok (yerden cephane topla)`); return; }
+    if (weaponEmpty(id)) { showToast(`${WEAPONS[id].name}: ${ammoWord(id)} yok (yerden cephane topla)`); return; }
     player.reloading = false;                    // silah değişince şarjör değiştirme iptal
     player.fireCooldown = Math.max(player.fireCooldown, 0.25);
     // Tetik basılıyken silah değişirse yeni (yarı otomatik) silah kendiliğinden ateş etmesin

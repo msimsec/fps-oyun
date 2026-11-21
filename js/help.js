@@ -42,7 +42,7 @@ const HELP_SECTIONS = [
         'Space: zıpla. 1 birim yüksekliğindeki kasalara zıplayarak çıkabilirsin; çok alçak basamaklara yürüyerek çıkılır.',
         'C ya da Ctrl: basılı tuttukça çömel. Çömelince alçalırsın (alçak siperin arkasında düşman seni göremez, mermisi de sana gelmez), yarı hızda yürürsün, atışların daha isabetli olur; zıplayamazsın. Not: tarayıcıda Ctrl+W sekmeyi kapatır, çömelip ileri yürürken C tuşunu kullan (kapansa bile DEVAM ET ile kaldığın yerden sürersin).',
         'Fare: nişan al. Hassasiyeti Ayarlar\'dan değiştirebilirsin.',
-        'Sol tık: ateş et. Otomatik silahta (Taramalı Tabanca) ve Testereli Eldiven\'de basılı tutunca sürekli çalışır; diğerleri her tıkta bir atar.',
+        `Sol tık: ateş et. Otomatik silahlarda (${WEAPON_ORDER.filter(id => WEAPONS[id].auto).map(id => WEAPONS[id].name).join(', ')}) basılı tutunca sürekli çalışır; diğerleri her tıkta bir atar.`,
         'Sağ tık: dürbün (yalnızca Keskin Nişancı). Dürbünle bakarken yavaş yürürsün ama isabet tamdır.',
         'R: şarjör değiştir. Şarjör boşalınca kendiliğinden de değişir.',
         'B: bomba at (alışık olanlar için G de çalışır).',
@@ -70,7 +70,7 @@ const HELP_SECTIONS = [
         'Dalga modunda can sıfırlanınca el biter (GÖREV BAŞARISIZ). Ulaştığın dalga ve skorun rekorlara yazılır.',
         'Yarıda ana menüye dönersen o ana kadarki skor ve dalga rekorlara işlenir; el de kaydedilir, ana menüdeki DEVAM ET ▶ ile kaldığın yerden sürdürebilirsin.',
         '1v1 DÜELLO: Sağa sola kayarak sürekli ateş eden mor bota karşı teke tek. Botun canı ekranın üstündeki çubukta görünür.',
-        'Botu öldürürsen kazanırsın (+500 skor ve altın), sen ölürsen kaybedersin. Düelloda can yenilenmez.',
+        'Botu öldürürsen kazanırsın (+500 skor ve altın), sen ölürsen kaybedersin. Düelloda can kendiliğinden yenilenmez; haritadaki can, kalkan ve cephane eşyaları düelloda da alınabilir, güç kutusu çıkmaz.',
         'Dalga modunun ve düellonun zorluğu Ayarlar\'dan ayrı ayrı seçilir: Kolay, Orta, Zor. Değişiklik bir sonraki elde geçerli olur.'
     ] },
     { id: 'health', title: '❤️ Can ve Kalkan', lines: () => [
@@ -86,8 +86,8 @@ const HELP_SECTIONS = [
         `Mağazadaki Can Sınırı yükseltmesi maksimum canı kalıcı olarak +${UPGRADES.health.per} artırır.`
     ] },
     { id: 'weapons', title: '🔫 Silahlar ve Cephane', lines: () => [
-        'Silahlar gerçeğe yakın dengelendi (mermi başına öldürücülük): Roketatar > Keskin Nişancı > Av Tüfeği (yakında) > Yaylı Tüfek > Tabanca > Taramalı Tabanca. Taramalı tek mermisi zayıf ama çok hızlı atar; Testereli Eldiven yalnızca dipte etkilidir ama orada çok öldürücüdür.',
-        'Sağ alttaki panelde silahın adı, şarjördeki mermi / yedek mermi ve sahip olduğun silahlar yazar.',
+        'Silahlar gerçeğe yakın dengelendi (atış başına öldürücülük): Roketatar > Işın Tüfeği > Keskin Nişancı > Av Tüfeği (yakında) > Yaylı Tüfek > Tabanca > Taramalı Tabanca > Yıldırım. Taramalı ve Yıldırım\'ın tek vuruşu zayıftır ama çok hızlı vururlar; Testereli Eldiven yalnızca dipte etkilidir ama orada çok öldürücüdür.',
+        'Sağ alttaki panelde silahın adı, şarjördeki / yedekteki cephane (silaha göre MERMİ, OK, SAÇMA, ROKET, ŞARJ ya da ENERJİ) ve sahip olduğun silahlar yazar.',
         ...WEAPON_ORDER.map((id, i) => {
             const w = WEAPONS[id];
             const how = w.cost ? `mağazada ${w.cost} altın` : 'başlangıçta açık';
@@ -107,8 +107,8 @@ const HELP_SECTIONS = [
         'Yıldırım (9): basılı tuttukça önündeki ilk düşmana zikzaklı bir elektrik akımı verir; menzili kısadır (14 birim) ama tam isabetlidir. Her vuruş az hasar verir, saniyede yaklaşık 20 kez vurur; nişanı düşmanın üstünde tut.',
         'Taramalı Tabanca tamamen siyah, tırtıklı kabzalı AR tipi bir silahtır; skin seçimi gövdesinin rengini değiştirmez, yalnızca mermi rengi skine göre değişir.',
         'Tabancanın yedek mermisi sınırsızdır; diğer silahların mermisi bitse bile tabancayla savaşmaya devam edebilirsin.',
-        'Bir silahın şarjörü de yedek mermisi de tamamen biterse oyun kendiliğinden bir alt sıradaki mermisi olan silaha geçer (en geç Tabanca\'ya); ekranda "… mermisi bitti → …" yazar.',
-        'Mermisi tamamen bitmiş silah, yerden cephanesini toplayana kadar seçilemez: numara tuşuyla seçersen "mermisi yok" yazar; fare tekerleği ve ⇄ butonu onu atlar.',
+        'Bir silahın şarjörü de yedek mermisi de tamamen biterse oyun kendiliğinden bir alt sıradaki mermisi olan silaha geçer (en geç Tabanca\'ya); ekranda "Roketatar: roket bitti → …" yazar.',
+        'Mermisi tamamen bitmiş silah, yerden cephanesini toplayana kadar seçilemez: numara tuşuyla seçersen "… yok (yerden cephane topla)" yazar; fare tekerleği ve ⇄ butonu onu atlar.',
         'Her öldürdüğün düşman, sahip olduğun silahlara biraz yedek mermi verir.',
         'Kafa vuruşu her silahta 2 kat hasar verir; nişangâh kırmızı yanar. Göğsün biraz üstüne nişan al.',
         'Koşarken ve havadayken atışların biraz dağılır; durarak ateş etmek daha isabetlidir.',
@@ -158,7 +158,7 @@ const HELP_SECTIONS = [
         `Ölen düşman %${Math.round(CFG.dropChance * 100)} ihtimalle yere dönen, parlayan bir eşya bırakır.`,
         'Her eşyanın üstünde ne olduğunu yazan renkli bir etiket, altında da aynı renkte parlayan bir halka vardır.',
         'Cephane silaha özeldir: etikette hangi silahın cephanesi olduğu ve kaç tane verdiği yazar. Yalnızca sahip olduğun silahların cephanesi düşer; elindeki silahın yedeği azsa onunki daha sık düşer.',
-        'Cephane kutusunun üstünde o silahın küçük modeli yatar (hep yandan görünür): 🏹 OK +5 Yaylı Tüfek · 🔴 SAÇMA +6 Av Tüfeği · 🎯 MERMİ +5 Keskin Nişancı (dürbünlü) · 🔫 MERMİ +şarjör Taramalı Tabanca (siyah) · 🚀 ROKET +2 Roketatar (sarı başlıklı tüp). Kutunun bandı ve halkası da silahın renginde.',
+        `Cephane kutusunun üstünde o silahın küçük modeli yatar (hep yandan görünür): ${Object.keys(AMMO_INFO).map(id => `${AMMO_INFO[id].icon} ${AMMO_INFO[id].unit} +${AMMO_INFO[id].amount()} ${WEAPONS[id].name}`).join(' · ')}. Kutunun bandı ve halkası da silahın renginde.`,
         'Cephaneyi alınca sağ üstte "+6 saçma (Av Tüfeği) → 6/12" gibi ne aldığın yazar; elindeki silahın cephanesiyse mermi göstergesi yeşil yanar.',
         '🛡️ KALKAN +25 (mavi): artılı mavi plaka; +25 kalkan (kalkanın doluysa alınmaz).',
         '🪙 ALTIN (sarı): üst üste altın paralar; bir düşman öldürme ödülü kadar altın.',
@@ -194,7 +194,7 @@ const HELP_SECTIONS = [
         `Gelişmiş Taramalı Şarjörü (${CFG.magCost} altın): Taramalı Tabanca şarjörü +${CFG.magStep}.`,
         `Ağır Kalkan (${CFG.shieldCost} altın): +${CFG.armorAmount} kalkan.`,
         ...UPGRADE_IDS.map(id => `${UPGRADES[id].name}: kalıcı yükseltme, ${UPGRADES[id].max} seviye; her seviyede fiyat artar (ilk seviye ${upgradeCost(id, 0)} altın).`),
-        'Silahlar (Av Tüfeği, Keskin Nişancı, Taramalı Tabanca, Roketatar) bir kez alınır ve kalıcı olarak açılır.',
+        `Silahlar (${BUY_WEAPONS.map(id => `${WEAPONS[id].name} ${WEAPONS[id].cost}`).join(', ')} altın) bir kez alınır ve kalıcı olarak açılır.`,
         'Skinler silahın ve mermilerin rengini değiştirir (Taramalı Tabanca her zaman siyah kalır, yalnızca mermisi renk alır).',
         'Sahip olduğun skine tıklayınca kuşanılır, kilitli olana tıklayınca satın alınır.'
     ] },
