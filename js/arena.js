@@ -160,6 +160,7 @@ function activatePower(kind) {
 }
 
 function updateArena(dt) {
+    arenaTime += dt;
     // Sınırın üstündeki can (Büyük Can) yavaşça erir
     if (player.health > player.maxHealth) player.health = Math.max(player.maxHealth, player.health - OVERHEAL_DECAY * dt);
     const t = clock.elapsedTime;
@@ -242,18 +243,25 @@ function blastKnockback(pos, R) {
 }
 
 // ---- Madalyalar ve anons ----
+// Harika: kısa sürede art arda öldürme (iki düşman çok sık oluyordu; üç düşman gerçek bir seri).
+// Keskin Göz: yalnızca Keskin Nişancı tüfeğiyle kafadan öldürünce (başka silahın kafa vuruşu sayılmaz).
+const STREAK_KILLS = 3, STREAK_TIME = 3;
+const SAY_GAP = 6;                // aynı anons bu kadar saniye içinde tekrar seslendirilmez
 const MEDALS = {
-    harika:   { name: 'HARİKA!',     say: 'Harika!',     desc: '2 saniye içinde iki düşman' },
-    keskin:   { name: 'KESKİN GÖZ!', say: 'Keskin göz!', desc: 'art arda iki kafa vuruşuyla öldürme' },
+    harika:   { name: 'HARİKA!',     say: 'Harika!',     desc: `${STREAK_TIME} saniye içinde ${STREAK_KILLS} düşman` },
+    keskin:   { name: 'KESKİN GÖZ!', say: 'Keskin göz!', desc: 'Keskin Nişancı ile kafadan öldürme' },
     rezil:    { name: 'REZİL OLDU!', say: 'Rezil oldu!', desc: 'Testereli Eldiven ile öldürme' },
     kusursuz: { name: 'KUSURSUZ!',   say: 'Kusursuz!',   desc: 'dalgayı hiç hasar almadan bitirme' }
 };
-let killSource = null;            // testere vuruşu öldürdüyse 'saw' (madalya için)
-let lastKillAt = -10, headStreak = 0;
+let killSource = null;            // öldüren silah (madalya için): 'saw', 'sniper', ...; patlama ve ışında null
+let arenaTime = 0;                // oyun süresi (duraklatma sayılmaz): seri öldürme ve anons aralığı için
+let recentKills = [];             // son öldürmelerin zamanları
+const lastSaid = {};              // anons metni → en son söylendiği oyun zamanı
 
 function resetMedals() {
     runStats.medals = Object.fromEntries(Object.keys(MEDALS).map(k => [k, 0]));
-    lastKillAt = -10; headStreak = 0;
+    arenaTime = 0; recentKills = [];
+    Object.keys(lastSaid).forEach(k => delete lastSaid[k]);
 }
 
 function giveMedal(id) {
@@ -276,11 +284,10 @@ function popText(text, color) {
 
 // Öldürmeden sonra (onEnemyKilled): madalya kontrolleri
 function medalOnKill(head) {
-    const now = clock.elapsedTime;
-    if (now - lastKillAt <= 2) { giveMedal('harika'); lastKillAt = -10; }
-    else lastKillAt = now;
-    if (head) { if (++headStreak >= 2) { giveMedal('keskin'); headStreak = 0; } }
-    else headStreak = 0;
+    recentKills.push(arenaTime);
+    recentKills = recentKills.filter(t => arenaTime - t <= STREAK_TIME);
+    if (recentKills.length >= STREAK_KILLS) { giveMedal('harika'); recentKills = []; }
+    if (head && killSource === 'sniper') giveMedal('keskin');
     if (killSource === 'saw') giveMedal('rezil');
 }
 
@@ -299,8 +306,11 @@ function pickVoice() {
 }
 if ('speechSynthesis' in window) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
 
-function announce(text) {
+function announce(text, force = false) {
     if (!settings.announcer || !('speechSynthesis' in window) || settings.volume <= 0) return;
+    // Aynı söz kısa aralıkla tekrar seslendirilmez (yazısı yine çıkar)
+    if (!force && lastSaid[text] !== undefined && arenaTime - lastSaid[text] < SAY_GAP) return;
+    lastSaid[text] = arenaTime;
     try {
         speechSynthesis.cancel();
         const u = new SpeechSynthesisUtterance(text);

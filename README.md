@@ -41,7 +41,7 @@ Chrome ya da Edge'de ana menüde **UYGULAMA OLARAK YÜKLE 📲** butonu çıkar 
 ## Oyun modları
 
 - **Dalga modu:** Düşmanlar dalgalar halinde gelir. Her dalga bir öncekinden kalabalık ve güçlüdür. Dalga temizlenince bonus altın ve skor verilir, kısa bir moladan sonra sıradaki dalga başlar.
-- **Yarım kalan el (DEVAM ET):** Dalga modundaki el birkaç saniyede bir, ana menüye dönünce ve tarayıcı kapanırken kaydedilir. Ana menüde yeşil **DEVAM ET ▶** butonu eli kaldığı yerden sürdürür (bölüm, zorluk, dalga, can, kalkan, skor, cephane, bomba, konum, sahadaki düşmanlar ve yerdeki eşyalar). Yarım kalan el varken OYUNA BAŞLA önce sorar; el bitince kayıt silinir. Düello kaydedilmez.
+- **Yarım kalan el (DEVAM ET):** Dalga modundaki el birkaç saniyede bir, ana menüye dönünce ve tarayıcı kapanırken kaydedilir. Ana menüde yeşil **DEVAM ET ▶** butonu eli kaldığı yerden sürdürür (bölüm, zorluk, dalga, can, kalkan, skor, cephane, bomba, konum, sahadaki düşmanlar, yerdeki eşyalar, harita eşyalarının sayaçları, aktif güç ve madalyalar). Yarım kalan el varken OYUNA BAŞLA önce sorar; el bitince kayıt silinir. Düello kaydedilmez.
 - **1v1 Düello:** Sağa sola kayan ve sürekli ateş eden mor bota karşı teke tek. Botun canı ekranın üstündeki çubukta görünür.
 
 Düşmanların kafasında kendi renginde kızgın bir yüz (çatık kaşlar, dişli ağız) vardır. Dalga modunda 4 düşman tipi vardır: **Er** (kırmızı), **Koşucu** (turuncu, hızlı ama zayıf, 2. dalgadan itibaren), **Nişancı** (mavi, uzakta durup isabetli ateş eder, 3. dalgadan itibaren) ve **Zırhlı** (gri, iri, çok dayanıklı, 2.5 kat ödül, 4. dalgadan itibaren).
@@ -50,19 +50,19 @@ Zıplama yeteneği olan düşmanlar, basamakla çıkılan yüksek yerlere (kule,
 
 Dalgalar ilerledikçe düşmanlar yetenek kazanır: **2. dalga** zıplama (alçak kasa ve siperlerin üstüne çıkar, kasaya çıkan oyuncunun yanına zıplar), **3. dalga** rampa kullanma (Space'te oyuncunun platformuna en kısa rampa yoluyla gelir), **4. dalga** vurulunca yana kaçma, **5. dalga** keskin nişan (daha isabetli ve sık ateş). Ayrıca **3. dalgadan** itibaren düşmanlar arada bir çömelerek ateş eder (Koşucu hariç; düello botu da çömelir). Yeni yetenek dalga başında duyurulur.
 
-**Can yenilenmesi (dalga modu):** Bir süre hasar almazsan can kendiliğinden dolar; can göstergesi yeşil parlar ve kısa bir ses çalar. Kolay: 3 sn sonra saniyede 14, Orta: 4 sn sonra saniyede 10, Zor: 5 sn sonra saniyede 7 can. Düelloda can yenilenmez. Can kiti yoktur; eski kayıtlardaki kitler 50'şer altın olarak iade edilir.
+**Can yenilenmesi (dalga modu):** Bir süre hasar almazsan can kendiliğinden dolar; can göstergesi yeşil parlar ve kısa bir ses çalar. Kolay: 3 sn sonra saniyede 14, Orta: 4 sn sonra saniyede 10, Zor: 5 sn sonra saniyede 7 can. Düelloda can kendiliğinden yenilenmez (haritadaki can, kalkan ve cephane eşyaları düelloda da alınabilir; güç kutusu çıkmaz). Can kiti yoktur; eski kayıtlardaki kitler 50'şer altın olarak iade edilir.
 
 **Harita eşyaları:** Her bölümde sabit noktalarda dönen eşyalar durur ve alındıktan sonra aynı yerde yeniden çıkar: ➕ Can +25 (25 sn), 💚 Büyük Can +50 (45 sn; canı sınırın 50 üstüne çıkarır, fazlası saniyede 2 erir), 🛡️ Kalkan +25 (30 sn), 📦 Cephane kutusu (30 sn; her silaha bir şarjör yedek).
 
 **Güç kutusu (dalga modu):** Elin başından 40 sn sonra belirir, alındıktan 75 sn sonra yenisi çıkar; 20 saniye sürer. 🔥 **Öfke** 3 kat hasar · 💨 **Rüzgâr** %35 hızlı koşu ve ateş · 👤 **Gölge** düşman mermileri 3 kat sapar · ✚ **Şifa** saniyede 15 can.
 
-**Madalyalar ve sesli anons:** 🏅 Harika! (2 sn içinde iki düşman), Keskin Göz! (art arda iki kafa vuruşuyla öldürme), Rezil Oldu! (testereyle öldürme), Kusursuz! (dalgayı hasarsız bitirme). Ekranda yazı ve tarayıcının Türkçe sesiyle anons (Ayarlar'dan kapatılabilir); oyun sonunda sayılır.
+**Madalyalar ve sesli anons:** 🏅 Harika! (3 sn içinde üç düşman), Keskin Göz! (yalnızca Keskin Nişancı tüfeğiyle kafadan öldürme), Rezil Oldu! (testereyle öldürme), Kusursuz! (dalgayı hasarsız bitirme). Ekranda yazı ve tarayıcının Türkçe sesiyle anons (Ayarlar'dan kapatılabilir); oyun sonunda sayılır.
 
 **Roket zıplaması:** Kendi roketin/bomban yakınında patlarsa seni iter; ayağının dibine roket atınca ~3 birim yükseğe fırlarsın (canın yine azalır). Duvarların ve tavanın dışına çıkılamaz.
 
 **Bomba (B):** Her ele 2 bombayla başlanır (en fazla 4). Atılan bomba sekerek yuvarlanır, 1.8 sn sonra patlar; 6 birim içindeki düşmanlara uzaklıkla azalan hasar verir, duvarın arkasındakiler korunur. Çok yakındaysan sana da yarı hasar verir. Her dalga sonunda +1 bomba.
 
-**Yerden toplananlar:** Ölen düşman %35 ihtimalle bir eşya düşürür. Her eşyanın üstünde ne olduğunu yazan renkli bir etiket ve altında parlayan bir halka vardır. **Cephane silaha özeldir** (kutunun üstünde o silahın küçük modeli yatar): 🏹 OK +5 (Yaylı Tüfek), 🔴 SAÇMA +6 (Av Tüfeği), 🎯 MERMİ +5 (Keskin Nişancı), 🔫 MERMİ +şarjör (Taramalı Tabanca), 🚀 ROKET +2 (Roketatar); yalnızca sahip olduğun silahlarınki düşer, elindeki silahın yedeği azsa onunki daha sık düşer. Diğerleri: **🛡️ KALKAN +25**, **🪙 ALTIN**, **💣 BOMBA +1**. Üstünden geçince alınır; ne alındığı sağ üstte yazar. Kasanın ya da duvarın dibine düşen eşya en yakın boş yere kayar. Bomba çantası (4/4) ya da kalkan doluyken o eşya alınmaz; etiketi soluklaşır ve üstüne gelince nedeni yazar. 20 sn sonra (son saniyelerde yanıp sönerek) kaybolur.
+**Yerden toplananlar:** Ölen düşman %35 ihtimalle bir eşya düşürür. Her eşyanın üstünde ne olduğunu yazan renkli bir etiket ve altında parlayan bir halka vardır. **Cephane silaha özeldir** (kutunun üstünde o silahın küçük modeli yatar): 🏹 OK +5 (Yaylı Tüfek), 🔴 SAÇMA +6 (Av Tüfeği), 🎯 MERMİ +5 (Keskin Nişancı), 🔫 MERMİ +şarjör (Taramalı Tabanca), 🚀 ROKET +2 (Roketatar), 🔷 ŞARJ +3 (Işın Tüfeği), ⚡ ENERJİ +40 (Yıldırım); yalnızca sahip olduğun silahlarınki düşer, elindeki silahın yedeği azsa onunki daha sık düşer. Diğerleri: **🛡️ KALKAN +25**, **🪙 ALTIN**, **💣 BOMBA +1**. Üstünden geçince alınır; ne alındığı sağ üstte yazar. Kasanın ya da duvarın dibine düşen eşya en yakın boş yere kayar. Bomba çantası (4/4) ya da kalkan doluyken o eşya alınmaz; etiketi soluklaşır ve üstüne gelince nedeni yazar. 20 sn sonra (son saniyelerde yanıp sönerek) kaybolur.
 
 **Geri bildirim:** Vurulunca nişangâhın çevresinde atışın geldiği yönü gösteren kırmızı bir yay çıkar. Ölen düşman geriye doğru yığılıp yere gömülür; kafadan vurulursa kafası parçalanır.
 
@@ -79,7 +79,7 @@ Her iki modun zorluğu **Ayarlar** ekranından ayrı ayrı seçilir (Kolay / Ort
 | Space | Zıpla (1 birimlik kasalara çıkılabilir) |
 | C / Ctrl | Çömel (basılı tut): alçalırsın, yarı hız, daha isabetli. Ctrl+W tarayıcıda sekmeyi kapattığı için çömelip yürürken C önerilir |
 | Fare | Nişan |
-| Sol tık | Ateş (Taramalı Tabanca ve testere basılı tutunca sürekli) |
+| Sol tık | Ateş (Taramalı Tabanca, Yıldırım ve testere basılı tutunca sürekli) |
 | Sağ tık | Dürbün (keskin nişancı) |
 | R | Şarjör değiştir |
 | B | Bomba at (G de çalışır) |
@@ -94,16 +94,16 @@ Ayarlar'dan **görüş açısı (FOV)**, **nişangâh şekli ve rengi**, fare/do
 | # | Silah | Özellik | Nasıl açılır |
 |---|---|---|---|
 | 1 | Testereli Eldiven | Yakın dövüş (1.2x, saniyede ~8 kesik); basılı tutunca dönen testere önündeki düşmanı keser, **mermi harcamaz** | Başlangıçta açık |
-| 2 | Tabanca | Yarı otomatik, 1x hasar, **sınırsız yedek mermi**, iki elle tutulur | Başlangıçta açık |
+| 2 | Tabanca | Yarı otomatik, 1x hasar, 12'lik şarjör, **sınırsız yedek mermi**, iki elle tutulur | Başlangıçta açık |
 | 3 | Yaylı Tüfek | Ok atar; tek atış, 3.2x hasar, tam isabetli, ok uzakta hafifçe düşer, 5'lik şarjör | Başlangıçta açık |
-| 4 | Av Tüfeği | Pompalı, 8 saçma, yakında çok güçlü, menzili kısa | Mağaza, 250 altın |
-| 5 | Keskin Nişancı | 7x hasar, dürbün | Mağaza, 400 altın |
+| 4 | Av Tüfeği | Pompalı, 8 saçma (her biri 0.6x), yakında çok güçlü, menzili kısa, 6'lık şarjör | Mağaza, 250 altın |
+| 5 | Keskin Nişancı | 7x hasar, dürbün, 5'lik şarjör | Mağaza, 400 altın |
 | 6 | Taramalı Tabanca | Tamamı siyah AR tipi; çok hızlı otomatik ateş, 0.45x hasar, 40'lık şarjör (mağazadan 70'e büyür) | Mağaza, 300 altın |
-| 7 | Roketatar | Roket namludan alev ve duman izi bırakarak uçar, çarptığı yerde patlar (ateş topu, duman, ekran sarsıntısı). En öldürücü silah: doğrudan isabet (10x) ya da ayağının dibine düşerse öldürür, uzaklaştıkça hasar azalır (yarıçapın yarısında canın ~%65'i); çok yakındaysan sana da vurur | Mağaza, 600 altın |
+| 7 | Roketatar | Roket namludan alev ve duman izi bırakarak uçar, çarptığı yerde patlar (ateş topu, duman, ekran sarsıntısı). En öldürücü silah: doğrudan isabet (10x) ya da ayağının dibine düşerse öldürür, uzaklaştıkça hasar azalır (yarıçapın yarısında canın ~%65'i); çok yakındaysan sana da vurur; 4'lük şarjör | Mağaza, 600 altın |
 | 8 | Işın Tüfeği | Anında isabet eden ışın; yolundaki bütün düşmanları deler, havada camgöbeği sarmal iz bırakır. 8x hasar, yavaş (1.5 sn), 5'lik şarjör | Mağaza, 700 altın |
-| 9 | Yıldırım | Basılı tuttukça önündeki düşmana sürekli elektrik akımı (zikzaklı şimşek); 14 birim menzil, tam isabet, 100 enerji | Mağaza, 650 altın |
+| 9 | Yıldırım | Basılı tuttukça önündeki düşmana sürekli elektrik akımı (zikzaklı şimşek); 14 birim menzil, tam isabet, vuruş başına 0.3x (saniyede 20 vuruş), 100 enerji | Mağaza, 650 altın |
 
-Silahları birinci şahıs görünümde eldivenli eller tutar. Denge gerçeğe yakındır (mermi başına öldürücülük): Roketatar > Keskin Nişancı > Av Tüfeği (yakında) > Yaylı Tüfek > Tabanca > Taramalı Tabanca; Taramalı hızıyla, testere yalnızca dipte etkilidir.
+Silahları birinci şahıs görünümde eldivenli eller tutar. Denge gerçeğe yakındır (atış başına öldürücülük): Roketatar > Işın Tüfeği > Keskin Nişancı > Av Tüfeği (yakında) > Yaylı Tüfek > Tabanca > Taramalı Tabanca > Yıldırım; Taramalı ve Yıldırım hızıyla, testere yalnızca dipte etkilidir. Otomatik silahların atış hızı ekranın kare hızından bağımsızdır.
 
 Kafa vuruşu her silahta 2 kat hasar verir. Mağazadaki "Silah Hasarı" yükseltmesi tüm silahlara işler.
 
@@ -123,7 +123,7 @@ Kafa vuruşu her silahta 2 kat hasar verir. Mağazadaki "Silah Hasarı" yükselt
 | Dalga Ustası | 10. dalgaya ulaş | 400 |
 | Demir Yürek | Zor seviyede 5. dalgaya ulaş | 300 |
 | Dokunulmaz | Bir dalgayı hiç hasar almadan bitir | 200 |
-| Bombacı | Tek bombayla 3 düşman öldür | 200 |
+| Bombacı | Tek patlamayla (bomba ya da roket) 3 düşman öldür | 200 |
 | Toplayıcı | Tek elde yerden 10 eşya topla | 150 |
 | Düellocu | Bir düello kazan | 150 |
 | Şampiyon | Zor seviyede düello kazan | 400 |
