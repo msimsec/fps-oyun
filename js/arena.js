@@ -232,10 +232,13 @@ function blastKnockback(pos, R) {
     const dir = c.sub(pos);
     if (dir.lengthSq() < 1e-6) dir.set(0, 1, 0);
     dir.normalize();
+    // Yerdeyken zayıf itme (uzaktaki patlama) yok sayılır: hız yalnızca havadayken işlediği için
+    // yerde verilen yatay hız kalır ve sonraki zıplamada oyuncuyu kaydırırdı
+    if (player.onGround && s <= 2) return;
     player.velY = Math.max(player.velY, 0) + dir.y * s;
     player.airVX += dir.x * s * 0.8;
     player.airVZ += dir.z * s * 0.8;
-    if (s > 2) player.onGround = false;
+    player.onGround = false;
 }
 
 // ---- Madalyalar ve anons ----

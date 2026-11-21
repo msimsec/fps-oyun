@@ -240,7 +240,8 @@ class HumanoidEnemy {
                 // Space: oyuncu başka platformda. Rampa yeteneği varsa oraya giden rampaya yürü,
                 // yoksa kenarda ileri geri gidip gelmek yerine yerinde yana kayarak ateş et.
                 if (!(this.skills.pads && this.goToPad(dt))) this.strafeAndKeepDistance(dt, dist, nx, nz, 0, Infinity);
-            } else if (dist > 1.5) {
+            } else if (dist > 1.5 || (NAV.climb && this.skills.jump && rise >= 1.2)) {
+                // (Oyuncu tam üstündeki yüksek yerdeyse dibinde beklemez, basamaklara gider)
                 // Oyuncu zıplanabilecek bir kasanın üstündeyse yanına zıpla
                 if (this.skills.jump && this.jumpCd <= 0 && dist < 3.5 && rise > CFG.stepHeight && rise < 1.1) this.jump(nx, nz);
                 else this.chase(dt, dist, nx, nz);
@@ -273,6 +274,19 @@ class HumanoidEnemy {
         const p = this.group.position;
         const step = this.speed * dt;
         const ox = p.x, oz = p.z;
+        // Tırmanma: oyuncu yüksek bir yerdeyken basamakların dibine gelen (ya da basamaklarda olan)
+        // düşman, basamak ekseni boyunca yukarıdaki giriş noktasına yürür; önü kapanınca zıplar
+        const c = NAV.climb;
+        if (c && this.skills.jump && p.y < c.y - 0.2) {
+            const atFoot = p.y <= 0.5 && Math.hypot(p.x - c.foot.x, p.z - c.foot.z) < 1.2;
+            if (atFoot || (p.y > 0.5 && distToSegment(p.x, p.z, c.foot, c.top) < 2.5)) {
+                const tx = c.top.x - p.x, tz = c.top.z - p.z, l = Math.hypot(tx, tz) || 1;
+                nx = tx / l; nz = tz / l;
+                this.move(nx * step, nz * step);
+                if (Math.hypot(p.x - ox, p.z - oz) < step * 0.5 && this.jumpCd <= 0 && this.jumpableAhead(nx, nz)) this.jump(nx, nz);
+                return;
+            }
+        }
         // Zeminli bölümlerde (Depo): hedefe düz yol yoksa yol bulma alanının gösterdiği yöne git
         if (curMap().floorY !== -Infinity && NAV.dist) {
             this.navCheck -= dt;
@@ -496,10 +510,28 @@ class HumanoidEnemy {
 //  kaç adım uzak olduğunu yazar. Düşman, bulunduğu karenin en yakın komşusuna yürür.
 //  Bütün düşmanlar aynı alanı kullanır; saniyede ~3 kez ya da oyuncu kare değiştirince yenilenir.
 // =====================================================================
-const NAV = { min: -45, n: 90, walk: null, dist: null, timer: 0, mapId: null, pi: -1, pj: -1 };
+// climb: oyuncu basamakla çıkılan yüksek bir yerdeyken (kule, balkon, çatı) o yerin rotası
+// { box, y, foot: basamakların dibi, top: yukarıdaki giriş noktası }; değilse null
+const NAV = { min: -45, n: 90, walk: null, dist: null, timer: 0, mapId: null, pi: -1, pj: -1, climb: null };
+
+// Oyuncu, bölümün tanımlı yüksek yerlerinden birinin üstünde mi
+function currentClimb() {
+    const x = camera.position.x, z = camera.position.z, feet = footY();
+    for (const c of curMap().climbs || []) {
+        if (x >= c.box[0] && x <= c.box[1] && z >= c.box[2] && z <= c.box[3] && feet >= c.y - 0.6) return c;
+    }
+    return null;
+}
 const navCell = (v) => Math.floor(v - NAV.min);
 const navIdx = (i, j) => i * NAV.n + j;
 const navInside = (i, j) => i >= 0 && j >= 0 && i < NAV.n && j < NAV.n;
+
+// (x, z) noktasının a-b doğru parçasına uzaklığı
+function distToSegment(x, z, a, b) {
+    const dx = b.x - a.x, dz = b.z - a.z, l2 = dx * dx + dz * dz || 1;
+    const t = Math.max(0, Math.min(1, ((x - a.x) * dx + (z - a.z) * dz) / l2));
+    return Math.hypot(x - (a.x + dx * t), z - (a.z + dz * t));
+}
 
 function navBuild() {
     NAV.walk = new Uint8Array(NAV.n * NAV.n);
@@ -523,6 +555,13 @@ function navUpdate(dt) {
     const dist = NAV.dist;
     dist.fill(-1);
     const queue = [];
+    // Oyuncu basamakla çıkılan yüksek bir yerdeyse yol, basamakların dibine çıkar (düşmanlar
+    // yapının dibine yığılmak yerine basamaklara yürür, oradan zıplayarak tırmanır)
+    NAV.climb = currentClimb();
+    if (NAV.climb) {
+        const fi = navCell(NAV.climb.foot.x), fj = navCell(NAV.climb.foot.z);
+        if (navInside(fi, fj) && NAV.walk[navIdx(fi, fj)]) { dist[navIdx(fi, fj)] = 0; queue.push(navIdx(fi, fj)); }
+    }
     // Oyuncunun karesi yürünemezse (ör. kasanın üstünde) çevresindeki kareler başlangıç olur
     for (let r = 0; r <= 2 && !queue.length; r++) {
         for (let i = ci - r; i <= ci + r; i++) for (let j = cj - r; j <= cj + r; j++) {
