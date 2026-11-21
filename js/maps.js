@@ -69,6 +69,7 @@ MAPS.desert = {
     floorY: 0, killY: -Infinity, bulletMinY: 0, bulletMaxY: 60, enemyRange: 30, bound: 43.4,
     spawn: { x: 0, y: 0, z: 36, angle: 0 },
     duel: { player: { x: 0, y: 0, z: 20, angle: 0 }, bot: { x: 0, y: 0, z: -10 } },
+    climbs: [{ box: [22, 28, 1, 7], y: 3, foot: { x: 17.2, z: 4 }, top: { x: 24, z: 4 } }],       // gözetleme evinin çatısı
     build: buildDesert,
     enemySpawn: floorSpawn
 };
@@ -79,6 +80,7 @@ MAPS.snow = {
     floorY: 0, killY: -Infinity, bulletMinY: 0, bulletMaxY: 60, enemyRange: 30, bound: 43.4,
     spawn: { x: 0, y: 0, z: 34, angle: 0 },
     duel: { player: { x: 0, y: 0, z: 18, angle: 0 }, bot: { x: 0, y: 0, z: -12 } },
+    climbs: [{ box: [33, 39, 15, 21], y: 3, foot: { x: 28.2, z: 18 }, top: { x: 35, z: 18 } }],   // gözetleme kulesi
     build: buildSnow,
     enemySpawn: floorSpawn
 };
@@ -90,6 +92,7 @@ MAPS.harbor = {
     floorY: 0, killY: -Infinity, bulletMinY: 0, bulletMaxY: 60, enemyRange: 30, bound: 43.4,
     spawn: { x: 0, y: 0, z: 36, angle: 0 },
     duel: { player: { x: 0, y: 0, z: 18, angle: 0 }, bot: { x: 0, y: 0, z: -12 } },
+    climbs: [{ box: [23, 29, 32.75, 35.25], y: 2.6, foot: { x: 18.7, z: 34 }, top: { x: 25, z: 34 } }],   // basamaklı konteyner
     build: buildHarbor,
     enemySpawn: floorSpawn
 };
@@ -101,6 +104,13 @@ MAPS.tower = {
     spawn: { x: 0, y: 0, z: 36, angle: 0 },
     // Düello hattı (x=22) kule ve balkonların dışında, arada duvar yok
     duel: { player: { x: 22, y: 0, z: 22, angle: 0 }, bot: { x: 22, y: 0, z: -16 } },
+    // Basamakla çıkılan yerler: box [x0, x1, z0, z1], y: üst yüzey, foot: basamakların dibi, top: giriş
+    climbs: [
+        { box: [-6, 6, -6, 6], y: 4, foot: { x: 0, z: -12.2 }, top: { x: 0, z: -4.5 } },
+        ...[[-32, -32], [32, -32], [-32, 32], [32, 32]].map(([bx, bz]) => ({
+            box: [bx - 5, bx + 5, bz - 5, bz + 5], y: 3,
+            foot: { x: bx - Math.sign(bx) * 9.2, z: bz }, top: { x: bx - Math.sign(bx) * 3.5, z: bz } }))
+    ],
     build: buildTower,
     enemySpawn: floorSpawn
 };
@@ -129,7 +139,7 @@ function buildMap(id) {
     jumpPads = [];
     mapAnimators = [];
     // Önceki bölümden kalan cesetler, bombalar ve yerdeki eşyalar yeni bölüme taşınmasın
-    clearCorpses(); clearGrenades(); clearDrops();
+    clearCorpses(); clearGrenades(); clearDrops(); clearBeams();
     currentMapId = id;
     // Gündüz ışıkları; gece bölümü kendi kurulumunda kısar
     ambientLight.color.setHex(0xffffff); ambientLight.intensity = 0.6;
@@ -969,8 +979,8 @@ const TOWER_PADS = [
     { x: 14, z: 0, to: { x: 1.5, z: 0, y: 4 } }       // doğu rampası → kule tepesi
 ];
 const TOWER_TELEPORTS = [
-    { x: -20, z: 0, y: 0, to: { x: 30, z: -30, y: 3, angle: Math.PI * 0.25 } },     // zemin → kuzeydoğu balkonu
-    { x: -32, z: 32, y: 3, to: { x: 20, z: 6, y: 0, angle: Math.PI } }              // güneybatı balkonu → zemin
+    { x: -20, z: 0, y: 0, to: { x: 30, z: -30, y: 3, angle: Math.PI * 0.75 } },     // zemin → kuzeydoğu balkonu
+    { x: -32, z: 32, y: 3, to: { x: 20, z: 6, y: 0, angle: Math.PI / 2 } }              // güneybatı balkonu → zemin
 ];
 
 function buildTower() {

@@ -13,7 +13,7 @@ let lastBeamHitSfx = 0;
 function traceWall(origin, dir, maxDist) {
     const p = new THREE.Vector3();
     const M = curMap();
-    for (let d = 0.3; d <= maxDist; d += 0.2) {
+    for (let d = 0.3; d <= maxDist; d += 0.1) {
         p.copy(origin).addScaledVector(dir, d);
         if (pointInWall(p) || p.y < M.bulletMinY || p.y > M.bulletMaxY) return d;
     }

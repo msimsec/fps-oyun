@@ -1,7 +1,7 @@
 {
   "name": "3D Tactical FPS",
   "short_name": "FPS Oyun",
-  "description": "Tarayıcıda 3D FPS: dalga modu, 1v1 düello, 5 bölüm, silah mağazası.",
+  "description": "Tarayıcıda 3D FPS: dalga modu, 1v1 düello, 6 bölüm, 9 silah, dokunmatik kontroller.",
   "lang": "tr",
   "start_url": "./",
   "scope": "./",

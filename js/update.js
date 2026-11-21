@@ -12,6 +12,7 @@ const isCrouching = () => player.eye < CFG.eyeHeight - 0.1;
 function jump() {
     if (!player.onGround || keys.crouch) return;   // çömelikken zıplanmaz
     player.velY = CFG.jumpSpeed;
+    player.airVX = 0; player.airVZ = 0;            // yerden zıplarken eski itme/rampa hızı taşınmaz
     player.onGround = false;
     sfx('jump');
 }
@@ -98,7 +99,10 @@ function updatePlayer(dt) {
         checkJumpPads();
     }
 
+    // Bekleme süresi sıfırın altına inen artığı (bir kareden az) otomatik silahta sonraki atışa
+    // devreder: atış hızı ekranın kare hızına bağlı kalmaz. Tetik bırakılınca artık sıfırlanır.
     if (player.fireCooldown > 0) player.fireCooldown -= dt;
+    else if (!firing) player.fireCooldown = 0;
     if (player.reloading) {
         player.reloadTimer -= dt;
         if (player.reloadTimer <= 0) finishReload();

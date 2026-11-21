@@ -137,6 +137,7 @@ const HELP_SECTIONS = [
         }[t.name] || ''}${t.minWave ? ` ${t.minWave}. dalgadan itibaren çıkar.` : ''}`),
         'Dalgalar ilerledikçe düşmanlar yeni yetenekler kazanır (dalga başında duyurulur):',
         ...ENEMY_SKILLS.map(k => `${k.wave}. dalga: ${k.text}${k.needsPads ? ' (yalnızca rampalı bölümde, Space)' : ''}`),
+        'Yüksek yerler güvenli değildir: zıplama yeteneği olan düşmanlar (2. dalgadan itibaren) basamakla çıkılan yerlere (Kule Arenası\'nın kulesi ve balkonları, Kar Üssü\'nün kulesi, Çöl\'deki çatı, Gece Limanı\'ndaki konteyner) basamakların dibine yürüyüp zıplayarak tırmanır ve yanına gelir.',
         'Düşman yakına gelince temas hasarı verir; mesafeni koru.',
         '3. dalgadan itibaren düşmanlar arada bir durup çömelerek ateş eder: alçalırlar (kafaları da aşağı iner), daha isabetli atarlar. Dibine gelince ya da vurulup kaçarken kalkarlar. Koşucular çömelmez; düello botu da arada bir çömelir.',
         'Ölen düşman geriye doğru devrilir, birkaç saniye yerde kalır, sonra toprağa gömülür. Kafadan öldürülürse kafası parçalanır.',

@@ -72,6 +72,13 @@ function cycleWeapon(step) {
     selectWeapon(owned[(i + step + owned.length) % owned.length]);
 }
 
+// Sonraki atışa kadar beklenecek süre. Otomatik silahta önceki bekleme süresinden artan (negatif,
+// bir kareden kısa) süre düşülür; böylece 60 FPS'te de 144 FPS'te de aynı hızda ateş eder.
+function shotDelay(w) {
+    const carry = w.auto ? Math.max(-0.05, Math.min(0, player.fireCooldown)) : 0;
+    return carry + w.interval * fireMul();
+}
+
 function tryShoot() {
     const w = curWeapon(), a = curAmmo();
     if (player.reloading || player.fireCooldown > 0) return;
@@ -84,7 +91,7 @@ function tryShoot() {
         return;
     }
     a.ammo--;
-    player.fireCooldown = w.interval * fireMul();      // Rüzgâr: hızlı ateş
+    player.fireCooldown = shotDelay(w);                // Rüzgâr: hızlı ateş
     player.semiFired = true;
 
     const dir = new THREE.Vector3();
@@ -168,7 +175,7 @@ function setZoom(on) {
 // Testereli Eldiven: önündeki (menzil ve görüş konisi içindeki) en yakın hedefe kesme hasarı.
 // Bakılan noktaya göre kafa vuruşu da sayılır. Mermi harcamaz, şarjör değiştirmez.
 function sawAttack(w) {
-    player.fireCooldown = w.interval * fireMul();
+    player.fireCooldown = shotDelay(w);
     player.sawSpin = 0.25;                       // testere bu kadar süre hızlı döner (görsel)
     const dir = new THREE.Vector3();
     camera.getWorldDirection(dir);
