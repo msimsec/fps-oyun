@@ -446,6 +446,10 @@ const AMMO_INFO = {
 
 // Hangi silahın cephanesi düşsün: yalnızca sahip olunanlar; elindeki silahın yedeği azsa
 // ya da bir silahın mermisi hiç kalmadıysa onun düşme ihtimali artar
+// Silahın cephanesinin adı (gösterge ve bildirimlerde): OK, SAÇMA, ROKET, ŞARJ, ENERJİ; yoksa MERMİ
+const ammoUnit = (id) => (AMMO_INFO[id] ? AMMO_INFO[id].unit : 'MERMİ');
+const ammoWord = (id) => (AMMO_INFO[id] ? AMMO_INFO[id].word : 'mermi');
+
 function pickAmmoWeapon() {
     const opts = Object.keys(AMMO_INFO).filter(id => player.ownedWeapons[id] && player.arsenal[id]);
     if (!opts.length) return null;

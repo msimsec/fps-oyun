@@ -75,7 +75,7 @@ function setAnnouncer(on) {
     settings.announcer = !!on;
     saveSettings();
     updateSettingsScreen();
-    if (on) { initAudio(); announce('Harika!'); }
+    if (on) { initAudio(); announce('Sesli anons açık', true); }
 }
 
 function setTouchMode(value) {

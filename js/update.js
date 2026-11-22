@@ -175,7 +175,7 @@ function updateBullets(dt) {
                     flashClass('crosshair', hit === 'head' ? 'head' : 'hit', 120);
                     showDamageNumber(e, dmg, hit === 'head');
                     sfx(hit === 'head' ? 'head' : 'hit', dmg);
-                    if (e.health <= 0) onEnemyKilled(e, hit);
+                    if (e.health <= 0) { killSource = b.weapon; onEnemyKilled(e, hit); killSource = null; }
                     remove = true;
                     break;
                 }
@@ -220,10 +220,11 @@ function updateHUD() {
     $('healthHud').classList.toggle('regen', isRegenerating());
     setHud('shieldDisplay', player.armor > 0 ? String(Math.ceil(player.armor)) : (player.hasShield ? 'HAZIR' : 'YOK'));
     setHud('weaponName', w.name.toLocaleUpperCase('tr'));
+    setHud('ammoLabel', ammoUnit(player.weapon));
     setHud('ammoDisplay', a ? (a.ammo === Infinity ? '∞' : a.ammo) : 0);
     setHud('ammoPoolDisplay', a ? (a.pool === Infinity ? '∞' : a.pool) : 0);
     setHud('reloadDisplay', player.reloading ? 'ŞARJÖR DEĞİŞİYOR...' :
-        (a && a.ammo === 0 && a.pool === 0 ? 'MERMİ BİTTİ · 2: TABANCA · 1: TESTERE' : ''));
+        (a && a.ammo === 0 && a.pool === 0 ? `${ammoUnit(player.weapon)} BİTTİ · 2: TABANCA · 1: TESTERE` : ''));
     setHud('weaponSlots', WEAPON_ORDER.map((id, i) =>
         player.ownedWeapons[id] ? (id === player.weapon ? `[${i + 1}]` : ` ${i + 1} `) : ' · ').join(''));
     setHud('grenadeDisplay', String(player.grenades));

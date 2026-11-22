@@ -40,7 +40,7 @@ const ACHIEVEMENTS = [
       check: () => inWaves() && run.game === 'hard' && wave.num >= 5 },
     { id: 'untouchable', name: 'Dokunulmaz', desc: 'Bir dalgayı hiç hasar almadan bitir', reward: 200,
       check: () => runStats.cleanWave === true },
-    { id: 'bomber', name: 'Bombacı', desc: 'Tek bombayla 3 düşman öldür', reward: 200,
+    { id: 'bomber', name: 'Bombacı', desc: 'Tek patlamayla (bomba ya da roket) 3 düşman öldür', reward: 200,
       check: () => runStats.bestBlast >= 3 },
     { id: 'collector', name: 'Toplayıcı', desc: 'Tek elde yerden 10 eşya topla', reward: 150,
       check: () => runStats.pickups >= 10, progress: () => [run.active ? runStats.pickups : 0, 10] },
