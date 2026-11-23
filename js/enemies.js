@@ -360,10 +360,11 @@ class HumanoidEnemy {
     // Havadayken: yerçekimi ve yatay hız; bir zemine inince durur, boşluğa düşerse ölür
     updateAir(dt) {
         const p = this.group.position;
+        const v0 = this.vy;
         this.vy -= CFG.gravity * dt;
         moveWithCollision(p, this.avx * dt, this.avz * dt, this.radius, p.y);
         const ground = groundHeight(p.x, p.z, p.y, this.radius);
-        const ny = p.y + this.vy * dt;
+        const ny = p.y + (v0 + this.vy) * 0.5 * dt;   // ortalama hız: uçuş kare hızından bağımsız
         if (this.vy <= 0 && ny <= ground) {
             p.y = ground;
             this.air = false; this.vy = 0; this.avx = 0; this.avz = 0;

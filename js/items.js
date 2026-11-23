@@ -35,6 +35,7 @@ function updateGrenades(dt) {
     for (let i = grenades.length - 1; i >= 0; i--) {
         const g = grenades[i], p = g.mesh.position;
         g.fuse -= dt;
+        const gv0 = g.vy;
         g.vy -= CFG.gravity * dt;
         // Eksen eksen ilerle: duvara çarpan eksende sekip yavaşla
         const nx = p.x + g.vx * dt;
@@ -42,7 +43,7 @@ function updateGrenades(dt) {
         const nz = p.z + g.vz * dt;
         if (pointInWall({ x: p.x, y: p.y, z: nz })) g.vz *= -0.4; else p.z = nz;
         const ground = groundHeight(p.x, p.z, p.y, 0) + 0.14;
-        const ny = p.y + g.vy * dt;
+        const ny = p.y + (gv0 + g.vy) * 0.5 * dt;    // ortalama hız: bombanın yolu kare hızından bağımsız
         if (ny <= ground && g.vy < 0) {
             p.y = ground;
             g.vy = Math.abs(g.vy) > 2 ? -g.vy * 0.35 : 0;

@@ -31,7 +31,7 @@ function updatePlayer(dt) {
     player.regenOn = regen;
     // Çömelme: göz hizası yumuşakça iner/kalkar; ayaklar yerinde kalır
     const eyeTarget = keys.crouch ? CFG.crouchEye : CFG.eyeHeight;
-    const newEye = player.eye + (eyeTarget - player.eye) * Math.min(1, dt * 12);
+    const newEye = player.eye + (eyeTarget - player.eye) * (1 - Math.exp(-12 * dt));   // kare hızından bağımsız yumuşatma
     camera.position.y += newEye - player.eye;
     player.eye = newEye;
     const f = new THREE.Vector3();
@@ -76,8 +76,11 @@ function updatePlayer(dt) {
     const ground = groundHeight(camera.position.x, camera.position.z, feet, CFG.playerRadius);
     if (player.onGround && feet > ground + 0.01) player.onGround = false;   // kenardan yürüyüp düştü
     if (!player.onGround) {
+        // Yerçekimi: karenin başındaki ve sonundaki hızın ortalamasıyla ilerle. Böylece zıplama
+        // yüksekliği ve rampa uçuşu kare hızından bağımsız olur (20 FPS'te rampalar ıskalıyordu).
+        const v0 = player.velY;
         player.velY -= CFG.gravity * dt;
-        let newFeet = feet + player.velY * dt;
+        let newFeet = feet + (v0 + player.velY) * 0.5 * dt;
         // Yükselirken başını tavana/kemere çarpar (roketle zıplarken kemerin içine girilmesin)
         if (player.velY > 0) {
             const top = headroom(camera.position.x, camera.position.z, CFG.playerRadius, feet);
